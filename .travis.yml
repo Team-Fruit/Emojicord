@@ -1,0 +1,25 @@
+language: java
+jdk: oraclejdk8
+branches:
+  except:
+    - /^b[0-9]/
+env:
+  - GRADLE_OPTS="-Dorg.gradle.daemon=false"
+before_install:
+  - chmod a+x gradlew
+  - ./gradlew clean
+install: "./gradlew setupCIWorkspace --continue"
+script: "./gradlew build --continue"
+after_success:
+  - ./gradlew githubRelease curseforge bintrayUpload --continue
+  #- ./gradlew githubRelease --continue
+  #- ./gradlew bintrayUpload --continue
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+notifications:
+  email: false
