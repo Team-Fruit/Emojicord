@@ -1,3 +1,5 @@
 dependencies {
     testCompile ('junit:junit:4.4')
+    // https://mvnrepository.com/artifact/com.esotericsoftware.yamlbeans/yamlbeans
+    compile group: 'com.esotericsoftware.yamlbeans', name: 'yamlbeans', version: '1.08'
 }

@@ -1,0 +1,19 @@
+{
+	"modListVersion": 2,
+	"modList": [
+		{
+			"modid": "emojicord",
+			"name": "Emojicord",
+			"description": "Discord Emojis in Minecraft",
+			"authorList": [
+				"Kamesuta"
+			],
+			"credits": "2019 TeamFruit",
+			"logoFile": "assets/emojicord/textures/logo.png",
+			"screenshots": [],
+			"updateUrl": "https://github.com/Team-Fruit/Emojicord/releases",
+			"url": "https://github.com/Team-Fruit/Emojicord/releases",
+			"useDependencyInformation": false
+		}
+	]
+}

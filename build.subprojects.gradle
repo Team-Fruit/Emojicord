@@ -95,6 +95,19 @@ sourceSets {
 	}
 }
 
+eclipse {
+	classpath {
+		defaultOutputDir = file('bin')
+		file.whenMerged {
+			entries.each { entry ->
+				if (entry.kind == 'src' && entry.hasProperty('output')) {
+					entry.output = null
+				}
+			}
+		}
+	}
+}
+
 // Fix compatibility issue between Gradle 4 and ForgeGradle 2.1
 if (project.forgegradle.contains('1.2') || project.forgegradle.contains('2.1'))
 	if (gradle.startParameter.logLevel.compareTo(org.gradle.api.logging.LogLevel.LIFECYCLE) >= 0)
@@ -124,13 +137,8 @@ configurations {
 }
 
 // Configure Java Compile Options
-[
-compileJava, compileApiJava, compileTestJava,
-compileBase_mainJava, compileBase_apiJava, compileBase_testJava,
-compileBootstrap_mainJava, compileBootstrap_apiJava, compileBootstrap_testJava,
-compileCompat_mainJava, compileCompat_apiJava, compileCompat_testJava,
-compileUniversal_mainJava, compileUniversal_apiJava, compileUniversal_testJava
-]*.options*.encoding = 'UTF-8'
+tasks.withType(AbstractCompile).each { it.options.encoding = 'UTF-8' }
+tasks.withType(GroovyCompile).each { it.groovyOptions.encoding = 'UTF-8' }
 sourceCompatibility = targetCompatibility = '1.8'
 
 // Add Arguments for Eclipse
@@ -236,6 +244,9 @@ processResources {
 	// this will ensure that this task is redone when the versions change.
 	inputs.property 'version', mod_version
 	inputs.property 'mcversion', project.version_minecraft
+
+	// copy everything else, thats not the mcmod.info
+	sourceSets.each { from(it.resources.srcDirs) }
 }
 
 // Dependency Repositories
