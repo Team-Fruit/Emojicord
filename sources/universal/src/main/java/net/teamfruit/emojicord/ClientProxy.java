@@ -15,6 +15,9 @@ import javax.annotation.Nonnull;
 
 import com.esotericsoftware.yamlbeans.YamlException;
 import com.esotericsoftware.yamlbeans.YamlReader;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
 
 import net.minecraft.client.Minecraft;
@@ -25,6 +28,15 @@ public class ClientProxy extends CommonProxy {
 	public static final Minecraft MC = Minecraft.getMinecraft();
 	public static final Map<String, List<Emoji>> EMOJI_MAP = new HashMap<>();
 	public static final List<Emoji> EMOJI_LIST = new ArrayList<>();
+	public static final LoadingCache<String, Emoji> EMOJI_ID_MAP = CacheBuilder.newBuilder()
+			.build(new CacheLoader<String, Emoji>() {
+				@Override
+				public Emoji load(final String key) throws Exception {
+					final Emoji emoji = new Emoji();
+					emoji.name = key;
+					return emoji;
+				}
+			});
 	boolean error = false;
 
 	public static void main(final String[] s) throws YamlException {

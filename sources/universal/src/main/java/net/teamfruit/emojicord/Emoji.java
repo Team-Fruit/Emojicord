@@ -38,10 +38,9 @@ public class Emoji implements Predicate<String> {
 
 	public void checkLoad() {
 		if (this.img == null) {
-			this.img = new DownloadImageData(new File("emojicord/cache/" + this.name + "-" + this.version),
-					"https://raw.githubusercontent.com/HrznStudio/Emojiful/master/" + this.location, loading_texture);
-			this.resourceLocation = new ResourceLocation("emojicord",
-					"textures/emoji/" + this.name + "-" + this.version);
+			this.img = new DownloadImageData(new File("emojicord/cache/" + this.name),
+					"https://cdn.discordapp.com/emojis/" + this.name, loading_texture);
+			this.resourceLocation = new ResourceLocation("emojicord", "textures/emoji/" + this.name);
 			Minecraft.getMinecraft().renderEngine.loadTexture(this.resourceLocation, this.img);
 		}
 	}
@@ -124,6 +123,11 @@ public class Emoji implements Predicate<String> {
 								.openConnection(Minecraft.getMinecraft().getProxy());
 						httpurlconnection.setDoInput(true);
 						httpurlconnection.setDoOutput(false);
+						httpurlconnection.setRequestProperty("User-Agent",
+								"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
+						httpurlconnection.setRequestProperty("Accept", "*/*");
+						httpurlconnection.setRequestProperty("Accept-Encoding", "");
+						httpurlconnection.setRequestProperty("Accept-Language", "ja,en-US;q=0.9,en;q=0.8");
 						httpurlconnection.connect();
 
 						if (httpurlconnection.getResponseCode() / 100 == 2) {

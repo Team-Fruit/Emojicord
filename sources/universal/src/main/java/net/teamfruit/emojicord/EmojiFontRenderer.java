@@ -5,8 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
@@ -40,19 +42,21 @@ public class EmojiFontRenderer extends FontRenderer {
 			final String[] split = unformattedText.split(" ");
 			final List<Pair<Emoji, String>> addedEmojis = new ArrayList<>();
 			for (final String word : split) {
-				Emoji wordEmoji = null;
-				for (final Emoji emoji : ClientProxy.EMOJI_LIST)
-					if (emoji.test(word.trim())) {
-						wordEmoji = emoji;
-						break;
+				final String strip = StringUtils.strip(word, ":");
+				if (StringUtils.equals(":" + strip + ":", word)) {
+					Emoji wordEmoji = null;
+					try {
+						wordEmoji = ClientProxy.EMOJI_ID_MAP.get(strip);
+					} catch (final ExecutionException e) {
 					}
 
-				if (wordEmoji != null)
-					addedEmojis.add(Pair.of(wordEmoji, word));
+					if (wordEmoji != null)
+						addedEmojis.add(Pair.of(wordEmoji, word));
+				}
 			}
-			fomattingText = text.toLowerCase(Locale.ENGLISH);
+			fomattingText = text;
 			for (final Pair<Emoji, String> entry : addedEmojis) {
-				final String emojiText = entry.getValue().toLowerCase(Locale.ENGLISH);
+				final String emojiText = entry.getValue();
 				final int index = fomattingText.indexOf(emojiText);
 				this.emojis.put(index, entry.getKey());
 				fomattingText = fomattingText.replaceFirst(Pattern.quote(emojiText), "?");
@@ -192,10 +196,13 @@ public class EmojiFontRenderer extends FontRenderer {
 		final float size = 10.0F;
 		final float offsetY = 1.0F;
 		final float offsetX = 0.0F;
+
+		OpenGL.glPushAttrib();
+
 		OpenGL.glEnable(GL11.GL_BLEND);
 		OpenGL.glEnable(GL11.GL_ALPHA_TEST);
 
-		OpenGL.glColor3f(1.0F, 1.0F, 1.0F);
+		OpenGL.glColor4f(1.0F, 1.0F, 1.0F, (OpenGL.glGetColorRGBA() >> 24 & 0xff) / 256f);
 		OpenGL.glTexParameteri(3553, 10241, 9729);
 		OpenGL.glTexParameteri(3553, 10240, 9729);
 		OpenGL.glBegin(GL11.GL_TRIANGLE_STRIP);
@@ -211,6 +218,9 @@ public class EmojiFontRenderer extends FontRenderer {
 		OpenGL.glTexParameteri(3553, 10240, 9728);
 		OpenGL.glTexParameteri(3553, 10241, 9728);
 		OpenGL.glDisable(GL11.GL_BLEND);
+
+		OpenGL.glPopAttrib();
+
 		setColor(this.red, this.green, this.blue, this.alpha);
 		return 10.0F;
 	}
