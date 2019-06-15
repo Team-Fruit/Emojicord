@@ -4,9 +4,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -19,15 +16,14 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import net.minecraft.client.Minecraft;
 
 public class ClientProxy extends CommonProxy {
-	public static final String MODID = "emojiful";
-	public static final String VERSION = "1.0.3";
 	public static final Minecraft MC = Minecraft.getMinecraft();
-	public static final Map<String, List<Emoji>> EMOJI_MAP = new HashMap<>();
-	public static final List<Emoji> EMOJI_LIST = new ArrayList<>();
+
+	public static final Map<String, String> EMOJI_NAME_MAP = Maps.newHashMap();
 	public static final LoadingCache<String, Emoji> EMOJI_ID_MAP = CacheBuilder.newBuilder()
 			.build(new CacheLoader<String, Emoji>() {
 				@Override
@@ -43,12 +39,8 @@ public class ClientProxy extends CommonProxy {
 		final YamlReader reader = new YamlReader(new StringReader(
 				readStringFromURL("https://raw.githubusercontent.com/HrznStudio/Emojiful/master/Categories.yml")));
 		@SuppressWarnings("unchecked")
-		final ArrayList<String> categories = (ArrayList<String>) reader.read();
-		for (final String category : categories) {
-			final List<Emoji> emojis = readCategory(category);
-			EMOJI_LIST.addAll(emojis);
-			EMOJI_MAP.put(category, emojis);
-		}
+		final Map<String, String> names = (Map<String, String>) reader.read();
+		EMOJI_NAME_MAP.putAll(names);
 	}
 
 	public static List<Emoji> readCategory(final String cat) throws YamlException {
@@ -78,21 +70,21 @@ public class ClientProxy extends CommonProxy {
 
 		Log.log = event.getModLog();
 
-		try {
-			final YamlReader reader = new YamlReader(new StringReader(
-					readStringFromURL("https://raw.githubusercontent.com/HrznStudio/Emojiful/master/Categories.yml")));
-			@SuppressWarnings("unchecked")
-			final ArrayList<String> categories = (ArrayList<String>) reader.read();
-			final Iterator<String> var4 = categories.iterator();
-			while (var4.hasNext()) {
-				final String category = var4.next();
-				final List<Emoji> emojis = readCategory(category);
-				EMOJI_LIST.addAll(emojis);
-				EMOJI_MAP.put(category, emojis);
-			}
-		} catch (final YamlException var7) {
-			this.error = true;
-		}
+		//		try {
+		//			final YamlReader reader = new YamlReader(new StringReader(
+		//					readStringFromURL("https://raw.githubusercontent.com/HrznStudio/Emojiful/master/Categories.yml")));
+		//			@SuppressWarnings("unchecked")
+		//			final ArrayList<String> categories = (ArrayList<String>) reader.read();
+		//			final Iterator<String> var4 = categories.iterator();
+		//			while (var4.hasNext()) {
+		//				final String category = var4.next();
+		//				final List<Emoji> emojis = readCategory(category);
+		//				EMOJI_LIST.addAll(emojis);
+		//				EMOJI_MAP.put(category, emojis);
+		//			}
+		//		} catch (final YamlException var7) {
+		//			this.error = true;
+		//		}
 	}
 
 	@Override

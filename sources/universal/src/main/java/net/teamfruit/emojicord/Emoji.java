@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
@@ -25,9 +24,6 @@ public class Emoji implements Predicate<String> {
 	public static final ResourceLocation error_texture = new ResourceLocation("emojicord", "textures/26d4.png");
 	private static final AtomicInteger threadDownloadCounter = new AtomicInteger(0);
 	public String name;
-	public List<String> strings;
-	public String location;
-	public int version = 1;
 	public boolean deleteOldTexture;
 	public SimpleTexture img;
 	public ResourceLocation resourceLocation;
@@ -56,9 +52,8 @@ public class Emoji implements Predicate<String> {
 
 	@Override
 	public boolean test(final String s) {
-		for (final String text : this.strings)
-			if (s.equalsIgnoreCase(text))
-				return true;
+		if (s.equals(this.name))
+			return true;
 		return false;
 	}
 
@@ -130,7 +125,7 @@ public class Emoji implements Predicate<String> {
 						httpurlconnection.setRequestProperty("Accept-Language", "ja,en-US;q=0.9,en;q=0.8");
 						httpurlconnection.connect();
 
-						if (httpurlconnection.getResponseCode() / 100 == 2) {
+						if (httpurlconnection.getResponseCode() == 200) {
 							//final int contentLength = httpurlconnection.getContentLength();
 							BufferedImage bufferedimage;
 							if (DownloadImageData.this.cacheFile != null) {
