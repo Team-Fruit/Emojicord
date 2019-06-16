@@ -28,9 +28,7 @@ public class ClientProxy extends CommonProxy {
 			.build(new CacheLoader<String, Emoji>() {
 				@Override
 				public Emoji load(final String key) throws Exception {
-					final Emoji emoji = new Emoji();
-					emoji.name = key;
-					return emoji;
+					return new Emoji(key);
 				}
 			});
 	boolean error = false;

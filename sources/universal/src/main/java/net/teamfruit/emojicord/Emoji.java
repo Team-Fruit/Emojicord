@@ -5,12 +5,14 @@ import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Predicate;
 
 import javax.imageio.ImageIO;
 
 import org.apache.commons.io.FileUtils;
+
+import com.google.common.base.Stopwatch;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.SimpleTexture;
@@ -18,21 +20,27 @@ import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 
-public class Emoji implements Predicate<String> {
+public class Emoji {
 	public static final ResourceLocation loading_texture = new ResourceLocation("emojicord", "textures/26a0.png");
 	public static final ResourceLocation noSignal_texture = new ResourceLocation("emojicord", "textures/26d4.png");
 	public static final ResourceLocation error_texture = new ResourceLocation("emojicord", "textures/26d4.png");
-	private static final AtomicInteger threadDownloadCounter = new AtomicInteger(0);
-	public String name;
-	public boolean deleteOldTexture;
-	public SimpleTexture img;
-	public ResourceLocation resourceLocation;
 
-	public Emoji() {
+	public static final long EMOJI_LIFETIME_SEC = 60;
+
+	private static final AtomicInteger threadDownloadCounter = new AtomicInteger(0);
+	private final String name;
+	private boolean deleteOldTexture;
+	private SimpleTexture img;
+	private ResourceLocation resourceLocation;
+	private final Stopwatch lifeTime;
+
+	public Emoji(final String name) {
 		this.resourceLocation = loading_texture;
+		this.name = name;
+		this.lifeTime = Stopwatch.createStarted();
 	}
 
-	public void checkLoad() {
+	private void checkLoad() {
 		if (this.img == null) {
 			this.img = new DownloadImageData(new File("emojicord/cache/" + this.name),
 					"https://cdn.discordapp.com/emojis/" + this.name, loading_texture);
@@ -42,6 +50,7 @@ public class Emoji implements Predicate<String> {
 	}
 
 	public ResourceLocation getResourceLocationForBinding() {
+		this.lifeTime.reset();
 		checkLoad();
 		if (this.deleteOldTexture) {
 			this.img.deleteGlTexture();
@@ -50,11 +59,8 @@ public class Emoji implements Predicate<String> {
 		return this.resourceLocation;
 	}
 
-	@Override
-	public boolean test(final String s) {
-		if (s.equals(this.name))
-			return true;
-		return false;
+	public boolean isExpired() {
+		return this.lifeTime.elapsed(TimeUnit.SECONDS) > EMOJI_LIFETIME_SEC;
 	}
 
 	public class DownloadImageData extends SimpleTexture {
@@ -72,8 +78,7 @@ public class Emoji implements Predicate<String> {
 		}
 
 		private void checkTextureUploaded() {
-			if ((!this.textureUploaded) &&
-					(this.bufferedImage != null)) {
+			if ((!this.textureUploaded) && (this.bufferedImage != null)) {
 				if (this.textureLocation != null)
 					deleteGlTexture();
 
