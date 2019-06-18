@@ -13,13 +13,17 @@ public abstract class EmojiId {
 	public abstract String getType();
 
 	public File getCache() {
-		return new File(String.format("%s/cache/%s/%s", Reference.MODID, getType(), getId()));
+		return new File(String.format("%s/cache/%s/%s", Reference.MODID, getType(), getCacheName()));
 	}
 
 	public abstract String getRemote();
 
+	public String getCacheName() {
+		return getId();
+	}
+
 	public ResourceLocation getResourceLocation() {
-		return new ResourceLocation(Reference.MODID, String.format("textures/emojis/%s/%s", getType(), getId()));
+		return new ResourceLocation(Reference.MODID, String.format("textures/emojis/%s/%s", getType(), getCacheName()));
 	}
 
 	@Override
@@ -45,15 +49,22 @@ public abstract class EmojiId {
 	}
 
 	public static class StandardEmojiId extends EmojiId {
-		private final String id;
+		private final String url;
+		private final String cache;
 
-		private StandardEmojiId(final String id) {
-			this.id = id;
+		public StandardEmojiId(final String url, final String cache) {
+			this.url = url;
+			this.cache = cache;
 		}
 
 		@Override
 		public String getId() {
-			return this.id;
+			return this.url;
+		}
+
+		@Override
+		public String getCacheName() {
+			return this.cache;
 		}
 
 		@Override
@@ -63,15 +74,7 @@ public abstract class EmojiId {
 
 		@Override
 		public String getRemote() {
-			return "https://cdn.discordapp.com/emojis/" + getId();
-		}
-
-		public static DiscordEmojiId fromDecimalId(final String id) {
-			return new DiscordEmojiId(NumberUtils.toLong(id));
-		}
-
-		public static DiscordEmojiId fromBase62Id(final String id) {
-			return new DiscordEmojiId(Base62.decode(id));
+			return getId();
 		}
 	}
 
