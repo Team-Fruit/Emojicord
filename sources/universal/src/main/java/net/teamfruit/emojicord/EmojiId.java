@@ -1,6 +1,8 @@
 package net.teamfruit.emojicord;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import org.apache.commons.lang3.math.NumberUtils;
@@ -49,6 +51,8 @@ public abstract class EmojiId {
 	}
 
 	public static class StandardEmojiId extends EmojiId {
+		public static final Map<String, EmojiId> EMOJI_DICTIONARY = new HashMap<>();
+
 		private final String url;
 		private final String cache;
 
@@ -76,6 +80,10 @@ public abstract class EmojiId {
 		public String getRemote() {
 			return getId();
 		}
+
+		public static EmojiId fromEndpoint(final String id) {
+			return EMOJI_DICTIONARY.get(id);
+		}
 	}
 
 	public static class DiscordEmojiId extends EmojiId {
@@ -100,11 +108,11 @@ public abstract class EmojiId {
 			return "https://cdn.discordapp.com/emojis/" + getId();
 		}
 
-		public static DiscordEmojiId fromDecimalId(final String id) {
+		public static EmojiId fromDecimalId(final String id) {
 			return new DiscordEmojiId(NumberUtils.toLong(id));
 		}
 
-		public static DiscordEmojiId fromBase62Id(final String id) {
+		public static EmojiId fromBase62Id(final String id) {
 			return new DiscordEmojiId(Base62.decode(id));
 		}
 	}

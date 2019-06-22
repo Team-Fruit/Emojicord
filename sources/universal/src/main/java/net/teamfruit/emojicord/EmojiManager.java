@@ -19,6 +19,6 @@ public class EmojiManager {
 			});
 
 	public Emoji getEmoji(final EmojiId name) {
-		return ClientProxy.EMOJI_ID_MAP.getUnchecked(name.getId());
+		return this.EMOJI_ID_MAP.getUnchecked(name.getId());
 	}
 }

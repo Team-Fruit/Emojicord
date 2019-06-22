@@ -34,7 +34,7 @@ public class EmojiFontRenderer extends FontRenderer {
 
 	private String getEmojiFormattedString(String text) {
 		String fomattingText;
-		if ((EmojifulConfig.renderEmoji) && (!StringUtil.isNullOrEmpty(text))) {
+		if ((EmojicordConfig.renderEmoji) && (!StringUtil.isNullOrEmpty(text))) {
 			final String unformattedText = net.minecraft.util.text.TextFormatting
 					.getTextWithoutFormattingCodes(text);
 			if (StringUtil.isNullOrEmpty(unformattedText))
@@ -172,7 +172,7 @@ public class EmojiFontRenderer extends FontRenderer {
 	}
 
 	private float renderChar(final char c, final boolean italic, final int index) {
-		if (EmojifulConfig.renderEmoji) {
+		if (EmojicordConfig.renderEmoji) {
 			final Emoji emoji = this.emojis.get(Integer.valueOf(index));
 			if (emoji != null) {
 				bindTexture(emoji.getResourceLocationForBinding());

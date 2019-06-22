@@ -22,7 +22,6 @@ public class EmojiEndpoint {
 	public static final String EMOJI_GATEWAY = "https://raw.githubusercontent.com/Team-Fruit/Emojicord/api/api.yml";
 	public static EmojiGateway EMOJI_API;
 	public static List<String> EMOJI_WEB_ENDPOINT;
-	public static final Map<String, EmojiId> EMOJI_DICTIONARY = new HashMap<>();
 
 	public static class EmojiGateway {
 		public List<String> emojis;
@@ -89,6 +88,6 @@ public class EmojiEndpoint {
 					IOUtils.closeQuietly(reader::close);
 			}
 		}
-		EMOJI_DICTIONARY.putAll(dict);
+		EmojiId.StandardEmojiId.EMOJI_DICTIONARY.putAll(dict);
 	}
 }
