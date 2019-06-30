@@ -28,23 +28,22 @@ public class Emoji {
 	public static final long EMOJI_LIFETIME_SEC = 60;
 
 	private static final AtomicInteger threadDownloadCounter = new AtomicInteger(0);
-	private final String name;
+	private final EmojiId id;
 	private boolean deleteOldTexture;
 	private SimpleTexture img;
 	private ResourceLocation resourceLocation;
 	private final Stopwatch lifeTime;
 
-	public Emoji(final String name) {
+	public Emoji(final EmojiId id) {
 		this.resourceLocation = loading_texture;
-		this.name = name;
+		this.id = id;
 		this.lifeTime = Stopwatch.createStarted();
 	}
 
 	private void checkLoad() {
 		if (this.img == null) {
-			this.img = new DownloadImageData(new File("emojicord/cache/" + this.name),
-					"https://cdn.discordapp.com/emojis/" + this.name, loading_texture);
-			this.resourceLocation = new ResourceLocation("emojicord", "textures/emoji/" + this.name);
+			this.img = new DownloadImageData(this.id.getCache(), this.id.getRemote(), loading_texture);
+			this.resourceLocation = this.id.getResourceLocation();
 			Minecraft.getMinecraft().renderEngine.loadTexture(this.resourceLocation, this.img);
 		}
 	}

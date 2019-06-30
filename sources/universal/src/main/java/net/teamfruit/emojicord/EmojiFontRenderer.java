@@ -5,10 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
@@ -39,21 +37,15 @@ public class EmojiFontRenderer extends FontRenderer {
 					.getTextWithoutFormattingCodes(text);
 			if (StringUtil.isNullOrEmpty(unformattedText))
 				return text;
-			final String[] split = unformattedText.split(" ");
 			final List<Pair<Emoji, String>> addedEmojis = new ArrayList<>();
-			for (final String word : split) {
-				final String strip = StringUtils.strip(word, ":");
-				if (StringUtils.equals(":" + strip + ":", word)) {
-					Emoji wordEmoji = null;
-					try {
-						wordEmoji = ClientProxy.EMOJI_ID_MAP.get(strip);
-					} catch (final ExecutionException e) {
-					}
+			final List<Pair<EmojiId, String>> emojis = EmojiParser.parse(unformattedText);
+			for (final Pair<EmojiId, String> word : emojis)
+				if (word.getLeft() != null) {
+					final Emoji wordEmoji = EmojiManager.instance.getEmoji(word.getLeft());
 
 					if (wordEmoji != null)
-						addedEmojis.add(Pair.of(wordEmoji, word));
+						addedEmojis.add(Pair.of(wordEmoji, word.getRight()));
 				}
-			}
 			fomattingText = text;
 			for (final Pair<Emoji, String> entry : addedEmojis) {
 				final String emojiText = entry.getValue();
@@ -147,7 +139,7 @@ public class EmojiFontRenderer extends FontRenderer {
 					this.posX -= size;
 					this.posY -= size;
 				}
-				float offset = renderChar(character, this.italicStyle, charIndex);
+				float offset = renderChar(character, this.italicStyle, charIndex, false);
 				if (shadow) {
 					this.posX += size;
 					this.posY += size;
@@ -158,7 +150,7 @@ public class EmojiFontRenderer extends FontRenderer {
 						this.posX -= size;
 						this.posY -= size;
 					}
-					renderChar(character, this.italicStyle, charIndex);
+					renderChar(character, this.italicStyle, charIndex, true);
 					this.posX -= size;
 					if (shadow) {
 						this.posX += size;
@@ -171,8 +163,8 @@ public class EmojiFontRenderer extends FontRenderer {
 		}
 	}
 
-	private float renderChar(final char c, final boolean italic, final int index) {
-		if (EmojicordConfig.renderEmoji) {
+	private float renderChar(final char c, final boolean italic, final int index, final boolean shadow) {
+		if (!shadow && EmojicordConfig.renderEmoji) {
 			final Emoji emoji = this.emojis.get(Integer.valueOf(index));
 			if (emoji != null) {
 				bindTexture(emoji.getResourceLocationForBinding());
@@ -199,25 +191,27 @@ public class EmojiFontRenderer extends FontRenderer {
 
 		OpenGL.glPushAttrib();
 
-		OpenGL.glEnable(GL11.GL_BLEND);
-		OpenGL.glEnable(GL11.GL_ALPHA_TEST);
+		//OpenGL.glEnable(GL11.GL_BLEND);
+		//OpenGL.glEnable(GL11.GL_ALPHA_TEST);
 
 		OpenGL.glColor4f(1.0F, 1.0F, 1.0F, (OpenGL.glGetColorRGBA() >> 24 & 0xff) / 256f);
-		OpenGL.glTexParameteri(3553, 10241, 9729);
-		OpenGL.glTexParameteri(3553, 10240, 9729);
-		OpenGL.glBegin(GL11.GL_TRIANGLE_STRIP);
+		//OpenGL.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
+		//OpenGL.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+		OpenGL.glBegin(GL11.GL_QUADS);
 		OpenGL.glTexCoord2f(textureX, textureY);
 		OpenGL.glVertex3f(this.posX - offsetX, this.posY - offsetY, 0.0F);
 		OpenGL.glTexCoord2f(textureX, textureY + textureOffset);
 		OpenGL.glVertex3f(this.posX - offsetX, this.posY + size - offsetY, 0.0F);
-		OpenGL.glTexCoord2f(textureX + textureOffset, textureY / textureSize);
-		OpenGL.glVertex3f(this.posX - offsetX + size, this.posY - offsetY, 0.0F);
 		OpenGL.glTexCoord2f(textureX + textureOffset, textureY + textureOffset);
 		OpenGL.glVertex3f(this.posX - offsetX + size, this.posY + size - offsetY, 0.0F);
+		OpenGL.glTexCoord2f(textureX + textureOffset, textureY / textureSize);
+		OpenGL.glVertex3f(this.posX - offsetX + size, this.posY - offsetY, 0.0F);
 		OpenGL.glEnd();
-		OpenGL.glTexParameteri(3553, 10240, 9728);
-		OpenGL.glTexParameteri(3553, 10241, 9728);
-		OpenGL.glDisable(GL11.GL_BLEND);
+		//OpenGL.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+		//OpenGL.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+
+		//OpenGL.glDisable(GL11.GL_ALPHA_TEST);
+		//OpenGL.glDisable(GL11.GL_BLEND);
 
 		OpenGL.glPopAttrib();
 

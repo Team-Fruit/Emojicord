@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.math.NumberUtils;
 
 import net.minecraft.util.ResourceLocation;
@@ -81,7 +83,7 @@ public abstract class EmojiId {
 			return getId();
 		}
 
-		public static EmojiId fromEndpoint(final String id) {
+		public static @Nullable EmojiId fromEndpoint(final String id) {
 			return EMOJI_DICTIONARY.get(id);
 		}
 	}
@@ -108,7 +110,9 @@ public abstract class EmojiId {
 			return "https://cdn.discordapp.com/emojis/" + getId();
 		}
 
-		public static EmojiId fromDecimalId(final String id) {
+		public static @Nullable EmojiId fromDecimalId(final String id) {
+			if (!NumberUtils.isCreatable(id))
+				return null;
 			return new DiscordEmojiId(NumberUtils.toLong(id));
 		}
 

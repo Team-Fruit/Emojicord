@@ -15,8 +15,8 @@ public class EmojiParserTest {
 	@Test
 	public void test1() {
 		final String input = "rtvh<:crime:332181988633083925>we:sushi:bxfn";
-		final Pattern pattern = EmojiParser.p;
-		final Matcher matcher = EmojiParser.p.matcher(input);
+		final Pattern pattern = EmojiParser.pattern;
+		final Matcher matcher = EmojiParser.pattern.matcher(input);
 		while (matcher.find()) {
 			final String matched = matcher.group();
 			System.out.printf("[%s] がマッチしました。 Pattern:[%s] input:[%s] m0:[%s] m1:[%s] m2:[%s] m3[%s]\n", matched,

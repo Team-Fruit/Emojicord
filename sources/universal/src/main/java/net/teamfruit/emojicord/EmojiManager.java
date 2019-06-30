@@ -10,15 +10,15 @@ public class EmojiManager {
 	private EmojiManager() {
 	}
 
-	private final LoadingCache<String, Emoji> EMOJI_ID_MAP = CacheBuilder.newBuilder()
-			.build(new CacheLoader<String, Emoji>() {
+	private final LoadingCache<EmojiId, Emoji> EMOJI_ID_MAP = CacheBuilder.newBuilder()
+			.build(new CacheLoader<EmojiId, Emoji>() {
 				@Override
-				public Emoji load(final String key) throws Exception {
+				public Emoji load(final EmojiId key) throws Exception {
 					return new Emoji(key);
 				}
 			});
 
 	public Emoji getEmoji(final EmojiId name) {
-		return this.EMOJI_ID_MAP.getUnchecked(name.getId());
+		return this.EMOJI_ID_MAP.getUnchecked(name);
 	}
 }
