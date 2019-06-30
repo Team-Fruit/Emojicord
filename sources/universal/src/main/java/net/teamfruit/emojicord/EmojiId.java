@@ -113,7 +113,7 @@ public abstract class EmojiId {
 		}
 
 		public static EmojiId fromBase62Id(final String id) {
-			return new DiscordEmojiId(Base62.decode(id));
+			return new DiscordEmojiId(Base64Utils.decode(id));
 		}
 	}
 }

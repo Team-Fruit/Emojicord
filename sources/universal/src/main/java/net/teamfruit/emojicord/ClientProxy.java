@@ -10,6 +10,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Maps;
 
 import net.minecraft.client.Minecraft;
+import net.minecraftforge.common.MinecraftForge;
 import net.teamfruit.emojicord.compat.Compat.CompatMinecraft;
 
 public class ClientProxy extends CommonProxy {
@@ -46,5 +47,7 @@ public class ClientProxy extends CommonProxy {
 	@Override
 	public void postInit(final @Nonnull CompatFMLPostInitializationEvent event) {
 		super.postInit(event);
+
+		MinecraftForge.EVENT_BUS.register(new UTFSendTest());
 	}
 }
