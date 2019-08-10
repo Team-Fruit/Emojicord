@@ -1,6 +1,9 @@
 package net.teamfruit.emojicord;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.SocketAddress;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -15,7 +18,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 
 import org.apache.http.Header;
-import org.apache.http.client.HttpClient;
+import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.config.RequestConfig.Builder;
 import org.apache.http.config.Registry;
@@ -25,9 +28,12 @@ import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLContextBuilder;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicHeader;
+
+import net.teamfruit.emojicord.compat.Compat;
 
 public class Downloader {
 	public static final int timeout = 15000;
@@ -36,7 +42,7 @@ public class Downloader {
 	public static final @Nonnull Downloader downloader = new Downloader();
 
 	public final @Nonnull PoolingHttpClientConnectionManager manager;
-	public @Nonnull HttpClient client;
+	public @Nonnull CloseableHttpClient client;
 
 	public Downloader() {
 		Registry<ConnectionSocketFactory> registry = null;
@@ -84,9 +90,20 @@ public class Downloader {
 			this.manager = new PoolingHttpClientConnectionManager();
 
 		final Builder requestConfig = RequestConfig.custom();
+
 		if (timeout > 0) {
 			requestConfig.setConnectTimeout(timeout);
 			requestConfig.setSocketTimeout(timeout);
+		}
+
+		final Proxy proxy = Compat.CompatMinecraft.getMinecraft().getProxy();
+		if (proxy != null && !Proxy.NO_PROXY.equals(proxy)) {
+			final SocketAddress saddr = proxy.address();
+			if (saddr instanceof InetSocketAddress) {
+				final InetSocketAddress inetsaddr = (InetSocketAddress) saddr;
+				final HttpHost httpproxy = new HttpHost(inetsaddr.getAddress(), inetsaddr.getPort());
+				requestConfig.setProxy(httpproxy);
+			}
 		}
 
 		final List<Header> headers = new ArrayList<>();

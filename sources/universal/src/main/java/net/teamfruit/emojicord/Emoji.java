@@ -3,14 +3,21 @@ package net.teamfruit.emojicord;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.imageio.ImageIO;
+import javax.annotation.Nonnull;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.message.BasicHeader;
 
 import com.google.common.base.Stopwatch;
 
@@ -27,7 +34,9 @@ public class Emoji {
 
 	public static final long EMOJI_LIFETIME_SEC = 60;
 
-	private static final AtomicInteger threadDownloadCounter = new AtomicInteger(0);
+	private static final @Nonnull ExecutorService threadpool = ThreadUtils
+			.newFixedCachedThreadPool(16, "emojicord-http-%d");
+
 	private final EmojiId id;
 	private boolean deleteOldTexture;
 	private SimpleTexture img;
@@ -66,7 +75,7 @@ public class Emoji {
 		private final File cacheFile;
 		private final String imageUrl;
 		private BufferedImage bufferedImage;
-		private Thread imageThread;
+		private boolean downloading;
 		private boolean textureUploaded;
 
 		public DownloadImageData(final File cacheFileIn, final String imageUrlIn,
@@ -100,10 +109,10 @@ public class Emoji {
 		public void loadTexture(final IResourceManager resourceManager) throws IOException {
 			if ((this.bufferedImage == null) && (this.textureLocation != null))
 				super.loadTexture(resourceManager);
-			if (this.imageThread == null)
+			if (!this.downloading)
 				if ((this.cacheFile != null) && (this.cacheFile.isFile()))
 					try {
-						this.bufferedImage = ImageIO.read(this.cacheFile);
+						this.bufferedImage = TextureUtil.readBufferedImage(FileUtils.openInputStream(this.cacheFile));
 					} catch (final IOException ioexception) {
 						loadTextureFromServer();
 					}
@@ -112,49 +121,45 @@ public class Emoji {
 		}
 
 		protected void loadTextureFromServer() {
-			this.imageThread = new Thread(
-					"Emojicord Texture Downloader #" + Emoji.threadDownloadCounter.incrementAndGet()) {
-				@Override
-				public void run() {
-					HttpURLConnection httpurlconnection = null;
-					try {
-						httpurlconnection = (HttpURLConnection) new URL(DownloadImageData.this.imageUrl)
-								.openConnection(Minecraft.getMinecraft().getProxy());
-						httpurlconnection.setDoInput(true);
-						httpurlconnection.setDoOutput(false);
-						httpurlconnection.setRequestProperty("User-Agent",
-								"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36");
-						httpurlconnection.setRequestProperty("Accept", "*/*");
-						httpurlconnection.setRequestProperty("Accept-Encoding", "");
-						httpurlconnection.setRequestProperty("Accept-Language", "ja,en-US;q=0.9,en;q=0.8");
-						httpurlconnection.connect();
+			this.downloading = true;
+			threadpool.execute(() -> {
+				CloseableHttpResponse response = null;
+				try {
+					final HttpUriRequest req = new HttpGet(DownloadImageData.this.imageUrl);
+					req.setHeaders(new Header[] {
+							new BasicHeader("User-Agent",
+									"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36"),
+							new BasicHeader("Accept", "*/*"),
+							new BasicHeader("Accept-Encoding", ""),
+							new BasicHeader("Accept-Language", "ja,en-US;q=0.9,en;q=0.8"),
+					});
+					final HttpClientContext context = HttpClientContext.create();
+					response = Downloader.downloader.client.execute(req, context);
+					final HttpEntity entity = response.getEntity();
 
-						if (httpurlconnection.getResponseCode() == 200) {
-							//final int contentLength = httpurlconnection.getContentLength();
-							BufferedImage bufferedimage;
-							if (DownloadImageData.this.cacheFile != null) {
-								FileUtils.copyInputStreamToFile(httpurlconnection.getInputStream(),
-										DownloadImageData.this.cacheFile);
-								bufferedimage = ImageIO.read(DownloadImageData.this.cacheFile);
-							} else
-								bufferedimage = TextureUtil.readBufferedImage(httpurlconnection.getInputStream());
+					final int statusCode = response.getStatusLine().getStatusCode();
+					if (statusCode == HttpStatus.SC_OK) {
+						BufferedImage bufferedimage;
+						if (DownloadImageData.this.cacheFile != null) {
+							FileUtils.copyInputStreamToFile(entity.getContent(),
+									DownloadImageData.this.cacheFile);
+							bufferedimage = TextureUtil
+									.readBufferedImage(FileUtils.openInputStream(DownloadImageData.this.cacheFile));
+						} else
+							bufferedimage = TextureUtil.readBufferedImage(entity.getContent());
 
-							setBufferedImage(bufferedimage);
-						} else {
-							Emoji.this.resourceLocation = Emoji.noSignal_texture;
-							Emoji.this.deleteOldTexture = true;
-						}
-					} catch (final Exception exception) {
-						Emoji.this.resourceLocation = Emoji.error_texture;
+						setBufferedImage(bufferedimage);
+					} else {
+						Emoji.this.resourceLocation = Emoji.noSignal_texture;
 						Emoji.this.deleteOldTexture = true;
-					} finally {
-						if (httpurlconnection != null)
-							httpurlconnection.disconnect();
 					}
+				} catch (final Exception exception) {
+					Emoji.this.resourceLocation = Emoji.error_texture;
+					Emoji.this.deleteOldTexture = true;
+				} finally {
+					IOUtils.closeQuietly(response);
 				}
-			};
-			this.imageThread.setDaemon(true);
-			this.imageThread.start();
+			});
 		}
 	}
 }
