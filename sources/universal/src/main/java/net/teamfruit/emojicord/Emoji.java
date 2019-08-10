@@ -4,7 +4,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
 
@@ -19,20 +18,16 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.message.BasicHeader;
 
-import com.google.common.base.Stopwatch;
-
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
+import net.teamfruit.emojicord.compat.Compat;
 
 public class Emoji {
 	public static final ResourceLocation loading_texture = new ResourceLocation("emojicord", "textures/26a0.png");
 	public static final ResourceLocation noSignal_texture = new ResourceLocation("emojicord", "textures/26d4.png");
 	public static final ResourceLocation error_texture = new ResourceLocation("emojicord", "textures/26d4.png");
-
-	public static final long EMOJI_LIFETIME_SEC = 60;
 
 	private static final @Nonnull ExecutorService threadpool = ThreadUtils
 			.newFixedCachedThreadPool(16, "emojicord-http-%d");
@@ -41,24 +36,21 @@ public class Emoji {
 	private boolean deleteOldTexture;
 	private SimpleTexture img;
 	private ResourceLocation resourceLocation;
-	private final Stopwatch lifeTime;
 
 	public Emoji(final EmojiId id) {
 		this.resourceLocation = loading_texture;
 		this.id = id;
-		this.lifeTime = Stopwatch.createStarted();
 	}
 
 	private void checkLoad() {
 		if (this.img == null) {
 			this.img = new DownloadImageData(this.id.getCache(), this.id.getRemote(), loading_texture);
 			this.resourceLocation = this.id.getResourceLocation();
-			Minecraft.getMinecraft().renderEngine.loadTexture(this.resourceLocation, this.img);
+			Compat.CompatMinecraft.getMinecraft().renderEngine.loadTexture(this.resourceLocation, this.img);
 		}
 	}
 
 	public ResourceLocation getResourceLocationForBinding() {
-		this.lifeTime.reset();
 		checkLoad();
 		if (this.deleteOldTexture) {
 			this.img.deleteGlTexture();
@@ -67,8 +59,11 @@ public class Emoji {
 		return this.resourceLocation;
 	}
 
-	public boolean isExpired() {
-		return this.lifeTime.elapsed(TimeUnit.SECONDS) > EMOJI_LIFETIME_SEC;
+	public void delete() {
+		if (this.img != null) {
+			this.img.deleteGlTexture();
+			this.deleteOldTexture = false;
+		}
 	}
 
 	public class DownloadImageData extends SimpleTexture {

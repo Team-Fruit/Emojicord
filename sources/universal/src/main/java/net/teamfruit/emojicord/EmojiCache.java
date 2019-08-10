@@ -5,15 +5,20 @@ import java.util.concurrent.TimeUnit;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.cache.RemovalNotification;
 
-public class EmojiManager {
-	public static final EmojiManager instance = new EmojiManager();
+public class EmojiCache {
+	public static final long EMOJI_LIFETIME_SEC = 60;
 
-	private EmojiManager() {
+	public static final EmojiCache instance = new EmojiCache();
+
+	private EmojiCache() {
 	}
 
 	private final LoadingCache<EmojiId, Emoji> EMOJI_ID_MAP = CacheBuilder.newBuilder()
-			.expireAfterAccess(60, TimeUnit.SECONDS)
+			.expireAfterAccess(EMOJI_LIFETIME_SEC, TimeUnit.SECONDS)
+			.removalListener(
+					(final RemovalNotification<EmojiId, Emoji> notification) -> notification.getValue().delete())
 			.build(new CacheLoader<EmojiId, Emoji>() {
 				@Override
 				public Emoji load(final EmojiId key) throws Exception {

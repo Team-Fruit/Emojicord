@@ -41,7 +41,7 @@ public class EmojiFontRenderer extends FontRenderer {
 			final List<Pair<EmojiId, String>> emojis = EmojiParser.parse(unformattedText);
 			for (final Pair<EmojiId, String> word : emojis)
 				if (word.getLeft() != null) {
-					final Emoji wordEmoji = EmojiManager.instance.getEmoji(word.getLeft());
+					final Emoji wordEmoji = EmojiCache.instance.getEmoji(word.getLeft());
 
 					if (wordEmoji != null)
 						addedEmojis.add(Pair.of(wordEmoji, word.getRight()));
