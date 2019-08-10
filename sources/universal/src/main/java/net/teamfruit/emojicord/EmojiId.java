@@ -116,8 +116,12 @@ public abstract class EmojiId {
 			return new DiscordEmojiId(NumberUtils.toLong(id));
 		}
 
-		public static EmojiId fromBase62Id(final String id) {
-			return new DiscordEmojiId(Base64Utils.decode(id));
+		public static @Nullable EmojiId fromEncodedId(final String id) {
+			try {
+				return new DiscordEmojiId(Base64Utils.decode(id));
+			} catch (final IllegalArgumentException e) {
+			}
+			return null;
 		}
 	}
 }

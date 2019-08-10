@@ -11,7 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 public class EmojiParser {
-	static final @Nonnull Pattern pattern = Pattern.compile("<a?\\:(\\w+?)\\:([a-zA-Z0-9+/]+?)>|\\:(\\w+?)\\:"); // <a?\:(\w+?)\:([a-zA-Z0-9+/]+?)>|\:(\w+?)\:
+	static final @Nonnull Pattern pattern = Pattern.compile("<a?\\:(\\w+?)\\:([a-zA-Z0-9+/=]+?)>|\\:(\\w+?)\\:"); // <a?\:(\w+?)\:([a-zA-Z0-9+/]+?)>|\:(\w+?)\:
 
 	public static List<Pair<EmojiId, String>> parse(final String text) {
 		final List<Pair<EmojiId, String>> emojis = new ArrayList<>();
@@ -20,7 +20,10 @@ public class EmojiParser {
 			final String matched = matcher.group(0);
 			final String g2 = matcher.group(2);
 			if (!StringUtils.isEmpty(g2))
-				emojis.add(Pair.of(EmojiId.DiscordEmojiId.fromDecimalId(g2), matched));
+				if (StringUtils.length(g2) > 12)
+					emojis.add(Pair.of(EmojiId.DiscordEmojiId.fromDecimalId(g2), matched));
+				else
+					emojis.add(Pair.of(EmojiId.DiscordEmojiId.fromEncodedId(g2), matched));
 			final String g3 = matcher.group(3);
 			if (!StringUtils.isEmpty(g3))
 				emojis.add(Pair.of(EmojiId.StandardEmojiId.fromEndpoint(g3), matched));

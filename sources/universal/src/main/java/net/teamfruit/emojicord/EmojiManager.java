@@ -1,5 +1,7 @@
 package net.teamfruit.emojicord;
 
+import java.util.concurrent.TimeUnit;
+
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -11,6 +13,7 @@ public class EmojiManager {
 	}
 
 	private final LoadingCache<EmojiId, Emoji> EMOJI_ID_MAP = CacheBuilder.newBuilder()
+			.expireAfterAccess(60, TimeUnit.SECONDS)
 			.build(new CacheLoader<EmojiId, Emoji>() {
 				@Override
 				public Emoji load(final EmojiId key) throws Exception {

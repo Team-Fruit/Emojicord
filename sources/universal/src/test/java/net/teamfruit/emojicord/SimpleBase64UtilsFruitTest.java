@@ -8,7 +8,7 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Parameterized.class)
-public class Base64UtilsFruitTest {
+public class SimpleBase64UtilsFruitTest {
 	@Before
 	public void setUp() throws Exception {
 	}
@@ -95,8 +95,8 @@ public class Base64UtilsFruitTest {
 	public void test() {
 		final long emojil = Long.parseLong(this.emoji);
 		Log.log.info(this.emoji);
-		Log.log.info(Base64Utils.encode1(emojil) + " : "
-				+ Base64Utils.encode2(emojil) + " : "
-				+ Base64Utils.encode3(emojil));
+		Log.log.info(SimpleBase64Utils.encode1(emojil) + " : "
+				+ SimpleBase64Utils.encode2(emojil) + " : "
+				+ SimpleBase64Utils.encode3(emojil));
 	}
 }

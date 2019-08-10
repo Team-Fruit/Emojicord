@@ -20,7 +20,7 @@ public class Base65536UtilsTest {
 	@Test
 	public void test1A() {
 		for (long i = 1; i < Long.MAX_VALUE - 1 && i < i * 2; i *= 2)
-			Log.log.info(i + " : " + Base64Utils.encode2(i).length() + " : " + Base65536Utils.encode(i).length());
+			Log.log.info(i + " : " + SimpleBase64Utils.encode2(i).length() + " : " + Base65536Utils.encode(i).length());
 	}
 
 	@Test

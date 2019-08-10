@@ -9,7 +9,7 @@ import org.junit.Test;
 import org.junit.rules.Stopwatch;
 import org.junit.runner.Description;
 
-public class Base64UtilsTimeTest {
+public class SimpleBase64UtilsTimeTest {
 	static class MyJUnitStopWatch extends Stopwatch {
 		private static void logInfo(final Description description, final String status, final long nanos) {
 			final String testName = description.getMethodName();
@@ -49,18 +49,18 @@ public class Base64UtilsTimeTest {
 	@Test
 	public void testTime1() {
 		for (long i = 0; i < 10_000_000l; i++)
-			Base64Utils.encode1(i);
+			SimpleBase64Utils.encode1(i);
 	}
 
 	@Test
 	public void testTime2() {
 		for (long i = 0; i < 10_000_000l; i++)
-			Base64Utils.encode2(i);
+			SimpleBase64Utils.encode2(i);
 	}
 
 	@Test
 	public void testTime3() {
 		for (long i = 0; i < 10_000_000l; i++)
-			Base64Utils.encode3(i);
+			SimpleBase64Utils.encode3(i);
 	}
 }
