@@ -1,4 +1,4 @@
 {
-    "api": "https://emojicord.teamfruit.net/api/emojis/",
-    "emojis": "https://raw.githubusercontent.com/Team-Fruit/Emojicord/api/emojis/emojis.min.json"
+    "api": ["https://emojicord.teamfruit.net/api/emojis/"],
+    "emojis": ["https://raw.githubusercontent.com/Team-Fruit/Emojicord/api/emojis/emojis.min.json"]
 }
