@@ -17,7 +17,7 @@ public abstract class EmojiId {
 	public abstract String getType();
 
 	public File getCache() {
-		return new File(String.format("%s/cache/%s/%s", Reference.MODID, getType(), getCacheName()));
+		return new File(EmojicordFile.instance.getCacheDirectory(), String.format("%s/%s", getType(), getCacheName()));
 	}
 
 	public abstract String getRemote();

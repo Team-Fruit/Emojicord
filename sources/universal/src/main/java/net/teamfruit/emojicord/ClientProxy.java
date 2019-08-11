@@ -22,8 +22,8 @@ public class ClientProxy extends CommonProxy {
 	public void init(final @Nonnull CompatFMLInitializationEvent event) {
 		super.init(event);
 
-		if (EmojiEndpoint.loadGateway())
-			EmojiEndpoint.loadStandardEmojis();
+		if (EmojicordEndpoint.loadGateway())
+			EmojicordEndpoint.loadStandardEmojis();
 
 		if (!this.error)
 			MC.fontRenderer = new EmojiFontRenderer(MC);
