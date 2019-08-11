@@ -110,10 +110,18 @@ public abstract class EmojiId {
 			return "https://cdn.discordapp.com/emojis/" + getId();
 		}
 
+		public String getEncodedId() {
+			return Base64Utils.encode(this.id);
+		}
+
+		public static @Nullable EmojiId fromDecimalId(final long id) {
+			return new DiscordEmojiId(id);
+		}
+
 		public static @Nullable EmojiId fromDecimalId(final String id) {
 			if (!NumberUtils.isCreatable(id))
 				return null;
-			return new DiscordEmojiId(NumberUtils.toLong(id));
+			return DiscordEmojiId.fromDecimalId(NumberUtils.toLong(id));
 		}
 
 		public static @Nullable EmojiId fromEncodedId(final String id) {

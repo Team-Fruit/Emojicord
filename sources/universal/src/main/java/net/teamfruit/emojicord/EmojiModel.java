@@ -23,22 +23,27 @@ public class EmojiModel {
 		public List<EmojiStandardGroup> groups;
 	}
 
-	public static class EmojiDicord {
+	public static class EmojiDiscord {
 		public String name;
 		public String id;
 	}
 
-	public static class EmojiDicordGroup {
-		public List<EmojiDicord> emojis;
+	public static class EmojiDiscordGroup {
+		public List<EmojiDiscord> emojis;
 		public String name;
 		public String id;
 	}
 
-	public static class EmojiDicordList {
-		public List<EmojiDicordGroup> groups;
+	public static class EmojiDiscordList {
+		public List<EmojiDiscordGroup> groups;
 	}
 
-	public static class EmojiDicordIndexList {
-		public List<String> indexes;
+	public static class EmojiDiscordIndex {
+		public String name;
+		public String id;
+	}
+
+	public static class EmojiDiscordIndexList {
+		public List<EmojiDiscordIndex> indexes;
 	}
 }

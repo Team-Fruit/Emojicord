@@ -10,15 +10,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
+import com.google.common.collect.Iterators;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimaps;
 
-import net.teamfruit.emojicord.EmojiModel.EmojiDicord;
-import net.teamfruit.emojicord.EmojiModel.EmojiDicordGroup;
-import net.teamfruit.emojicord.EmojiModel.EmojiDicordIndexList;
-import net.teamfruit.emojicord.EmojiModel.EmojiDicordList;
+import net.teamfruit.emojicord.EmojiModel.EmojiDiscord;
+import net.teamfruit.emojicord.EmojiModel.EmojiDiscordGroup;
+import net.teamfruit.emojicord.EmojiModel.EmojiDiscordIndex;
+import net.teamfruit.emojicord.EmojiModel.EmojiDiscordIndexList;
+import net.teamfruit.emojicord.EmojiModel.EmojiDiscordList;
 
 public class EmojiDictionary {
 	public static final EmojiDictionary instance = new EmojiDictionary();
@@ -49,6 +51,11 @@ public class EmojiDictionary {
 		this.dictionary.clear();
 	}
 
+	public void loadAll(final File dictDir) {
+		clear();
+		new EmojiDictionaryLoader(this).loadAll(dictDir);
+	}
+
 	public static class EmojiDictionaryLoader {
 		private final EmojiDictionary dictionary;
 
@@ -57,11 +64,11 @@ public class EmojiDictionary {
 		}
 
 		public void load(final File dictFile) {
-			final EmojiDicordList emojiList = EmojicordData.loadFile(dictFile, EmojiDicordList.class,
+			final EmojiDiscordList emojiList = EmojicordData.loadFile(dictFile, EmojiDiscordList.class,
 					"Discord Emoji Dictionary");
 			if (emojiList != null)
-				for (final EmojiDicordGroup emojiGroup : emojiList.groups)
-					for (final EmojiDicord emoji : emojiGroup.emojis) {
+				for (final EmojiDiscordGroup emojiGroup : emojiList.groups)
+					for (final EmojiDiscord emoji : emojiGroup.emojis) {
 						final EmojiId id = EmojiId.DiscordEmojiId.fromDecimalId(emoji.id);
 						if (id != null)
 							this.dictionary.register(emoji.name, id);
@@ -69,42 +76,51 @@ public class EmojiDictionary {
 		}
 
 		public void loadAll(final File dictDir) {
-			final File groupsDir = new File(dictDir, "groups");
+			final File groupsDir = new File(dictDir, "mappings");
 			final File manifestFile = new File(dictDir, "indexes.json");
 
-			final ListMultimap<String, EmojiDicordGroup> groups = Multimaps.newListMultimap(Maps.newHashMap(),
+			final ListMultimap<String, EmojiDiscordGroup> groups = Multimaps.newListMultimap(
+					Maps.newHashMap(),
 					() -> Lists.newArrayList());
 			for (final File dictFile : FileUtils.listFiles(groupsDir, new String[] { "json" }, true)) {
-				final EmojiDicordList emojiList = EmojicordData.loadFile(dictFile, EmojiDicordList.class,
+				final EmojiDiscordList emojiList = EmojicordData.loadFile(dictFile, EmojiDiscordList.class,
 						"Discord Emoji Dictionary");
 				if (emojiList != null)
-					for (final EmojiDicordGroup emojiGroup : emojiList.groups)
+					for (final EmojiDiscordGroup emojiGroup : emojiList.groups)
 						groups.put(emojiGroup.id, emojiGroup);
 			}
 
-			final List<Pair<String, List<EmojiDicordGroup>>> indexed = Lists.newArrayList();
-			final EmojiDicordIndexList indexes = EmojicordData.loadFile(manifestFile, EmojiDicordIndexList.class, null);
+			final List<Pair<EmojiDiscordIndex, List<EmojiDiscordGroup>>> indexed = Lists.newArrayList();
+			final EmojiDiscordIndexList indexes = EmojicordData.loadFile(manifestFile, EmojiDiscordIndexList.class,
+					null);
 			if (indexes != null)
-				for (final String index : indexes.indexes)
+				for (final EmojiDiscordIndex index : indexes.indexes)
 					if (groups.containsKey(index)) {
-						final List<EmojiDicordGroup> group = groups.get(index);
+						final List<EmojiDiscordGroup> group = groups.get(index.id);
 						groups.removeAll(index);
 						indexed.add(Pair.of(index, group));
 					}
-			for (final Entry<String, List<EmojiDicordGroup>> entry : Multimaps.asMap(groups).entrySet())
-				indexed.add(Pair.of(entry.getKey(), entry.getValue()));
+			for (final Entry<String, List<EmojiDiscordGroup>> entry : Multimaps.asMap(groups).entrySet()) {
+				final EmojiDiscordIndex index = new EmojiDiscordIndex();
+				index.id = entry.getKey();
+				index.name = entry.getValue().isEmpty() ? "" : entry.getValue().get(0).name;
+				indexed.add(Pair.of(index, entry.getValue()));
+			}
 
-			final List<String> newindexes = indexed.stream().map(Pair::getKey).collect(Collectors.toList());
-			if (indexes == null || !indexes.indexes.equals(newindexes)) {
-				final EmojiDicordIndexList data = new EmojiDicordIndexList();
+			final List<EmojiDiscordIndex> newindexes = indexed.stream().map(Pair::getKey).collect(Collectors.toList());
+			if (indexes == null
+					|| indexes.indexes.size() != newindexes.size()
+					|| !Iterators.elementsEqual(indexes.indexes.stream().map(e -> e.id).iterator(),
+							newindexes.stream().map(e -> e.id).iterator())) {
+				final EmojiDiscordIndexList data = new EmojiDiscordIndexList();
 				data.indexes = newindexes;
-				EmojicordData.saveFile(manifestFile, EmojiDicordIndexList.class, data,
+				EmojicordData.saveFile(manifestFile, EmojiDiscordIndexList.class, data,
 						"Discord Emoji Dictionary Manifest File");
 			}
 
-			for (final Pair<String, List<EmojiDicordGroup>> emojiList : indexed)
-				for (final EmojiDicordGroup emojiGroup : emojiList.getRight())
-					for (final EmojiDicord emoji : emojiGroup.emojis) {
+			for (final Pair<EmojiDiscordIndex, List<EmojiDiscordGroup>> emojiList : indexed)
+				for (final EmojiDiscordGroup emojiGroup : emojiList.getRight())
+					for (final EmojiDiscord emoji : emojiGroup.emojis) {
 						final EmojiId id = EmojiId.DiscordEmojiId.fromDecimalId(emoji.id);
 						if (id != null)
 							this.dictionary.register(emoji.name, id);

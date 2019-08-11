@@ -30,4 +30,21 @@ public class EmojiParser {
 		}
 		return emojis;
 	}
+
+	public static String encode(final String text) {
+		final StringBuffer sb = new StringBuffer();
+		final Matcher matcher = EmojiParser.pattern.matcher(text);
+		while (matcher.find()) {
+			final String g3 = matcher.group(3);
+			if (!StringUtils.isEmpty(g3))
+				if (EmojiId.StandardEmojiId.fromEndpoint(g3) == null) {
+					final EmojiId id = EmojiDictionary.instance.get(g3);
+					if (id instanceof EmojiId.DiscordEmojiId)
+						matcher.appendReplacement(sb,
+								String.format("<:%s:%s>", g3, ((EmojiId.DiscordEmojiId) id).getEncodedId()));
+				}
+		}
+		matcher.appendTail(sb);
+		return sb.toString();
+	}
 }

@@ -3,6 +3,7 @@ package net.teamfruit.emojicord;
 import javax.annotation.Nonnull;
 
 import net.minecraft.client.Minecraft;
+import net.minecraftforge.common.MinecraftForge;
 import net.teamfruit.emojicord.compat.Compat.CompatMinecraft;
 
 public class ClientProxy extends CommonProxy {
@@ -22,8 +23,12 @@ public class ClientProxy extends CommonProxy {
 	public void init(final @Nonnull CompatFMLInitializationEvent event) {
 		super.init(event);
 
+		EmojiDictionary.instance.loadAll(EmojicordFile.instance.getDictionaryDirectory());
+
 		if (EmojicordEndpoint.loadGateway())
 			EmojicordEndpoint.loadStandardEmojis();
+
+		MinecraftForge.EVENT_BUS.register(new EmojicordHandler());
 
 		if (!this.error)
 			MC.fontRenderer = new EmojiFontRenderer(MC);
