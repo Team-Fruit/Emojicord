@@ -85,6 +85,9 @@ public class Emoji {
 				if (this.textureLocation != null)
 					deleteGlTexture();
 
+				//final DynamicImageTexture texture = DynamicImageTexture.createSized(this.bufferedImage);
+				//texture.load();
+				//this.glTextureId = texture.getId();
 				TextureUtil.uploadTextureImage(super.getGlTextureId(), this.bufferedImage);
 				this.textureUploaded = true;
 			}

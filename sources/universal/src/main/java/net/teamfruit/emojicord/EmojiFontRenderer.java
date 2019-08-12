@@ -32,7 +32,7 @@ public class EmojiFontRenderer extends FontRenderer {
 
 	private String getEmojiFormattedString(String text) {
 		String fomattingText;
-		if ((EmojicordConfig.renderEmoji) && (!StringUtil.isNullOrEmpty(text))) {
+		if ((EmojicordConfig.renderEnabled) && (!StringUtil.isNullOrEmpty(text))) {
 			final String unformattedText = net.minecraft.util.text.TextFormatting
 					.getTextWithoutFormattingCodes(text);
 			if (StringUtil.isNullOrEmpty(unformattedText))
@@ -139,7 +139,7 @@ public class EmojiFontRenderer extends FontRenderer {
 					this.posX -= size;
 					this.posY -= size;
 				}
-				float offset = renderChar(character, this.italicStyle, charIndex, false);
+				float offset = renderChar(character, this.italicStyle, charIndex, hasShadow);
 				if (shadow) {
 					this.posX += size;
 					this.posY += size;
@@ -163,13 +163,17 @@ public class EmojiFontRenderer extends FontRenderer {
 		}
 	}
 
-	private float renderChar(final char c, final boolean italic, final int index, final boolean shadow) {
-		if (!shadow && EmojicordConfig.renderEmoji) {
+	private float renderChar(final char c, final boolean italic, final int index, final boolean hasShadow) {
+		if (EmojicordConfig.renderEnabled) {
 			final Emoji emoji = this.emojis.get(Integer.valueOf(index));
-			if (emoji != null) {
-				bindTexture(emoji.getResourceLocationForBinding());
-				return renderEmoji(emoji);
-			}
+			if (emoji != null)
+				if (hasShadow)
+					return 10.0F;
+				else {
+					bindTexture(emoji.getResourceLocationForBinding());
+					renderEmoji(emoji);
+					return 10.0F;
+				}
 		}
 		if (c == ' ')
 			return 4.0F;
@@ -180,7 +184,7 @@ public class EmojiFontRenderer extends FontRenderer {
 				: renderUnicodeChar(c, italic);
 	}
 
-	private float renderEmoji(final Emoji emoji) {
+	private void renderEmoji(final Emoji emoji) {
 		final float textureSize = 16.0F;
 		final float textureX = 0.0F / textureSize;
 		final float textureY = 0.0F / textureSize;
@@ -195,8 +199,11 @@ public class EmojiFontRenderer extends FontRenderer {
 		//OpenGL.glEnable(GL11.GL_ALPHA_TEST);
 
 		OpenGL.glColor4f(1.0F, 1.0F, 1.0F, (OpenGL.glGetColorRGBA() >> 24 & 0xff) / 256f);
+		OpenGL.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
 		//OpenGL.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
 		//OpenGL.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+		//OpenGL.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+		//OpenGL.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
 		OpenGL.glBegin(GL11.GL_QUADS);
 		OpenGL.glTexCoord2f(textureX, textureY);
 		OpenGL.glVertex3f(this.posX - offsetX, this.posY - offsetY, 0.0F);
@@ -213,9 +220,8 @@ public class EmojiFontRenderer extends FontRenderer {
 		//OpenGL.glDisable(GL11.GL_ALPHA_TEST);
 		//OpenGL.glDisable(GL11.GL_BLEND);
 
-		OpenGL.glPopAttrib();
-
 		setColor(this.red, this.green, this.blue, this.alpha);
-		return 10.0F;
+
+		OpenGL.glPopAttrib();
 	}
 }
