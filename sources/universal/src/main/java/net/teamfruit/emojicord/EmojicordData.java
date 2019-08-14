@@ -27,13 +27,13 @@ public class EmojicordData {
 	public static final Gson gson = new Gson();
 
 	private static void reportRead(final Exception e, final @Nullable String description) {
-		if (description != null)
-			Log.log.warn("Failed to load " + description + ": ", e);
+		if (description!=null)
+			Log.log.warn("Failed to load "+description+": ", e);
 	}
 
 	private static void reportWrite(final Exception e, final @Nullable String description) {
-		if (description != null)
-			Log.log.warn("Failed to save " + description + ": ", e);
+		if (description!=null)
+			Log.log.warn("Failed to save "+description+": ", e);
 	}
 
 	private static <T> T readStream(final InputStream stream, final Class<T> clazz) throws Exception {
@@ -47,8 +47,10 @@ public class EmojicordData {
 		}
 	}
 
-	public static @Nullable <T> T loadStream(final InputStream stream, final Class<T> clazz,
-			final @Nullable String description) {
+	public static @Nullable <T> T loadStream(
+			final InputStream stream, final Class<T> clazz,
+			final @Nullable String description
+	) {
 		try {
 			return readStream(stream, clazz);
 		} catch (final Exception e) {
@@ -71,8 +73,10 @@ public class EmojicordData {
 		}
 	}
 
-	public static @Nullable <T> boolean saveStream(final OutputStream stream, final Class<T> clazz, final T object,
-			final @Nullable String description) {
+	public static <T> boolean saveStream(
+			final OutputStream stream, final Class<T> clazz, final T object,
+			final @Nullable String description
+	) {
 		try {
 			return writeStream(stream, clazz, object);
 		} catch (final Exception e) {
@@ -98,8 +102,10 @@ public class EmojicordData {
 		return writeStream(FileUtils.openOutputStream(file), clazz, object);
 	}
 
-	public static @Nullable <T> boolean saveFile(final File file, final Class<T> clazz, final T object,
-			final @Nullable String description) {
+	public static <T> boolean saveFile(
+			final File file, final Class<T> clazz, final T object,
+			final @Nullable String description
+	) {
 		try {
 			return writeFile(file, clazz, object);
 		} catch (final Exception e) {
@@ -115,8 +121,8 @@ public class EmojicordData {
 		final HttpEntity entity = response.getEntity();
 
 		final int statusCode = response.getStatusLine().getStatusCode();
-		if (statusCode != HttpStatus.SC_OK)
-			throw new HttpResponseException(statusCode, "Invalid status code: " + url);
+		if (statusCode!=HttpStatus.SC_OK)
+			throw new HttpResponseException(statusCode, "Invalid status code: "+url);
 
 		return entity.getContent();
 	}

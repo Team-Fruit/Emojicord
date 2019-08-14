@@ -36,14 +36,22 @@ public class EmojiModel {
 
 	public static class EmojiDiscordList {
 		public List<EmojiDiscordGroup> groups;
+		public String name;
+		public String id;
 	}
 
-	public static class EmojiDiscordIndex {
+	public static class EmojiDiscordIndexGroup {
 		public String name;
 		public String id;
 	}
 
 	public static class EmojiDiscordIndexList {
-		public List<EmojiDiscordIndex> indexes;
+		public List<EmojiDiscordIndexGroup> groups;
+		public String name;
+		public String id;
+	}
+
+	public static class EmojiDiscordIndexFolder {
+		public List<EmojiDiscordIndexList> lists;
 	}
 }
