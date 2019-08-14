@@ -4,10 +4,15 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.math.NumberUtils;
+
+import com.google.common.base.Suppliers;
 
 import net.minecraft.util.ResourceLocation;
 
@@ -37,23 +42,27 @@ public abstract class EmojiId {
 
 	@Override
 	public boolean equals(final Object obj) {
-		if (this == obj)
+		if (this==obj)
 			return true;
-		if (obj == null)
+		if (obj==null)
 			return false;
 		if (!(obj instanceof EmojiId))
 			return false;
 		final EmojiId other = (EmojiId) obj;
-		return Objects.equals(getId(), other.getId()) && Objects.equals(getType(), other.getType());
+		return Objects.equals(getId(), other.getId())&&Objects.equals(getType(), other.getType());
 	}
 
 	@Override
 	public String toString() {
-		return "EmojiId [id=" + getId() + ", type=" + getType() + "]";
+		return "EmojiId [id="+getId()+", type="+getType()+"]";
 	}
 
 	public static class StandardEmojiId extends EmojiId {
 		public static final Map<String, EmojiId> EMOJI_DICTIONARY = new HashMap<>();
+		public static final Supplier<Set<String>> EMOJI_SHORT = Suppliers.memoize(() -> EMOJI_DICTIONARY.keySet().stream()
+				.filter(str -> {
+					return str.matches("[\\w]*[^\\w]+[\\w]*");
+				}).collect(Collectors.toSet()));
 
 		private final String url;
 		private final String cache;
@@ -107,7 +116,7 @@ public abstract class EmojiId {
 
 		@Override
 		public String getRemote() {
-			return "https://cdn.discordapp.com/emojis/" + getId();
+			return "https://cdn.discordapp.com/emojis/"+getId();
 		}
 
 		public String getEncodedId() {

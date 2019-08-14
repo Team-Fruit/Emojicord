@@ -32,7 +32,7 @@ public class EmojiFontRenderer extends FontRenderer {
 
 	private String getEmojiFormattedString(String text) {
 		String fomattingText;
-		if ((EmojicordConfig.renderEnabled) && (!StringUtil.isNullOrEmpty(text))) {
+		if (EmojicordConfig.renderEnabled&&!StringUtil.isNullOrEmpty(text)) {
 			final String unformattedText = net.minecraft.util.text.TextFormatting
 					.getTextWithoutFormattingCodes(text);
 			if (StringUtil.isNullOrEmpty(unformattedText))
@@ -40,10 +40,9 @@ public class EmojiFontRenderer extends FontRenderer {
 			final List<Pair<Emoji, String>> addedEmojis = new ArrayList<>();
 			final List<Pair<EmojiId, String>> emojis = EmojiParser.parse(unformattedText);
 			for (final Pair<EmojiId, String> word : emojis)
-				if (word.getLeft() != null) {
+				if (word.getLeft()!=null) {
 					final Emoji wordEmoji = EmojiCache.instance.getEmoji(word.getLeft());
-
-					if (wordEmoji != null)
+					if (wordEmoji!=null)
 						addedEmojis.add(Pair.of(wordEmoji, word.getRight()));
 				}
 			fomattingText = text;
@@ -52,7 +51,7 @@ public class EmojiFontRenderer extends FontRenderer {
 				final int index = fomattingText.indexOf(emojiText);
 				this.emojis.put(index, entry.getKey());
 				fomattingText = fomattingText.replaceFirst(Pattern.quote(emojiText), "?");
-				text = text.replaceFirst("(?i)" + Pattern.quote(emojiText), "?");
+				text = text.replaceFirst("(?i)"+Pattern.quote(emojiText), "?");
 			}
 		}
 		return text;
@@ -60,7 +59,7 @@ public class EmojiFontRenderer extends FontRenderer {
 
 	@Override
 	public int getCharWidth(final char character) {
-		if (character == '?')
+		if (character=='?')
 			return 10;
 		return super.getCharWidth(character);
 	}
@@ -71,18 +70,18 @@ public class EmojiFontRenderer extends FontRenderer {
 			return;
 		this.emojis.clear();
 		text = getEmojiFormattedString(text);
-		for (int charIndex = 0; charIndex < text.length(); charIndex++) {
+		for (int charIndex = 0; charIndex<text.length(); charIndex++) {
 			char character = text.charAt(charIndex);
-			if ((character == '§') && (charIndex + 1 < text.length())) {
+			if (character=='§'&&charIndex+1<text.length()) {
 				int formatting = "0123456789abcdefklmnor"
-						.indexOf(text.toLowerCase(Locale.ENGLISH).charAt(charIndex + 1));
-				if (formatting < 16) {
+						.indexOf(text.toLowerCase(Locale.ENGLISH).charAt(charIndex+1));
+				if (formatting<16) {
 					this.randomStyle = false;
 					this.boldStyle = false;
 					this.strikethroughStyle = false;
 					this.underlineStyle = false;
 					this.italicStyle = false;
-					if ((formatting < 0) || (formatting > 15))
+					if (formatting<0||formatting>15)
 						formatting = 15;
 
 					if (hasShadow)
@@ -90,24 +89,24 @@ public class EmojiFontRenderer extends FontRenderer {
 
 					final int colour = this.colorCode[formatting];
 					this.textColor = colour;
-					setColor((colour >> 16) / 255.0F, (colour >> 8 & 0xFF) / 255.0F, (colour & 0xFF) / 255.0F,
+					setColor((colour>>16)/255.0F, (colour>>8&0xFF)/255.0F, (colour&0xFF)/255.0F,
 							this.alpha);
-				} else if (formatting == 16)
+				} else if (formatting==16)
 					this.randomStyle = true;
 
-				else if (formatting == 17)
+				else if (formatting==17)
 					this.boldStyle = true;
 
-				else if (formatting == 18)
+				else if (formatting==18)
 					this.strikethroughStyle = true;
 
-				else if (formatting == 19)
+				else if (formatting==19)
 					this.underlineStyle = true;
 
-				else if (formatting == 20)
+				else if (formatting==20)
 					this.italicStyle = true;
 
-				else if (formatting == 21) {
+				else if (formatting==21) {
 					this.randomStyle = false;
 					this.boldStyle = false;
 					this.strikethroughStyle = false;
@@ -119,7 +118,7 @@ public class EmojiFontRenderer extends FontRenderer {
 			} else {
 				int c = "?????????????????????????\000\000\000\000\000\000\000 !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\000????????????????????????????￡?×???????????￢???≪≫???│┤??????????┐└┴┬├─┼???????????????????┘┌?????αβΓπΣσμτΦΘΩδ∞?∈∩≡±????÷?°?・√??■\000"
 						.indexOf(character);
-				if ((this.randomStyle) && (c != -1)) {
+				if (this.randomStyle&&c!=-1) {
 					final int width = getCharWidth(character);
 					char newChar;
 					for (;;) {
@@ -128,13 +127,13 @@ public class EmojiFontRenderer extends FontRenderer {
 										.length());
 						newChar = "?????????????????????????\000\000\000\000\000\000\000 !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\000????????????????????????????￡?×???????????￢???≪≫???│┤??????????┐└┴┬├─┼???????????????????┘┌?????αβΓπΣσμτΦΘΩδ∞?∈∩≡±????÷?°?・√??■\000"
 								.charAt(c);
-						if (width == getCharWidth(newChar))
+						if (width==getCharWidth(newChar))
 							break;
 					}
 					character = newChar;
 				}
-				final float size = (c == -1) || (this.unicodeFlag) ? 0.5F : 1.0F;
-				final boolean shadow = ((character == 0) || (c == -1) || (this.unicodeFlag)) && (hasShadow);
+				final float size = c==-1||this.unicodeFlag ? 0.5F : 1.0F;
+				final boolean shadow = (character==0||c==-1||this.unicodeFlag)&&hasShadow;
 				if (shadow) {
 					this.posX -= size;
 					this.posY -= size;
@@ -166,7 +165,7 @@ public class EmojiFontRenderer extends FontRenderer {
 	private float renderChar(final char c, final boolean italic, final int index, final boolean hasShadow) {
 		if (EmojicordConfig.renderEnabled) {
 			final Emoji emoji = this.emojis.get(Integer.valueOf(index));
-			if (emoji != null)
+			if (emoji!=null)
 				if (hasShadow)
 					return 10.0F;
 				else {
@@ -175,20 +174,20 @@ public class EmojiFontRenderer extends FontRenderer {
 					return 10.0F;
 				}
 		}
-		if (c == ' ')
+		if (c==' ')
 			return 4.0F;
 
 		final int charIndex = "?????????????????????????\000\000\000\000\000\000\000 !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\000????????????????????????????￡?×???????????￢???≪≫???│┤??????????┐└┴┬├─┼???????????????????┘┌?????αβΓπΣσμτΦΘΩδ∞?∈∩≡±????÷?°?・√??■\000"
 				.indexOf(c);
-		return (charIndex != -1) && (!this.unicodeFlag) ? renderDefaultChar(charIndex, italic)
+		return charIndex!=-1&&!this.unicodeFlag ? renderDefaultChar(charIndex, italic)
 				: renderUnicodeChar(c, italic);
 	}
 
 	private void renderEmoji(final Emoji emoji) {
 		final float textureSize = 16.0F;
-		final float textureX = 0.0F / textureSize;
-		final float textureY = 0.0F / textureSize;
-		final float textureOffset = 16.0F / textureSize;
+		final float textureX = 0.0F/textureSize;
+		final float textureY = 0.0F/textureSize;
+		final float textureOffset = 16.0F/textureSize;
 		final float size = 10.0F;
 		final float offsetY = 1.0F;
 		final float offsetX = 0.0F;
@@ -198,7 +197,7 @@ public class EmojiFontRenderer extends FontRenderer {
 		//OpenGL.glEnable(GL11.GL_BLEND);
 		//OpenGL.glEnable(GL11.GL_ALPHA_TEST);
 
-		OpenGL.glColor4f(1.0F, 1.0F, 1.0F, (OpenGL.glGetColorRGBA() >> 24 & 0xff) / 256f);
+		OpenGL.glColor4f(1.0F, 1.0F, 1.0F, (OpenGL.glGetColorRGBA()>>24&0xff)/256f);
 		OpenGL.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
 		//OpenGL.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
 		//OpenGL.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
@@ -206,13 +205,13 @@ public class EmojiFontRenderer extends FontRenderer {
 		//OpenGL.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
 		OpenGL.glBegin(GL11.GL_QUADS);
 		OpenGL.glTexCoord2f(textureX, textureY);
-		OpenGL.glVertex3f(this.posX - offsetX, this.posY - offsetY, 0.0F);
-		OpenGL.glTexCoord2f(textureX, textureY + textureOffset);
-		OpenGL.glVertex3f(this.posX - offsetX, this.posY + size - offsetY, 0.0F);
-		OpenGL.glTexCoord2f(textureX + textureOffset, textureY + textureOffset);
-		OpenGL.glVertex3f(this.posX - offsetX + size, this.posY + size - offsetY, 0.0F);
-		OpenGL.glTexCoord2f(textureX + textureOffset, textureY / textureSize);
-		OpenGL.glVertex3f(this.posX - offsetX + size, this.posY - offsetY, 0.0F);
+		OpenGL.glVertex3f(this.posX-offsetX, this.posY-offsetY, 0.0F);
+		OpenGL.glTexCoord2f(textureX, textureY+textureOffset);
+		OpenGL.glVertex3f(this.posX-offsetX, this.posY+size-offsetY, 0.0F);
+		OpenGL.glTexCoord2f(textureX+textureOffset, textureY+textureOffset);
+		OpenGL.glVertex3f(this.posX-offsetX+size, this.posY+size-offsetY, 0.0F);
+		OpenGL.glTexCoord2f(textureX+textureOffset, textureY/textureSize);
+		OpenGL.glVertex3f(this.posX-offsetX+size, this.posY-offsetY, 0.0F);
 		OpenGL.glEnd();
 		//OpenGL.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
 		//OpenGL.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
