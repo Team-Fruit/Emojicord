@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
 
@@ -17,6 +18,11 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.message.BasicHeader;
+
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.cache.RemovalNotification;
 
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.renderer.texture.TextureUtil;
@@ -45,7 +51,7 @@ public class EmojiObject {
 	}
 
 	private void checkLoad() {
-		if (this.img == null) {
+		if (this.img==null) {
 			this.img = new DownloadImageData(this.id.getCache(), this.id.getRemote(), loading_texture);
 			this.resourceLocation = this.id.getResourceLocation();
 			Compat.CompatMinecraft.getMinecraft().renderEngine.loadTexture(this.resourceLocation, this.img);
@@ -62,7 +68,7 @@ public class EmojiObject {
 	}
 
 	public void delete() {
-		if (this.img != null) {
+		if (this.img!=null) {
 			this.img.deleteGlTexture();
 			this.deleteOldTexture = false;
 		}
@@ -75,16 +81,18 @@ public class EmojiObject {
 		private boolean downloading;
 		private boolean textureUploaded;
 
-		public DownloadImageData(final File cacheFileIn, final String imageUrlIn,
-				final ResourceLocation textureResourceLocation) {
+		public DownloadImageData(
+				final File cacheFileIn, final String imageUrlIn,
+				final ResourceLocation textureResourceLocation
+		) {
 			super(textureResourceLocation);
 			this.cacheFile = cacheFileIn;
 			this.imageUrl = imageUrlIn;
 		}
 
 		private void checkTextureUploaded() {
-			if ((!this.textureUploaded) && (this.bufferedImage != null)) {
-				if (this.textureLocation != null)
+			if (!this.textureUploaded&&this.bufferedImage!=null) {
+				if (this.textureLocation!=null)
 					deleteGlTexture();
 
 				//final DynamicImageTexture texture = DynamicImageTexture.createSized(this.bufferedImage);
@@ -107,10 +115,10 @@ public class EmojiObject {
 
 		@Override
 		public void loadTexture(final IResourceManager resourceManager) throws IOException {
-			if ((this.bufferedImage == null) && (this.textureLocation != null))
+			if (this.bufferedImage==null&&this.textureLocation!=null)
 				super.loadTexture(resourceManager);
 			if (!this.downloading)
-				if ((this.cacheFile != null) && (this.cacheFile.isFile()))
+				if (this.cacheFile!=null&&this.cacheFile.isFile())
 					try {
 						this.bufferedImage = TextureUtil.readBufferedImage(FileUtils.openInputStream(this.cacheFile));
 					} catch (final IOException ioexception) {
@@ -138,9 +146,9 @@ public class EmojiObject {
 					final HttpEntity entity = response.getEntity();
 
 					final int statusCode = response.getStatusLine().getStatusCode();
-					if (statusCode == HttpStatus.SC_OK) {
+					if (statusCode==HttpStatus.SC_OK) {
 						BufferedImage bufferedimage;
-						if (DownloadImageData.this.cacheFile != null) {
+						if (DownloadImageData.this.cacheFile!=null) {
 							FileUtils.copyInputStreamToFile(entity.getContent(),
 									DownloadImageData.this.cacheFile);
 							bufferedimage = TextureUtil
@@ -160,6 +168,30 @@ public class EmojiObject {
 					IOUtils.closeQuietly(response);
 				}
 			});
+		}
+	}
+
+	public static class EmojiObjectCache {
+		public static final long EMOJI_LIFETIME_SEC = 60;
+
+		public static final EmojiObjectCache instance = new EmojiObjectCache();
+
+		private EmojiObjectCache() {
+		}
+
+		private final LoadingCache<EmojiId, EmojiObject> EMOJI_ID_MAP = CacheBuilder.newBuilder()
+				.expireAfterAccess(EMOJI_LIFETIME_SEC, TimeUnit.SECONDS)
+				.removalListener(
+						(final RemovalNotification<EmojiId, EmojiObject> notification) -> notification.getValue().delete())
+				.build(new CacheLoader<EmojiId, EmojiObject>() {
+					@Override
+					public EmojiObject load(final EmojiId key) throws Exception {
+						return new EmojiObject(key);
+					}
+				});
+
+		public EmojiObject getEmojiObject(final EmojiId name) {
+			return this.EMOJI_ID_MAP.getUnchecked(name);
 		}
 	}
 }

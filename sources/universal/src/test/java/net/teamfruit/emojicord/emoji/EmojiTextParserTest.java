@@ -7,7 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import net.teamfruit.emojicord.Log;
-import net.teamfruit.emojicord.emoji.TextParser;
+import net.teamfruit.emojicord.emoji.EmojiText.EmojiTextParser;
 
 public class EmojiTextParserTest {
 
@@ -18,8 +18,8 @@ public class EmojiTextParserTest {
 	@Test
 	public void test1() {
 		final String input = "rtvh<:crime:332181988633083925>we:sushi:bxfn";
-		final Pattern pattern = TextParser.pattern;
-		final Matcher matcher = TextParser.pattern.matcher(input);
+		final Pattern pattern = EmojiTextParser.pattern;
+		final Matcher matcher = EmojiTextParser.pattern.matcher(input);
 		while (matcher.find()) {
 			final String matched = matcher.group();
 			System.out.printf("[%s] がマッチしました。 Pattern:[%s] input:[%s] m0:[%s] m1:[%s] m2:[%s] m3[%s]\n", matched,
