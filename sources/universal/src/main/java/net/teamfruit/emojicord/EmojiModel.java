@@ -12,6 +12,7 @@ public class EmojiModel {
 		public String location;
 		public String name;
 		public List<String> strings;
+		public String surrogates;
 	}
 
 	public static class EmojiStandardGroup {

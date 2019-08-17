@@ -1,7 +1,6 @@
 package net.teamfruit.emojicord;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -13,6 +12,7 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import com.google.common.base.Suppliers;
+import com.google.common.collect.Maps;
 
 import net.minecraft.util.ResourceLocation;
 
@@ -58,7 +58,8 @@ public abstract class EmojiId {
 	}
 
 	public static class StandardEmojiId extends EmojiId {
-		public static final Map<String, EmojiId> EMOJI_DICTIONARY = new HashMap<>();
+		public static final Map<String, EmojiId> EMOJI_DICTIONARY = Maps.newHashMap();
+		public static final Map<String, EmojiId> EMOJI_UTF_DICTIONARY = Maps.newHashMap();
 		public static final Supplier<Set<String>> EMOJI_SHORT = Suppliers.memoize(() -> EMOJI_DICTIONARY.keySet().stream()
 				.filter(str -> {
 					return str.matches("[\\w]*[^\\w]+[\\w]*");
@@ -94,6 +95,10 @@ public abstract class EmojiId {
 
 		public static @Nullable EmojiId fromEndpoint(final String id) {
 			return EMOJI_DICTIONARY.get(id);
+		}
+
+		public static @Nullable EmojiId fromEndpointUtf(final String id) {
+			return EMOJI_UTF_DICTIONARY.get(id);
 		}
 	}
 
