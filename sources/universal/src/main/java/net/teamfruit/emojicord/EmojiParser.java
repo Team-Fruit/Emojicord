@@ -12,8 +12,15 @@ import org.apache.commons.lang3.tuple.Pair;
 import com.google.common.collect.Lists;
 
 public class EmojiParser {
-	public static final @Nonnull String placeHolder = "%s";
-	static final @Nonnull Pattern pattern = Pattern.compile("(?:(?i)\u00a7[0-9A-FK-OR])|<a?\\:(\\w+?)\\:([a-zA-Z0-9+/=]+?)>|\\:([\\w+-]+?)\\:(?:\\:skin-tone-(\\d)\\:)?|(?:([^ \u00A7]+?)([ \u00A7]|$))"); // <a?\:(\w+?)\:([a-zA-Z0-9+/]+?)>|\:(\w+?)\:
+	public static final @Nonnull String placeHolder = "%s";//"\u00A7s";
+	public static final @Nonnull Pattern placeHolderPattern = Pattern.compile(placeHolder);
+
+	static final @Nonnull Pattern pattern = Pattern.compile(
+			"("+placeHolder+")"
+					+"|(?:(?i)\u00A7[0-9A-FK-OR])"
+					+"|<a?\\:(?:\\w+?)\\:([a-zA-Z0-9+/=]+?)>"
+					+"|\\:([\\w+-]+?)\\:(?:\\:skin-tone-(\\d)\\:)?"
+					+"|(?:([^ \u00A7]+?)([ \u00A7]|$))");
 
 	public static Pair<String, List<Pair<EmojiId, String>>> parse(final String text) {
 		final StringBuffer sb = new StringBuffer();
@@ -21,6 +28,12 @@ public class EmojiParser {
 		final Matcher matcher = EmojiParser.pattern.matcher(text);
 		while (matcher.find()) {
 			final String matched = matcher.group(0).trim();
+			final String g1 = matcher.group(1);
+			if (!StringUtils.isEmpty(g1)) {
+				matcher.appendReplacement(sb, placeHolder);
+				emojis.add(Pair.of(null, matched));
+				continue;
+			}
 			final String g2 = matcher.group(2);
 			if (!StringUtils.isEmpty(g2))
 				if (StringUtils.length(g2)>12) {

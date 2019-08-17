@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
@@ -33,23 +33,25 @@ public class EmojiFontRenderer extends FontRenderer {
 		if (EmojicordConfig.renderEnabled&&!StringUtil.isNullOrEmpty(text)) {
 			if (StringUtil.isNullOrEmpty(text))
 				return text;
-			text = StringUtils.replace(text, "%", "%%");
 			final Pair<String, List<Pair<EmojiId, String>>> emojiPair = EmojiParser.parse(text);
 			text = emojiPair.getLeft();
-			text = StringUtils.replace(text, "%%", "%");
+			final Matcher matcher = EmojiParser.placeHolderPattern.matcher(text);
+			final StringBuffer sb = new StringBuffer();
 			final List<Pair<EmojiId, String>> emojis = emojiPair.getRight();
-			for (final Pair<EmojiId, String> entry : emojis) {
-				final EmojiId emojiId = entry.getLeft();
-				final Emoji emoji = emojiId==null ? null : EmojiCache.instance.getEmoji(emojiId);
-				final String placeHolder = EmojiParser.placeHolder;
-				if (emoji==null)
-					text = StringUtils.replaceOnce(text, placeHolder, entry.getRight());
-				else {
-					final int index = StringUtils.indexOf(text, placeHolder);
-					this.emojis.put(index, emoji);
-					text = StringUtils.replaceOnce(text, placeHolder, "?");
+			for (final Pair<EmojiId, String> entry : emojis)
+				if (matcher.find()) {
+					final EmojiId emojiId = entry.getLeft();
+					final Emoji emoji = emojiId==null ? null : EmojiCache.instance.getEmoji(emojiId);
+					if (emoji==null)
+						matcher.appendReplacement(sb, entry.getRight());
+					else {
+						matcher.appendReplacement(sb, "?");
+						final int index = sb.length()-"?".length();
+						this.emojis.put(index, emoji);
+					}
 				}
-			}
+			matcher.appendTail(sb);
+			text = sb.toString();
 		}
 		return text;
 	}
