@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -63,10 +64,21 @@ public abstract class EmojiId {
 	public static class StandardEmojiId extends EmojiId {
 		public static final Map<String, EmojiId> EMOJI_DICTIONARY = Maps.newHashMap();
 		public static final Map<String, EmojiId> EMOJI_UTF_DICTIONARY = Maps.newHashMap();
+		private static final Pattern EMOJI_SHORT_FILTER = Pattern.compile("[\\w]*[^\\w]+[\\w]*");
 		public static final Supplier<Set<String>> EMOJI_SHORT = Suppliers.memoize(() -> EMOJI_DICTIONARY.keySet().stream()
 				.filter(str -> {
-					return str.matches("[\\w]*[^\\w]+[\\w]*");
+					return EMOJI_SHORT_FILTER.matcher(str).matches();
 				}).collect(Collectors.toSet()));
+		private static final Pattern EMOJI_UTF_FILTER = Pattern.compile(".+[\uD83C\uDFFB-\uD83C\uDFFF]$");
+		public static final Supplier<Set<String>> EMOJI_UTF = Suppliers.memoize(() -> EMOJI_UTF_DICTIONARY.keySet().stream()
+				.filter(str -> {
+					return !EMOJI_UTF_FILTER.matcher(str).matches();
+				}).collect(Collectors.toSet()));
+		public static final Supplier<Pattern> EMOJI_UTF_PATTERN = Suppliers.memoize(() -> {
+			final String emojiFilter = EMOJI_UTF.get().stream().map(Pattern::quote).collect(Collectors.joining("|"));
+			final String toneFilter = "[\uD83C\uDFFB-\uD83C\uDFFF]";
+			return Pattern.compile(String.format("(?:%s)%s?", emojiFilter, toneFilter));
+		});
 
 		private final String url;
 		private final String cache;
@@ -100,8 +112,8 @@ public abstract class EmojiId {
 			return EMOJI_DICTIONARY.get(id);
 		}
 
-		public static @Nullable EmojiId fromEndpointUtf(final String id) {
-			return EMOJI_UTF_DICTIONARY.get(id);
+		public static @Nullable EmojiId fromEndpointUtf(final String surrogates) {
+			return EMOJI_UTF_DICTIONARY.get(surrogates);
 		}
 	}
 
