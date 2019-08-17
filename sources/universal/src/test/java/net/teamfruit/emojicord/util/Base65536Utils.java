@@ -1,4 +1,4 @@
-package net.teamfruit.emojicord;
+package net.teamfruit.emojicord.util;
 
 import java.math.BigInteger;
 

@@ -1,4 +1,4 @@
-package net.teamfruit.emojicord;
+package net.teamfruit.emojicord.util;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -6,6 +6,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
+
+import net.teamfruit.emojicord.Log;
 
 @RunWith(Parameterized.class)
 public class SimpleBase64UtilsFruitTest {

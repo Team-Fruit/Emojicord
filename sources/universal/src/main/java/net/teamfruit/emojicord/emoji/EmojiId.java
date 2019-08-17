@@ -1,4 +1,4 @@
-package net.teamfruit.emojicord;
+package net.teamfruit.emojicord.emoji;
 
 import java.io.File;
 import java.util.Map;
@@ -15,6 +15,9 @@ import com.google.common.base.Suppliers;
 import com.google.common.collect.Maps;
 
 import net.minecraft.util.ResourceLocation;
+import net.teamfruit.emojicord.Locations;
+import net.teamfruit.emojicord.Reference;
+import net.teamfruit.emojicord.util.Base64Utils;
 
 public abstract class EmojiId {
 	public abstract String getId();
@@ -22,7 +25,7 @@ public abstract class EmojiId {
 	public abstract String getType();
 
 	public File getCache() {
-		return new File(EmojicordFile.instance.getCacheDirectory(), String.format("%s/%s", getType(), getCacheName()));
+		return new File(Locations.instance.getCacheDirectory(), String.format("%s/%s", getType(), getCacheName()));
 	}
 
 	public abstract String getRemote();

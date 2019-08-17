@@ -1,4 +1,4 @@
-package net.teamfruit.emojicord;
+package net.teamfruit.emojicord.util;
 
 import static org.junit.Assert.*;
 
@@ -7,6 +7,7 @@ import javax.util.Base64;
 import org.junit.Before;
 import org.junit.Test;
 
+import net.teamfruit.emojicord.Log;
 import scala.actors.threadpool.Arrays;
 
 public class SimpleBase64UtilsTest {

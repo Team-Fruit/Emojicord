@@ -1,4 +1,4 @@
-package net.teamfruit.emojicord;
+package net.teamfruit.emojicord.emoji;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -6,7 +6,10 @@ import java.util.regex.Pattern;
 import org.junit.Before;
 import org.junit.Test;
 
-public class EmojiParserTest {
+import net.teamfruit.emojicord.Log;
+import net.teamfruit.emojicord.emoji.TextParser;
+
+public class EmojiTextParserTest {
 
 	@Before
 	public void setUp() throws Exception {
@@ -15,8 +18,8 @@ public class EmojiParserTest {
 	@Test
 	public void test1() {
 		final String input = "rtvh<:crime:332181988633083925>we:sushi:bxfn";
-		final Pattern pattern = EmojiParser.pattern;
-		final Matcher matcher = EmojiParser.pattern.matcher(input);
+		final Pattern pattern = TextParser.pattern;
+		final Matcher matcher = TextParser.pattern.matcher(input);
 		while (matcher.find()) {
 			final String matched = matcher.group();
 			System.out.printf("[%s] がマッチしました。 Pattern:[%s] input:[%s] m0:[%s] m1:[%s] m2:[%s] m3[%s]\n", matched,

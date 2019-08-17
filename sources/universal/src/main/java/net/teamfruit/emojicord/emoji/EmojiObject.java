@@ -1,4 +1,4 @@
-package net.teamfruit.emojicord;
+package net.teamfruit.emojicord.emoji;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -23,8 +23,10 @@ import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.teamfruit.emojicord.compat.Compat;
+import net.teamfruit.emojicord.util.Downloader;
+import net.teamfruit.emojicord.util.ThreadUtils;
 
-public class Emoji {
+public class EmojiObject {
 	public static final ResourceLocation loading_texture = new ResourceLocation("emojicord", "textures/26a0.png");
 	public static final ResourceLocation noSignal_texture = new ResourceLocation("emojicord", "textures/26d4.png");
 	public static final ResourceLocation error_texture = new ResourceLocation("emojicord", "textures/26d4.png");
@@ -37,7 +39,7 @@ public class Emoji {
 	private SimpleTexture img;
 	private ResourceLocation resourceLocation;
 
-	public Emoji(final EmojiId id) {
+	public EmojiObject(final EmojiId id) {
 		this.resourceLocation = loading_texture;
 		this.id = id;
 	}
@@ -148,12 +150,12 @@ public class Emoji {
 
 						setBufferedImage(bufferedimage);
 					} else {
-						Emoji.this.resourceLocation = Emoji.noSignal_texture;
-						Emoji.this.deleteOldTexture = true;
+						EmojiObject.this.resourceLocation = EmojiObject.noSignal_texture;
+						EmojiObject.this.deleteOldTexture = true;
 					}
 				} catch (final Exception exception) {
-					Emoji.this.resourceLocation = Emoji.error_texture;
-					Emoji.this.deleteOldTexture = true;
+					EmojiObject.this.resourceLocation = EmojiObject.error_texture;
+					EmojiObject.this.deleteOldTexture = true;
 				} finally {
 					IOUtils.closeQuietly(response);
 				}

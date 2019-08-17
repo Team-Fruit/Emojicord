@@ -1,10 +1,12 @@
-package net.teamfruit.emojicord;
+package net.teamfruit.emojicord.util;
 
 import static org.junit.Assert.*;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.Before;
 import org.junit.Test;
+
+import net.teamfruit.emojicord.Log;
 
 public class Base65536UtilsTest {
 	@Before

@@ -1,4 +1,4 @@
-package net.teamfruit.emojicord;
+package net.teamfruit.emojicord.util;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.teamfruit.emojicord.compat.Compat.CompatMinecraft;
 import net.teamfruit.emojicord.compat.Compat.CompatTextureUtil;
+import net.teamfruit.emojicord.EmojicordConfig;
 import net.teamfruit.emojicord.compat.OpenGL;
 
 public abstract class DynamicImageTexture implements ImageTexture {

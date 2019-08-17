@@ -1,8 +1,8 @@
-package net.teamfruit.emojicord;
+package net.teamfruit.emojicord.emoji;
 
 import java.util.List;
 
-public class EmojiModel {
+public class Models {
 	public static class EmojiGateway {
 		public List<String> emojis;
 		public List<String> api;

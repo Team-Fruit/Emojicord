@@ -1,4 +1,4 @@
-package net.teamfruit.emojicord;
+package net.teamfruit.emojicord.emoji;
 
 import java.util.concurrent.TimeUnit;
 
@@ -15,18 +15,18 @@ public class EmojiCache {
 	private EmojiCache() {
 	}
 
-	private final LoadingCache<EmojiId, Emoji> EMOJI_ID_MAP = CacheBuilder.newBuilder()
+	private final LoadingCache<EmojiId, EmojiObject> EMOJI_ID_MAP = CacheBuilder.newBuilder()
 			.expireAfterAccess(EMOJI_LIFETIME_SEC, TimeUnit.SECONDS)
 			.removalListener(
-					(final RemovalNotification<EmojiId, Emoji> notification) -> notification.getValue().delete())
-			.build(new CacheLoader<EmojiId, Emoji>() {
+					(final RemovalNotification<EmojiId, EmojiObject> notification) -> notification.getValue().delete())
+			.build(new CacheLoader<EmojiId, EmojiObject>() {
 				@Override
-				public Emoji load(final EmojiId key) throws Exception {
-					return new Emoji(key);
+				public EmojiObject load(final EmojiId key) throws Exception {
+					return new EmojiObject(key);
 				}
 			});
 
-	public Emoji getEmoji(final EmojiId name) {
+	public EmojiObject getEmoji(final EmojiId name) {
 		return this.EMOJI_ID_MAP.getUnchecked(name);
 	}
 }

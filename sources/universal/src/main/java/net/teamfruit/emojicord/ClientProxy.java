@@ -5,6 +5,10 @@ import javax.annotation.Nonnull;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.common.MinecraftForge;
 import net.teamfruit.emojicord.compat.Compat.CompatMinecraft;
+import net.teamfruit.emojicord.emoji.DiscordEmojiDictionary;
+import net.teamfruit.emojicord.emoji.Endpoint;
+import net.teamfruit.emojicord.emoji.EmojiFontRenderer;
+import net.teamfruit.emojicord.emoji.EventHandler;
 
 public class ClientProxy extends CommonProxy {
 	public static final Minecraft MC = CompatMinecraft.getMinecraft();
@@ -23,12 +27,12 @@ public class ClientProxy extends CommonProxy {
 	public void init(final @Nonnull CompatFMLInitializationEvent event) {
 		super.init(event);
 
-		EmojiDictionary.instance.loadAll(EmojicordFile.instance.getDictionaryDirectory());
+		DiscordEmojiDictionary.instance.loadAll(Locations.instance.getDictionaryDirectory());
 
-		if (EmojicordEndpoint.loadGateway())
-			EmojicordEndpoint.loadStandardEmojis();
+		if (Endpoint.loadGateway())
+			Endpoint.loadStandardEmojis();
 
-		MinecraftForge.EVENT_BUS.register(new EmojicordHandler());
+		MinecraftForge.EVENT_BUS.register(new EventHandler());
 
 		if (!this.error)
 			MC.fontRenderer = new EmojiFontRenderer(MC);

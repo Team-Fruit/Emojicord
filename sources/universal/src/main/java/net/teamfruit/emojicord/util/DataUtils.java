@@ -1,4 +1,4 @@
-package net.teamfruit.emojicord;
+package net.teamfruit.emojicord.util;
 
 import java.io.File;
 import java.io.InputStream;
@@ -23,7 +23,9 @@ import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
-public class EmojicordData {
+import net.teamfruit.emojicord.Log;
+
+public class DataUtils {
 	public static final Gson gson = new Gson();
 
 	private static void reportRead(final Exception e, final @Nullable String description) {

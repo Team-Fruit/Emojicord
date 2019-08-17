@@ -1,4 +1,4 @@
-package net.teamfruit.emojicord;
+package net.teamfruit.emojicord.emoji;
 
 import java.util.List;
 import java.util.regex.Matcher;
@@ -11,7 +11,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.Lists;
 
-public class EmojiParser {
+public class TextParser {
 	public static final @Nonnull String placeHolder = "\u00A7s";
 	public static final @Nonnull Pattern placeHolderPattern = Pattern.compile(placeHolder);
 
@@ -32,7 +32,7 @@ public class EmojiParser {
 		text = encode(text);
 		final StringBuffer sb = new StringBuffer();
 		final List<Pair<EmojiId, String>> emojis = Lists.newArrayList();
-		final Matcher matcher = EmojiParser.pattern.matcher(text);
+		final Matcher matcher = TextParser.pattern.matcher(text);
 		while (matcher.find()) {
 			final String matched = matcher.group(0).trim();
 			final String g1 = matcher.group(1);
@@ -78,12 +78,12 @@ public class EmojiParser {
 	public static String encode(String text) {
 		{
 			final StringBuffer sb = new StringBuffer();
-			final Matcher matcher = EmojiParser.pattern.matcher(text);
+			final Matcher matcher = TextParser.pattern.matcher(text);
 			while (matcher.find()) {
 				final String g3 = matcher.group(3);
 				if (!StringUtils.isEmpty(g3))
 					if (EmojiId.StandardEmojiId.fromEndpoint(g3)==null) {
-						final EmojiId id = EmojiDictionary.instance.get(g3);
+						final EmojiId id = DiscordEmojiDictionary.instance.get(g3);
 						if (id instanceof EmojiId.DiscordEmojiId)
 							matcher.appendReplacement(sb,
 									String.format("<:%s:%s>", g3, ((EmojiId.DiscordEmojiId) id).getEncodedId()));
@@ -94,7 +94,7 @@ public class EmojiParser {
 		}
 		{
 			final StringBuffer sb = new StringBuffer();
-			final Matcher matcher = EmojiParser.patternShort.matcher(text);
+			final Matcher matcher = TextParser.patternShort.matcher(text);
 			while (matcher.find()) {
 				final String g1 = matcher.group(1);
 				final String g2 = matcher.group(2);
@@ -111,7 +111,7 @@ public class EmojiParser {
 		}
 		{
 			final StringBuffer sb = new StringBuffer();
-			final Matcher matcher = EmojiParser.patternEmoji.matcher(text);
+			final Matcher matcher = TextParser.patternEmoji.matcher(text);
 			while (matcher.find()) {
 				final String g0 = matcher.group(0);
 				if (!StringUtils.isEmpty(g0)) {

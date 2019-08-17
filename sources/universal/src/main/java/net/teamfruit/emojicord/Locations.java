@@ -2,10 +2,11 @@ package net.teamfruit.emojicord;
 
 import java.io.File;
 
+import net.teamfruit.emojicord.Reference;
 import net.teamfruit.emojicord.compat.Compat;
 
-public class EmojicordFile {
-	public static final EmojicordFile instance = new EmojicordFile();
+public class Locations {
+	public static final Locations instance = new Locations();
 
 	public File getMinecraftDirectory() {
 		return Compat.CompatMinecraft.getMinecraft().mcDataDir;

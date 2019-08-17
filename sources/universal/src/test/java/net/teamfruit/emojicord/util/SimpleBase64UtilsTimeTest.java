@@ -1,4 +1,4 @@
-package net.teamfruit.emojicord;
+package net.teamfruit.emojicord.util;
 
 import java.util.concurrent.TimeUnit;
 
@@ -8,6 +8,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Stopwatch;
 import org.junit.runner.Description;
+
+import net.teamfruit.emojicord.Log;
 
 public class SimpleBase64UtilsTimeTest {
 	static class MyJUnitStopWatch extends Stopwatch {
