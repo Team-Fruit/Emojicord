@@ -27,6 +27,7 @@ for i, data in enumerate(jsn['emojiDefinitions']):
         'name': data['primaryName'],
         'strings': data['names'],
         'location': f'{filename}.png',
+        'surrogates': data['surrogates'],
     })
 
 with codecs.open('emojis.json', 'w', 'utf-8') as f:
