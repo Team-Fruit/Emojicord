@@ -10,4 +10,5 @@ public class Reference {
 	public static final @Nonnull String MINECRAFT = "${mcversion}";
 	public static final @Nonnull String PROXY_SERVER = "net.teamfruit.emojicord.CommonProxy";
 	public static final @Nonnull String PROXY_CLIENT = "net.teamfruit.emojicord.ClientProxy";
+	public static final @Nonnull String TRANSFORMER = "net.teamfruit.emojicord.asm.EmojicordTransformer";
 }
