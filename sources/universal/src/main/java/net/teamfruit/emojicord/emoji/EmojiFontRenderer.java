@@ -7,6 +7,7 @@ import java.util.regex.Matcher;
 
 import javax.annotation.Nonnull;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL11;
 
@@ -40,7 +41,7 @@ public class EmojiFontRenderer extends FontRenderer {
 	@Override
 	public int getStringWidth(final String text) {
 		CurrentText = getEmojiFormattedString(text);
-		return super.getStringWidth(text);
+		return super.getStringWidth(CurrentText);
 	}
 
 	public static String getEmojiFormattedString(String text) {
@@ -48,13 +49,15 @@ public class EmojiFontRenderer extends FontRenderer {
 			Compat.CompatMinecraft.getMinecraft().mcProfiler.startSection("emojicordParse");
 			if (StringUtil.isNullOrEmpty(text))
 				return text;
-			final EmojiText emojiPair = EmojiTextCache.instance.getEmojiText(text);
+			final EmojiText emojiPair = EmojiTextCache.instance.getEmojiText(text, IsNewChatRendering);
 			text = emojiPair.text;
 			final Matcher matcher = EmojiText.placeHolderPattern.matcher(text);
 			final StringBuffer sb = new StringBuffer();
 			final List<Pair<EmojiId, String>> emojis = emojiPair.emojis;
-			for (final Pair<EmojiId, String> entry : emojis)
-				if (matcher.find()) {
+			if (matcher.find()) {
+				final int emojiIndex = NumberUtils.toInt(matcher.group(1), -1);
+				if (0<=emojiIndex&&emojiIndex<emojis.size()) {
+					final Pair<EmojiId, String> entry = emojis.get(emojiIndex);
 					final EmojiId emojiId = entry.getLeft();
 					final EmojiObject emoji = emojiId==null ? null : EmojiObjectCache.instance.getEmojiObject(emojiId);
 					if (emoji==null)
@@ -65,6 +68,7 @@ public class EmojiFontRenderer extends FontRenderer {
 						CurrentEmojis.put(index, emoji);
 					}
 				}
+			}
 			matcher.appendTail(sb);
 			text = sb.toString();
 			Compat.CompatMinecraft.getMinecraft().mcProfiler.endSection();
@@ -180,7 +184,7 @@ public class EmojiFontRenderer extends FontRenderer {
 				if (hasShadow)
 					return 10.0F;
 				else {
-					bindTexture(emoji.getResourceLocationForBinding());
+					Compat.CompatMinecraft.getMinecraft().renderEngine.bindTexture(emoji.getResourceLocationForBinding());
 					renderEmoji(emoji);
 					return 10.0F;
 				}
@@ -229,7 +233,7 @@ public class EmojiFontRenderer extends FontRenderer {
 		//OpenGL.glDisable(GL11.GL_ALPHA_TEST);
 		//OpenGL.glDisable(GL11.GL_BLEND);
 
-		setColor(this.red, this.green, this.blue, this.alpha);
+		OpenGL.glColor4f(this.red, this.green, this.blue, this.alpha);
 
 		OpenGL.glPopAttrib();
 	}

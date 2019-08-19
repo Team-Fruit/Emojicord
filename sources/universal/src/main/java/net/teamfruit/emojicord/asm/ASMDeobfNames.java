@@ -45,4 +45,6 @@ public class ASMDeobfNames {
 				return RefName.deobName("pageInsertIntoCurrent", "func_146459_b");
 		}
 	}).get();
+
+	public static final @Nonnull RefName GuiTextFieldDrawTextBox = RefName.deobName("drawTextBox", "func_146194_f");
 }

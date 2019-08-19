@@ -1,6 +1,7 @@
 package net.teamfruit.emojicord.emoji;
 
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -13,6 +14,7 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import com.google.common.base.Suppliers;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import net.minecraft.util.ResourceLocation;
@@ -64,11 +66,29 @@ public abstract class EmojiId {
 	public static class StandardEmojiId extends EmojiId {
 		public static final Map<String, EmojiId> EMOJI_DICTIONARY = Maps.newHashMap();
 		public static final Map<String, EmojiId> EMOJI_UTF_DICTIONARY = Maps.newHashMap();
-		private static final Pattern EMOJI_SHORT_FILTER = Pattern.compile("[\\w]*[^\\w]+[\\w]*");
+		private static final Pattern EMOJI_SHORT_FILTER_NOT = Pattern.compile(".+\\:skin-tone-\\d");
+		private static final Pattern EMOJI_SHORT_FILTER = Pattern.compile("^.*[^\\w].*$");
 		public static final Supplier<Set<String>> EMOJI_SHORT = Suppliers.memoize(() -> EMOJI_DICTIONARY.keySet().stream()
 				.filter(str -> {
-					return EMOJI_SHORT_FILTER.matcher(str).matches();
+					return !EMOJI_SHORT_FILTER_NOT.matcher(str).matches()&&EMOJI_SHORT_FILTER.matcher(str).matches();
 				}).collect(Collectors.toSet()));
+		public static final Supplier<Pattern> EMOJI_SHORT_PATTERN = Suppliers.memoize(() -> {
+			final List<String> emoticons = Lists.newArrayList(EMOJI_SHORT.get());
+			//List of emotions should be pre-processed to handle instances of subtrings like :-) :-
+			//Without this pre-processing, emoticons in a string won't be processed properly
+			for (int i = 0; i<emoticons.size(); i++)
+				for (int j = i+1; j<emoticons.size(); j++) {
+					final String o1 = emoticons.get(i);
+					final String o2 = emoticons.get(j);
+					if (o2.contains(o1)) {
+						final String temp = o2;
+						emoticons.remove(j);
+						emoticons.add(i, temp);
+					}
+				}
+			final String emojiFilter = emoticons.stream().map(Pattern::quote).collect(Collectors.joining("|"));
+			return Pattern.compile(String.format("(?:%s)(?= |$)", emojiFilter));
+		});
 		private static final Pattern EMOJI_UTF_FILTER = Pattern.compile(".+[\uD83C\uDFFB-\uD83C\uDFFF]$");
 		public static final Supplier<Set<String>> EMOJI_UTF = Suppliers.memoize(() -> EMOJI_UTF_DICTIONARY.keySet().stream()
 				.filter(str -> {

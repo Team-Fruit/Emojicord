@@ -17,7 +17,6 @@ import net.minecraft.launchwrapper.LaunchClassLoader;
 import net.teamfruit.emojicord.Log;
 import net.teamfruit.emojicord.asm.lib.VisitorHelper;
 import net.teamfruit.emojicord.asm.lib.VisitorHelper.TransformProvider;
-import net.teamfruit.emojicord.compat.CompatVersion;
 
 public class EmojicordTransformer implements IClassTransformer {
 	private boolean intelliinputloaded;
@@ -62,40 +61,12 @@ public class EmojicordTransformer implements IClassTransformer {
 		initIntelliInput(name, transformedName);
 
 		try {
-			if (transformedName.equals("net.minecraft.tileentity.TileEntity"))
-				if (CompatVersion.newer(CompatVersion.V9))
-					return VisitorHelper.apply(bytes, name, new TransformProvider(ClassWriter.COMPUTE_FRAMES) {
-						@Override
-						public ClassVisitor createVisitor(final String name, final ClassVisitor cv) {
-							Log.log.info(String.format("Patching TileEntity.getRenderBoundingBox (class: %s)", name));
-							return new TileEntityVisitor(name, cv);
-						}
-					});
-
-			if (transformedName.equals("net.minecraft.client.gui.GuiScreenBook"))
+			if (transformedName.equals("net.minecraft.client.gui.GuiTextField"))
 				return VisitorHelper.apply(bytes, name, new TransformProvider(ClassWriter.COMPUTE_FRAMES) {
 					@Override
 					public ClassVisitor createVisitor(final String name, final ClassVisitor cv) {
-						Log.log.info(String.format("Patching GuiScreenBook.drawScreen (class: %s)", name));
-						return new GuiScreenBookVisitor(name, cv);
-					}
-				});
-
-			if (transformedName.equals("net.minecraft.client.gui.GuiNewChat"))
-				return VisitorHelper.apply(bytes, name, new TransformProvider(ClassWriter.COMPUTE_FRAMES) {
-					@Override
-					public ClassVisitor createVisitor(final String name, final ClassVisitor cv) {
-						Log.log.info(String.format("Patching GuiNewChat (class: %s)", name));
-						return new GuiNewChatVisitor(name, cv);
-					}
-				});
-
-			if (transformedName.equals("net.minecraft.client.gui.GuiScreen"))
-				return VisitorHelper.apply(bytes, name, new TransformProvider(ClassWriter.COMPUTE_FRAMES) {
-					@Override
-					public ClassVisitor createVisitor(final String name, final ClassVisitor cv) {
-						Log.log.info(String.format("Patching GuiScreen.handleInput (class: %s)", name));
-						return new GuiScreenVisitor(name, cv);
+						Log.log.info(String.format("Patching GuiTextField (class: %s)", name));
+						return new GuiTextFieldVisitor(name, cv);
 					}
 				});
 		} catch (final Exception e) {

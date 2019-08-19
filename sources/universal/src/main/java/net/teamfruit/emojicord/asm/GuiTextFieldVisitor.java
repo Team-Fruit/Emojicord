@@ -12,9 +12,9 @@ import net.teamfruit.emojicord.asm.lib.ClassName;
 import net.teamfruit.emojicord.asm.lib.DescHelper;
 import net.teamfruit.emojicord.asm.lib.MethodMatcher;
 
-public class GuiNewChatVisitor extends ClassVisitor {
-	private static class DrawChatHookMethodVisitor extends MethodVisitor {
-		public DrawChatHookMethodVisitor(final @Nullable MethodVisitor mv) {
+public class GuiTextFieldVisitor extends ClassVisitor {
+	private static class HookMethodVisitor extends MethodVisitor {
+		public HookMethodVisitor(final @Nullable MethodVisitor mv) {
 			super(Opcodes.ASM5, mv);
 		}
 
@@ -45,11 +45,11 @@ public class GuiNewChatVisitor extends ClassVisitor {
 		}
 	}
 
-	private final MethodMatcher drawchatmatcher;
+	private final MethodMatcher matcher;
 
-	public GuiNewChatVisitor(final @Nonnull String obfClassName, final @Nonnull ClassVisitor cv) {
+	public GuiTextFieldVisitor(final @Nonnull String obfClassName, final @Nonnull ClassVisitor cv) {
 		super(Opcodes.ASM5, cv);
-		this.drawchatmatcher = new MethodMatcher(ClassName.fromBytecodeName(obfClassName), DescHelper.toDescMethod(void.class, int.class), ASMDeobfNames.GuiNewChatDrawChat);
+		this.matcher = new MethodMatcher(ClassName.fromBytecodeName(obfClassName), DescHelper.toDescMethod(void.class, int.class), ASMDeobfNames.GuiTextFieldDrawTextBox);
 	}
 
 	@Override
@@ -62,8 +62,8 @@ public class GuiNewChatVisitor extends ClassVisitor {
 		final MethodVisitor parent = super.visitMethod(access, name, desc, signature, exceptions);
 		if (name==null||desc==null)
 			return parent;
-		if (this.drawchatmatcher.match(name, desc))
-			return new DrawChatHookMethodVisitor(parent);
+		if (this.matcher.match(name, desc))
+			return new HookMethodVisitor(parent);
 		return parent;
 	}
 }

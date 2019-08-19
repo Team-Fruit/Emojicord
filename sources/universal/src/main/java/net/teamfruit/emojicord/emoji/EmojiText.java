@@ -2,6 +2,7 @@ package net.teamfruit.emojicord.emoji;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,8 +17,8 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
 
 public class EmojiText {
-	public static final @Nonnull String placeHolder = "\u00A7s";
-	public static final @Nonnull Pattern placeHolderPattern = Pattern.compile(placeHolder);
+	public static final @Nonnull Function<Integer, String> placeHolderSupplier = e -> String.format("{%d}", e);
+	public static final @Nonnull Pattern placeHolderPattern = Pattern.compile("\\{(\\d+?)\\}");
 
 	public final @Nonnull String text;
 	public final @Nonnull List<Pair<EmojiId, String>> emojis;
@@ -28,37 +29,35 @@ public class EmojiText {
 	}
 
 	public static class EmojiTextParser {
-		// (§s)|(?:(?i)§[0-9A-FK-OR])|<a?\:(?:\w+?)\:([a-zA-Z0-9+/=]+?)>|\:([\w+-]+?)\:(?:\:skin-tone-(\d)\:)?
+		// \{(\d+?)\}|(?:(?i)§[0-9A-FK-OR])|<a?\:(?:\w+?)\:([a-zA-Z0-9+/=]+?)>|\:([\w+-]+?)\:(?:\:skin-tone-(\d)\:)?
 		static final @Nonnull Pattern pattern = Pattern.compile(
-				"("+placeHolder+")"
+				"\\{(\\d+?)\\}"
 						+"|(?:(?i)\u00A7[0-9A-FK-OR])"
 						+"|<a?\\:(?:\\w+?)\\:([a-zA-Z0-9+/=]+?)>"
 						+"|\\:([\\w+-]+?)\\:(?:\\:skin-tone-(\\d)\\:)?");
-		// (?:([^ §]+?)([ §]|$))
-		static final @Nonnull Pattern patternShort = Pattern.compile("(?:([^ \u00A7]+?)([ \u00A7]|$))");
 
-		public static EmojiText parse(String text) {
-			text = encode(text);
+		public static EmojiText parse(String text, final boolean isTextField) {
+			text = encode(text, isTextField);
 			final StringBuffer sb = new StringBuffer();
 			final List<Pair<EmojiId, String>> emojis = Lists.newArrayList();
 			final Matcher matcher = pattern.matcher(text);
 			while (matcher.find()) {
-				final String matched = matcher.group(0).trim();
+				final String g0 = matcher.group(0);
 				final String g1 = matcher.group(1);
 				if (!StringUtils.isEmpty(g1)) {
-					matcher.appendReplacement(sb, placeHolder);
-					emojis.add(Pair.of(null, matched));
+					matcher.appendReplacement(sb, placeHolderSupplier.apply(emojis.size()));
+					emojis.add(Pair.of(null, g0));
 					continue;
 				}
 				final String g2 = matcher.group(2);
 				if (!StringUtils.isEmpty(g2))
 					if (StringUtils.length(g2)>12) {
-						matcher.appendReplacement(sb, placeHolder);
-						emojis.add(Pair.of(EmojiId.DiscordEmojiId.fromDecimalId(g2), matched));
+						matcher.appendReplacement(sb, placeHolderSupplier.apply(emojis.size()));
+						emojis.add(Pair.of(EmojiId.DiscordEmojiId.fromDecimalId(g2), g0));
 						continue;
 					} else {
-						matcher.appendReplacement(sb, placeHolder);
-						emojis.add(Pair.of(EmojiId.DiscordEmojiId.fromEncodedId(g2), matched));
+						matcher.appendReplacement(sb, placeHolderSupplier.apply(emojis.size()));
+						emojis.add(Pair.of(EmojiId.DiscordEmojiId.fromEncodedId(g2), g0));
 						continue;
 					}
 				final String g3 = matcher.group(3);
@@ -67,15 +66,15 @@ public class EmojiText {
 					if (!StringUtils.isEmpty(g4)) {
 						EmojiId emojiId = EmojiId.StandardEmojiId.fromEndpoint(g3+":skin-tone-"+g4);
 						if (emojiId==null) {
-							matcher.appendReplacement(sb, placeHolder+String.format(":skin-tone-%s:", g4));
+							matcher.appendReplacement(sb, placeHolderSupplier.apply(emojis.size()));
 							emojiId = EmojiId.StandardEmojiId.fromEndpoint(g3);
 						} else
-							matcher.appendReplacement(sb, placeHolder);
-						emojis.add(Pair.of(emojiId, matched));
+							matcher.appendReplacement(sb, placeHolderSupplier.apply(emojis.size()));
+						emojis.add(Pair.of(emojiId, g0));
 						continue;
 					} else {
-						matcher.appendReplacement(sb, placeHolder);
-						emojis.add(Pair.of(EmojiId.StandardEmojiId.fromEndpoint(g3), matched));
+						matcher.appendReplacement(sb, placeHolderSupplier.apply(emojis.size()));
+						emojis.add(Pair.of(EmojiId.StandardEmojiId.fromEndpoint(g3), g0));
 						continue;
 					}
 			}
@@ -84,7 +83,7 @@ public class EmojiText {
 			return new EmojiText(text, emojis);
 		}
 
-		public static String encode(String text) {
+		public static String encode(String text, final boolean isTextField) {
 			{
 				final StringBuffer sb = new StringBuffer();
 				final Matcher matcher = pattern.matcher(text);
@@ -95,7 +94,7 @@ public class EmojiText {
 							final EmojiId id = DiscordEmojiDictionary.instance.get(g3);
 							if (id instanceof EmojiId.DiscordEmojiId)
 								matcher.appendReplacement(sb,
-										String.format("<:%s:%s>", g3, ((EmojiId.DiscordEmojiId) id).getEncodedId()));
+										String.format("<:%s:%s>", g3, ((EmojiId.DiscordEmojiId) id).getEncodedId())+(isTextField ? matcher.group(0) : ""));
 						}
 				}
 				matcher.appendTail(sb);
@@ -103,17 +102,13 @@ public class EmojiText {
 			}
 			{
 				final StringBuffer sb = new StringBuffer();
-				final Matcher matcher = patternShort.matcher(text);
+				final Matcher matcher = EmojiId.StandardEmojiId.EMOJI_SHORT_PATTERN.get().matcher(text);
 				while (matcher.find()) {
-					final String g1 = matcher.group(1);
-					final String g2 = matcher.group(2);
-					if (!StringUtils.isEmpty(g1))
-						if (EmojiId.StandardEmojiId.EMOJI_SHORT.get().contains(g1)) {
-							final EmojiId emojiId = EmojiId.StandardEmojiId.fromEndpoint(g1);
-							if (emojiId!=null)
-								matcher.appendReplacement(sb,
-										String.format(":%s:", emojiId.getCacheName())+g2);
-						}
+					final String g0 = matcher.group(0);
+					final EmojiId emojiId = EmojiId.StandardEmojiId.fromEndpoint(g0);
+					if (emojiId!=null)
+						matcher.appendReplacement(sb,
+								String.format(":%s:", emojiId.getCacheName())+(isTextField ? g0 : ""));
 				}
 				matcher.appendTail(sb);
 				text = sb.toString();
@@ -126,7 +121,7 @@ public class EmojiText {
 					final EmojiId emojiId = EmojiId.StandardEmojiId.fromEndpointUtf(g0);
 					if (emojiId!=null)
 						matcher.appendReplacement(sb,
-								String.format(":%s:", emojiId.getCacheName().replace(":", "::")));
+								String.format(":%s:", emojiId.getCacheName().replace(":", "::"))+(isTextField ? g0 : ""));
 				}
 				matcher.appendTail(sb);
 				text = sb.toString();
@@ -143,17 +138,17 @@ public class EmojiText {
 		private EmojiTextCache() {
 		}
 
-		private final LoadingCache<String, EmojiText> EMOJI_TEXT_MAP = CacheBuilder.newBuilder()
+		private final LoadingCache<Pair<String, Boolean>, EmojiText> EMOJI_TEXT_MAP = CacheBuilder.newBuilder()
 				.expireAfterAccess(LIFETIME_SEC, TimeUnit.SECONDS)
-				.build(new CacheLoader<String, EmojiText>() {
+				.build(new CacheLoader<Pair<String, Boolean>, EmojiText>() {
 					@Override
-					public EmojiText load(final String key) throws Exception {
-						return EmojiTextParser.parse(key);
+					public EmojiText load(final Pair<String, Boolean> key) throws Exception {
+						return EmojiTextParser.parse(key.getLeft(), key.getRight());
 					}
 				});
 
-		public EmojiText getEmojiText(final String name) {
-			return this.EMOJI_TEXT_MAP.getUnchecked(name);
+		public EmojiText getEmojiText(final String text, final boolean isTextField) {
+			return this.EMOJI_TEXT_MAP.getUnchecked(Pair.of(text, isTextField));
 		}
 	}
 }
