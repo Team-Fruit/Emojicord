@@ -87,7 +87,7 @@ public abstract class EmojiId {
 					}
 				}
 			final String emojiFilter = emoticons.stream().map(Pattern::quote).collect(Collectors.joining("|"));
-			return Pattern.compile(String.format("(?:%s)(?= |$)", emojiFilter));
+			return Pattern.compile(String.format("(?<=^| )(?:%s)(?= |$)", emojiFilter));
 		});
 		private static final Pattern EMOJI_UTF_FILTER = Pattern.compile(".+[\uD83C\uDFFB-\uD83C\uDFFF]$");
 		public static final Supplier<Set<String>> EMOJI_UTF = Suppliers.memoize(() -> EMOJI_UTF_DICTIONARY.keySet().stream()

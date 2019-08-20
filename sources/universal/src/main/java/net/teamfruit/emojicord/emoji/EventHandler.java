@@ -7,6 +7,9 @@ import net.teamfruit.emojicord.emoji.EmojiText.EmojiTextParser;
 public class EventHandler {
 	@SubscribeEvent
 	public void send(final ClientChatEvent ev) {
-		ev.setMessage(EmojiTextParser.encode(ev.getMessage(), false));
+		EmojiText emojiText = EmojiText.createUnparsed(ev.getMessage());
+		emojiText = EmojiTextParser.escape(emojiText);
+		emojiText = EmojiTextParser.encode(emojiText);
+		ev.setMessage(emojiText.getEncoded());
 	}
 }
