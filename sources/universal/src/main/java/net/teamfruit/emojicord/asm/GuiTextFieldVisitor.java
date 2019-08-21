@@ -25,7 +25,7 @@ public class GuiTextFieldVisitor extends ClassVisitor {
 				 1  putstatic net.teamfruit.emojicord.emoji.EmojiFontRenderer.IsNewChatRendering : boolean [15]
 				*/
 				super.visitInsn(Opcodes.ICONST_1);
-				super.visitFieldInsn(Opcodes.PUTSTATIC, ClassName.of("net.teamfruit.emojicord.emoji.EmojiFontRenderer").getBytecodeName(), "IsNewChatRendering", DescHelper.toDesc(boolean.class));
+				super.visitFieldInsn(Opcodes.PUTSTATIC, ClassName.of("net.teamfruit.emojicord.emoji.EmojiFontRenderer").getBytecodeName(), "isTextFieldRendering", DescHelper.toDesc(boolean.class));
 			}
 			super.visitCode();
 		}
@@ -38,7 +38,7 @@ public class GuiTextFieldVisitor extends ClassVisitor {
 				 1  putstatic net.teamfruit.emojicord.emoji.EmojiFontRenderer.IsNewChatRendering : boolean [15]
 				*/
 				super.visitInsn(Opcodes.ICONST_0);
-				super.visitFieldInsn(Opcodes.PUTSTATIC, ClassName.of("net.teamfruit.emojicord.emoji.EmojiFontRenderer").getBytecodeName(), "IsNewChatRendering", DescHelper.toDesc(boolean.class));
+				super.visitFieldInsn(Opcodes.PUTSTATIC, ClassName.of("net.teamfruit.emojicord.emoji.EmojiFontRenderer").getBytecodeName(), "isTextFieldRendering", DescHelper.toDesc(boolean.class));
 			}
 			super.visitInsn(opcode);
 		}
