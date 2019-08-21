@@ -1,8 +1,7 @@
 package net.teamfruit.emojicord.util;
 
 import java.math.BigInteger;
-
-import javax.util.Base64;
+import java.util.Base64;
 
 import org.apache.commons.lang3.Validate;
 

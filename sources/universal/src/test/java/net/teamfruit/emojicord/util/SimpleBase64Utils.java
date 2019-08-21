@@ -1,8 +1,7 @@
 package net.teamfruit.emojicord.util;
 
 import java.math.BigInteger;
-
-import javax.util.Base64;
+import java.util.Base64;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -19,23 +18,23 @@ public final class SimpleBase64Utils {
 	}
 
 	public static String encode2(long num) {
-		if (num <= 0)
+		if (num<=0)
 			return "0";
 		final StringBuilder sb = new StringBuilder();
-		while (num > 0) {
-			final int sup = (int) (num % BASE);
+		while (num>0) {
+			final int sup = (int) (num%BASE);
 			sb.append(CHARS.charAt(sup));
-			num = num / BASE;
+			num = num/BASE;
 		}
 		return StringUtils.rightPad(sb.reverse().toString(), 12, "=");
 	}
 
 	public static String encode3(long num) {
-		if (num <= 0)
+		if (num<=0)
 			return "0";
 		final StringBuilder sb = new StringBuilder();
-		while (num > 0) {
-			final int sup = (int) (num & 63);
+		while (num>0) {
+			final int sup = (int) (num&63);
 			sb.append(CHARS.charAt(sup));
 			num >>= 6;
 		}
@@ -46,9 +45,9 @@ public final class SimpleBase64Utils {
 		str = StringUtils.stripEnd(str, "=");
 		BigInteger num = BigInteger.valueOf(0);
 		final char[] chars = str.toCharArray();
-		for (int i = 0; i < chars.length; i++) {
-			final int index = CHARS.indexOf(chars[chars.length - i - 1]);
-			if (index == -1)
+		for (int i = 0; i<chars.length; i++) {
+			final int index = CHARS.indexOf(chars[chars.length-i-1]);
+			if (index==-1)
 				break;
 			num = num.add(BIG_BASE.pow(i).multiply(BigInteger.valueOf(index)));
 		}
