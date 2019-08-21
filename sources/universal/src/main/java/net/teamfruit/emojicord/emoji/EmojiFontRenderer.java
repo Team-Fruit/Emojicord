@@ -160,7 +160,7 @@ public class EmojiFontRenderer extends FontRenderer {
 	}
 
 	@CoreInvoke
-	public static final float EmojiCharWidth = 10.0F;
+	public static float EmojiCharWidth = 10.0F;
 
 	@CoreInvoke
 	public static boolean renderEmojiChar(final FontRenderer fontRenderer, final char c, final boolean italic) {

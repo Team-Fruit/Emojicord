@@ -69,6 +69,15 @@ public class EmojicordTransformer implements IClassTransformer {
 						return new GuiTextFieldVisitor(name, cv);
 					}
 				});
+
+			if (transformedName.equals("net.minecraft.client.gui.FontRenderer"))
+				return VisitorHelper.apply(bytes, name, new TransformProvider(ClassWriter.COMPUTE_FRAMES) {
+					@Override
+					public ClassVisitor createVisitor(final String name, final ClassVisitor cv) {
+						Log.log.info(String.format("Patching FontRenderer (class: %s)", name));
+						return new FontRendererVisitor(name, cv);
+					}
+				});
 		} catch (final Exception e) {
 			Log.log.fatal("Could not transform: ", e);
 		}
