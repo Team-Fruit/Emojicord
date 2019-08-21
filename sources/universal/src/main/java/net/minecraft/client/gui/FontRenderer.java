@@ -30,50 +30,50 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class FontRenderer implements IResourceManagerReloadListener {
-	protected static final ResourceLocation[] UNICODE_PAGE_LOCATIONS = new ResourceLocation[256];
+	public static final ResourceLocation[] UNICODE_PAGE_LOCATIONS = new ResourceLocation[256];
 	/** Array of width of all the characters in default.png */
-	protected final int[] charWidth = new int[256];
+	public final int[] charWidth = new int[256];
 	/** the height in pixels of default text */
 	public int FONT_HEIGHT = 9;
 	public Random fontRandom = new Random();
 	/** Array of the start/end column (in upper/lower nibble) for every glyph in the /font directory. */
-	protected final byte[] glyphWidth = new byte[65536];
+	public final byte[] glyphWidth = new byte[65536];
 	/**
 	 * Array of RGB triplets defining the 16 standard chat colors followed by 16 darker version of the same colors for
 	 * drop shadows.
 	 */
-	protected final int[] colorCode = new int[32];
-	protected final ResourceLocation locationFontTexture;
+	public final int[] colorCode = new int[32];
+	public final ResourceLocation locationFontTexture;
 	/** The RenderEngine used to load and setup glyph textures. */
-	protected final TextureManager renderEngine;
+	public final TextureManager renderEngine;
 	/** Current X coordinate at which to draw the next character. */
-	protected float posX;
+	public float posX;
 	/** Current Y coordinate at which to draw the next character. */
-	protected float posY;
+	public float posY;
 	/** If true, strings should be rendered with Unicode fonts instead of the default.png font */
-	protected boolean unicodeFlag;
+	public boolean unicodeFlag;
 	/** If true, the Unicode Bidirectional Algorithm should be run before rendering any string. */
-	protected boolean bidiFlag;
+	public boolean bidiFlag;
 	/** Used to specify new red value for the current color. */
-	protected float red;
+	public float red;
 	/** Used to specify new blue value for the current color. */
-	protected float blue;
+	public float blue;
 	/** Used to specify new green value for the current color. */
-	protected float green;
+	public float green;
 	/** Used to speify new alpha value for the current color. */
-	protected float alpha;
+	public float alpha;
 	/** Text color of the currently rendering string. */
-	protected int textColor;
+	public int textColor;
 	/** Set if the "k" style (random) is active in currently rendering string */
-	protected boolean randomStyle;
+	public boolean randomStyle;
 	/** Set if the "l" style (bold) is active in currently rendering string */
-	protected boolean boldStyle;
+	public boolean boldStyle;
 	/** Set if the "o" style (italic) is active in currently rendering string */
-	protected boolean italicStyle;
+	public boolean italicStyle;
 	/** Set if the "n" style (underlined) is active in currently rendering string */
-	protected boolean underlineStyle;
+	public boolean underlineStyle;
 	/** Set if the "m" style (strikethrough) is active in currently rendering string */
-	protected boolean strikethroughStyle;
+	public boolean strikethroughStyle;
 
 	public FontRenderer(final GameSettings gameSettingsIn, final ResourceLocation location, final TextureManager textureManagerIn, final boolean unicode) {
 		this.locationFontTexture = location;
@@ -324,7 +324,7 @@ public class FontRenderer implements IResourceManagerReloadListener {
 	/**
 	 * Render a single line string at the current (posX,posY) and update posX
 	 */
-	protected void renderStringAtPos(final String text, final boolean shadow) {
+	private void renderStringAtPos(final String text, final boolean shadow) {
 		for (int i = 0; i<text.length(); ++i) {
 			char c0 = text.charAt(i);
 

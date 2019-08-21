@@ -47,4 +47,6 @@ public class ASMDeobfNames {
 	}).get();
 
 	public static final @Nonnull RefName GuiTextFieldDrawTextBox = RefName.deobName("drawTextBox", "func_146194_f");
+	public static final @Nonnull RefName FontRendererRenderStringAtPos = RefName.deobName("renderStringAtPos", "");
+	public static final @Nonnull RefName FontRendererRenderChar = RefName.deobName("renderChar", "");
 }
