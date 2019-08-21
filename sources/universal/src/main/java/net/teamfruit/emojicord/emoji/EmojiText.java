@@ -16,6 +16,8 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 
+import net.teamfruit.emojicord.emoji.StandardEmojiIdDictionary.StandardEmojiIdRepository;
+
 public class EmojiText {
 	public static final @Nonnull Function<Integer, String> placeHolderSupplier = e -> String.format("{%d}", e);
 	public static final @Nonnull Pattern placeHolderPattern = Pattern.compile("\\{(\\d+?)\\}");
@@ -162,12 +164,12 @@ public class EmojiText {
 				final String g4 = matcher.group(4);
 				if (!StringUtils.isEmpty(g3))
 					if (!StringUtils.isEmpty(g4)) {
-						EmojiId emojiId = EmojiId.StandardEmojiId.fromEndpoint(g3+":skin-tone-"+g4);
+						EmojiId emojiId = EmojiId.StandardEmojiId.fromAlias(g3+":skin-tone-"+g4);
 						if (emojiId==null)
-							emojiId = EmojiId.StandardEmojiId.fromEndpoint(g3);
+							emojiId = EmojiId.StandardEmojiId.fromAlias(g3);
 						return new EmojiTextElement(emojiId, g0, g0);
 					} else
-						return new EmojiTextElement(EmojiId.StandardEmojiId.fromEndpoint(g3), g0, g0);
+						return new EmojiTextElement(EmojiId.StandardEmojiId.fromAlias(g3), g0, g0);
 				return null;
 			});
 			return emojiText;
@@ -178,23 +180,23 @@ public class EmojiText {
 				final String g0 = matcher.group(0);
 				final String g3 = matcher.group(3);
 				if (!StringUtils.isEmpty(g3))
-					if (EmojiId.StandardEmojiId.fromEndpoint(g3)==null) {
-						final EmojiId emojiId = DiscordEmojiDictionary.instance.get(g3);
+					if (EmojiId.StandardEmojiId.fromAlias(g3)==null) {
+						final EmojiId emojiId = DiscordEmojiIdDictionary.instance.get(g3);
 						if (emojiId instanceof EmojiId.DiscordEmojiId)
 							return new EmojiTextElement(emojiId, g0, String.format("<:%s:%s>", g3, ((EmojiId.DiscordEmojiId) emojiId).getEncodedId()));
 					}
 				return null;
 			});
-			emojiText = EmojiTextBuilder.builder(EmojiId.StandardEmojiId.EMOJI_SHORT_PATTERN.get(), emojiText).apply(matcher -> {
+			emojiText = EmojiTextBuilder.builder(StandardEmojiIdRepository.instance.shortAliasPattern, emojiText).apply(matcher -> {
 				final String g0 = matcher.group(0);
-				final EmojiId emojiId = EmojiId.StandardEmojiId.fromEndpoint(g0);
+				final EmojiId emojiId = EmojiId.StandardEmojiId.fromAlias(g0);
 				if (emojiId!=null)
 					return new EmojiTextElement(emojiId, g0, String.format(":%s:", emojiId.getCacheName()));
 				return null;
 			});
-			emojiText = EmojiTextBuilder.builder(EmojiId.StandardEmojiId.EMOJI_UTF_PATTERN.get(), emojiText).apply(matcher -> {
+			emojiText = EmojiTextBuilder.builder(StandardEmojiIdRepository.instance.utfPattern, emojiText).apply(matcher -> {
 				final String g0 = matcher.group(0);
-				final EmojiId emojiId = EmojiId.StandardEmojiId.fromEndpointUtf(g0);
+				final EmojiId emojiId = EmojiId.StandardEmojiId.fromUtf(g0);
 				if (emojiId!=null)
 					return new EmojiTextElement(emojiId, g0, String.format(":%s:", emojiId.getCacheName().replace(":", "::")));
 				return null;

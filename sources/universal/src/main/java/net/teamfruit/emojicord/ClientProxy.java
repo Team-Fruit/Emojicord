@@ -5,7 +5,7 @@ import javax.annotation.Nonnull;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.common.MinecraftForge;
 import net.teamfruit.emojicord.compat.Compat.CompatMinecraft;
-import net.teamfruit.emojicord.emoji.DiscordEmojiDictionary;
+import net.teamfruit.emojicord.emoji.DiscordEmojiIdDictionary;
 import net.teamfruit.emojicord.emoji.Endpoint;
 import net.teamfruit.emojicord.emoji.EventHandler;
 
@@ -23,7 +23,7 @@ public class ClientProxy extends CommonProxy {
 	public void init(final @Nonnull CompatFMLInitializationEvent event) {
 		super.init(event);
 
-		DiscordEmojiDictionary.instance.loadAll(Locations.instance.getDictionaryDirectory());
+		DiscordEmojiIdDictionary.instance.loadAll(Locations.instance.getDictionaryDirectory());
 
 		if (Endpoint.loadGateway())
 			Endpoint.loadStandardEmojis();

@@ -27,8 +27,8 @@ import net.teamfruit.emojicord.emoji.Models.EmojiDiscordIndexList;
 import net.teamfruit.emojicord.emoji.Models.EmojiDiscordList;
 import net.teamfruit.emojicord.util.DataUtils;
 
-public class DiscordEmojiDictionary {
-	public static final DiscordEmojiDictionary instance = new DiscordEmojiDictionary();
+public class DiscordEmojiIdDictionary {
+	public static final DiscordEmojiIdDictionary instance = new DiscordEmojiIdDictionary();
 
 	private final ListMultimap<String, EmojiId> dictionary = Multimaps.newListMultimap(Maps.newHashMap(),
 			() -> Lists.newArrayList());
@@ -62,9 +62,9 @@ public class DiscordEmojiDictionary {
 	}
 
 	public static class EmojiDictionaryLoader {
-		private final DiscordEmojiDictionary dictionary;
+		private final DiscordEmojiIdDictionary dictionary;
 
-		public EmojiDictionaryLoader(final DiscordEmojiDictionary dictionary) {
+		public EmojiDictionaryLoader(final DiscordEmojiIdDictionary dictionary) {
 			this.dictionary = dictionary;
 		}
 
