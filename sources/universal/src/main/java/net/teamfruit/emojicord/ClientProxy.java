@@ -7,14 +7,10 @@ import net.minecraftforge.common.MinecraftForge;
 import net.teamfruit.emojicord.compat.Compat.CompatMinecraft;
 import net.teamfruit.emojicord.emoji.DiscordEmojiDictionary;
 import net.teamfruit.emojicord.emoji.Endpoint;
-import net.teamfruit.emojicord.emoji.EmojiFontRenderer;
 import net.teamfruit.emojicord.emoji.EventHandler;
 
 public class ClientProxy extends CommonProxy {
 	public static final Minecraft MC = CompatMinecraft.getMinecraft();
-
-	//public static final Map<String, String> EMOJI_NAME_MAP = Maps.newHashMap();
-	boolean error = false;
 
 	@Override
 	public void preInit(final @Nonnull CompatFMLPreInitializationEvent event) {
@@ -34,8 +30,7 @@ public class ClientProxy extends CommonProxy {
 
 		MinecraftForge.EVENT_BUS.register(new EventHandler());
 
-		if (!this.error)
-			MC.fontRenderer = new EmojiFontRenderer(MC);
+		//MC.fontRenderer = new EmojiFontRenderer(MC);
 	}
 
 	@Override

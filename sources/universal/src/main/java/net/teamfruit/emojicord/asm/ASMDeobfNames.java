@@ -50,4 +50,5 @@ public class ASMDeobfNames {
 	public static final @Nonnull RefName FontRendererRenderStringAtPos = RefName.deobName("renderStringAtPos", "");
 	public static final @Nonnull RefName FontRendererRenderChar = RefName.deobName("renderChar", "");
 	public static final @Nonnull RefName FontRendererGetStringWidth = RefName.deobName("getStringWidth", "");
+	public static final @Nonnull RefName FontRendererGetCharWidth = RefName.deobName("getCharWidth", "");
 }

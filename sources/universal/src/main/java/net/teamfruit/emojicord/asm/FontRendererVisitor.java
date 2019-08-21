@@ -4,7 +4,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.FieldVisitor;
+import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
@@ -50,21 +50,21 @@ public class FontRendererVisitor extends ClassVisitor {
 				  +   istore 20 [net.teamfruit.emojicord.emoji.EmojiFontRenderer.italicStyle]
 				  +   istore 21 [character]
 				  +   astore 22 [this]
-				
+
 				 446  iload_3 [charIndex]
 				 447  putstatic net.teamfruit.emojicord.emoji.EmojiFontRenderer.index : int [181]
 				 450  iload_2 [shadow]
 				 451  putstatic net.teamfruit.emojicord.emoji.EmojiFontRenderer.shadow : boolean [183]
-				
+
 				  +   aload 22 [this]
 				  +   iload 21 [character]
 				  +   iload 20 [net.teamfruit.emojicord.emoji.EmojiFontRenderer.italicStyle]
 				 461  invokespecial net.teamfruit.emojicord.emoji.EmojiFontRenderer.renderChar(char, boolean) : float [185]
 				  +   fstore 23 [offset]
-				
+
 				 466  iconst_0
 				 467  putstatic net.teamfruit.emojicord.emoji.EmojiFontRenderer.shadow : boolean [183]
-				
+
 				  +   fload 23 [offset]
 				 }
 				 464  fstore 8 [offset]
@@ -114,6 +114,34 @@ public class FontRendererVisitor extends ClassVisitor {
 		}
 	}
 
+	private static class GetCharWidthHookMethodVisitor extends MethodVisitor {
+		public GetCharWidthHookMethodVisitor(final @Nullable MethodVisitor mv) {
+			super(Opcodes.ASM5, mv);
+		}
+
+		@Override
+		public void visitCode() {
+			{
+				/*
+				 0  iload_1 [character]
+				 1  bipush 63
+				 3  if_icmpne 9
+				 6  bipush 10
+				 8  ireturn
+				 9  -
+				*/
+				super.visitVarInsn(Opcodes.ILOAD, 1);
+				super.visitIntInsn(Opcodes.BIPUSH, '?');
+				final Label label = new Label();
+				super.visitJumpInsn(Opcodes.IF_ICMPNE, label);
+				super.visitIntInsn(Opcodes.BIPUSH, 10);
+				super.visitInsn(Opcodes.IRETURN);
+				super.visitLabel(label);
+			}
+			super.visitCode();
+		}
+	}
+
 	private static class RenderCharHookMethodVisitor extends MethodVisitor {
 		public RenderCharHookMethodVisitor(final @Nullable MethodVisitor mv) {
 			super(Opcodes.ASM5, mv);
@@ -127,32 +155,36 @@ public class FontRendererVisitor extends ClassVisitor {
 				 1  iload_1 [c]
 				 2  iload_2 [italic]
 				 3  invokestatic net.teamfruit.emojicord.emoji.EmojiFontRenderer.renderEmojiChar(net.minecraft.client.gui.FontRenderer, char, boolean) : boolean [206]
-				 6  ifeq 13
-				 9  getstatic net.teamfruit.emojicord.emoji.EmojiFontRenderer.EmojiCharWidth : float [25]
-				12  freturn
+				 6  ifeq 12
+				 9  ldc <Float 10.0> [21]
+				11  freturn
+				12  -
 				*/
-				super.visitVarInsn(Opcodes.ALOAD, 1);
-				super.visitMethodInsn(Opcodes.INVOKESTATIC, ClassName.of("net.teamfruit.emojicord.emoji.EmojiFontRenderer").getBytecodeName(), "updateEmojiContext", DescHelper.toDescMethod(ClassName.of("java.lang.String").getBytecodeName(), ClassName.of("java.lang.String").getBytecodeName()), false);
-				super.visitVarInsn(Opcodes.ASTORE, 1);
+				super.visitVarInsn(Opcodes.ALOAD, 0);
+				super.visitVarInsn(Opcodes.ILOAD, 1);
+				super.visitVarInsn(Opcodes.ILOAD, 2);
+				super.visitMethodInsn(Opcodes.INVOKESTATIC, ClassName.of("net.teamfruit.emojicord.emoji.EmojiFontRenderer").getBytecodeName(), "renderEmojiChar", DescHelper.toDescMethod(boolean.class, ClassName.of("net.minecraft.client.gui.FontRenderer").getBytecodeName(), char.class, boolean.class), false);
+				final Label label = new Label();
+				super.visitJumpInsn(Opcodes.IFEQ, label);
+				super.visitLdcInsn(10.0F);
+				super.visitInsn(Opcodes.FRETURN);
+				super.visitLabel(label);
 			}
 			super.visitCode();
 		}
 	}
 
 	private final MethodMatcher renderstringatposmatcher;
-	private final MethodMatcher getstringmatcher;
+	private final MethodMatcher getstringwidthmatcher;
+	private final MethodMatcher getcharwidthmatcher;
 	private final MethodMatcher rendercharmatcher;
 
 	public FontRendererVisitor(final @Nonnull String obfClassName, final @Nonnull ClassVisitor cv) {
 		super(Opcodes.ASM5, cv);
-		this.renderstringatposmatcher = new MethodMatcher(ClassName.fromBytecodeName(obfClassName), DescHelper.toDescMethod(void.class, int.class), ASMDeobfNames.FontRendererRenderStringAtPos);
-		this.getstringmatcher = new MethodMatcher(ClassName.fromBytecodeName(obfClassName), DescHelper.toDescMethod(int.class, ClassName.of("java.lang.String").getBytecodeName()), ASMDeobfNames.FontRendererGetStringWidth);
+		this.renderstringatposmatcher = new MethodMatcher(ClassName.fromBytecodeName(obfClassName), DescHelper.toDescMethod(void.class, ClassName.of("java.lang.String").getBytecodeName(), boolean.class), ASMDeobfNames.FontRendererRenderStringAtPos);
+		this.getstringwidthmatcher = new MethodMatcher(ClassName.fromBytecodeName(obfClassName), DescHelper.toDescMethod(int.class, ClassName.of("java.lang.String").getBytecodeName()), ASMDeobfNames.FontRendererGetStringWidth);
+		this.getcharwidthmatcher = new MethodMatcher(ClassName.fromBytecodeName(obfClassName), DescHelper.toDescMethod(int.class, char.class), ASMDeobfNames.FontRendererGetCharWidth);
 		this.rendercharmatcher = new MethodMatcher(ClassName.fromBytecodeName(obfClassName), DescHelper.toDescMethod(float.class, char.class, boolean.class), ASMDeobfNames.FontRendererRenderChar);
-	}
-
-	@Override
-	public @Nullable FieldVisitor visitField(final int access, @Nullable final String name, @Nullable final String desc, @Nullable final String signature, @Nullable final Object value) {
-		return super.visitField(access, name, desc, signature, value);
 	}
 
 	@Override
@@ -162,8 +194,10 @@ public class FontRendererVisitor extends ClassVisitor {
 			return parent;
 		if (this.renderstringatposmatcher.match(name, desc))
 			return new RenderStringAtPosHookMethodVisitor(parent);
-		if (this.getstringmatcher.match(name, desc))
+		if (this.getstringwidthmatcher.match(name, desc))
 			return new GetStringWidthHookMethodVisitor(parent);
+		if (this.getcharwidthmatcher.match(name, desc))
+			return new GetCharWidthHookMethodVisitor(parent);
 		if (this.rendercharmatcher.match(name, desc))
 			return new RenderCharHookMethodVisitor(parent);
 		return parent;

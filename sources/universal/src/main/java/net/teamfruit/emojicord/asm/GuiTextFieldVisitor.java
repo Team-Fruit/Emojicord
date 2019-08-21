@@ -4,7 +4,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
@@ -50,11 +49,6 @@ public class GuiTextFieldVisitor extends ClassVisitor {
 	public GuiTextFieldVisitor(final @Nonnull String obfClassName, final @Nonnull ClassVisitor cv) {
 		super(Opcodes.ASM5, cv);
 		this.matcher = new MethodMatcher(ClassName.fromBytecodeName(obfClassName), DescHelper.toDescMethod(void.class, int.class), ASMDeobfNames.GuiTextFieldDrawTextBox);
-	}
-
-	@Override
-	public @Nullable FieldVisitor visitField(final int access, @Nullable final String name, @Nullable final String desc, @Nullable final String signature, @Nullable final Object value) {
-		return super.visitField(access, name, desc, signature, value);
 	}
 
 	@Override

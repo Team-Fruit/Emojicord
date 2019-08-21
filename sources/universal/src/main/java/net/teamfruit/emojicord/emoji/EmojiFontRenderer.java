@@ -149,7 +149,7 @@ public class EmojiFontRenderer extends FontRenderer {
 
 	private float renderChar(final char c, final boolean italic) {
 		if (renderEmojiChar(this, c, italic))
-			return EmojiCharWidth;
+			return 10.0F;
 
 		if (c==' ')
 			return 4.0F;
@@ -158,9 +158,6 @@ public class EmojiFontRenderer extends FontRenderer {
 		return charIndex!=-1&&!this.unicodeFlag ? renderDefaultChar(charIndex, italic)
 				: renderUnicodeChar(c, italic);
 	}
-
-	@CoreInvoke
-	public static float EmojiCharWidth = 10.0F;
 
 	@CoreInvoke
 	public static boolean renderEmojiChar(final FontRenderer fontRenderer, final char c, final boolean italic) {
