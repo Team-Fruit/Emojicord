@@ -14,6 +14,8 @@ import io.netty.util.internal.StringUtil;
 import net.teamfruit.emojicord.emoji.EmojiText.EmojiTextElement;
 
 public class EmojiContext {
+	public static final char EMOJI_REPLACE_CHARACTOR = '\u0000';
+
 	public final String text;
 	public final Map<Integer, EmojiTextElement> emojis;
 

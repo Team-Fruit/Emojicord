@@ -56,7 +56,7 @@ public class EmojiText {
 	public String getEncoded() {
 		final Matcher matcher = placeHolderPattern.matcher(this.text);
 		final StringBuffer sb = new StringBuffer();
-		if (matcher.find()) {
+		while (matcher.find()) {
 			final int emojiIndex = NumberUtils.toInt(matcher.group(1), -1);
 			if (0<=emojiIndex&&emojiIndex<this.emojis.size()) {
 				final EmojiTextElement entry = this.emojis.get(emojiIndex);
@@ -69,7 +69,7 @@ public class EmojiText {
 
 	public EmojiContext getEmojiContext() {
 		final Map<Integer, EmojiTextElement> emojiMap = Maps.newHashMap();
-		final Matcher matcher = EmojiText.placeHolderPattern.matcher(this.text);
+		final Matcher matcher = EmojiText.placeHolderPattern.matcher(StringUtils.remove(this.text, EmojiContext.EMOJI_REPLACE_CHARACTOR));
 		final StringBuffer sb = new StringBuffer();
 		while (matcher.find()) {
 			final int emojiIndex = NumberUtils.toInt(matcher.group(1), -1);
@@ -77,11 +77,16 @@ public class EmojiText {
 				final EmojiTextElement entry = this.emojis.get(emojiIndex);
 				if (entry.id==null)
 					matcher.appendReplacement(sb, entry.raw);
+				//else if (EmojiFontRenderer.isTextFieldRendering) {
+				//	matcher.appendReplacement(sb, entry.raw);
+				//	final int index = sb.length()-entry.raw.length();
+				//	emojiMap.put(index, entry);
+				//}
 				else {
-					matcher.appendReplacement(sb, "?");
-					final int index = sb.length()-"?".length();
+					matcher.appendReplacement(sb, String.valueOf(EmojiContext.EMOJI_REPLACE_CHARACTOR));
+					final int index = sb.length()-1;
 					emojiMap.put(index, entry);
-					//if (isTextFieldRendering)
+					//if (EmojiFontRenderer.isTextFieldRendering)
 					//	sb.append(entry.raw);
 				}
 			}
@@ -239,8 +244,10 @@ public class EmojiText {
 			emojiText = EmojiTextBuilder.builder(StandardEmojiIdRepository.instance.utfPattern, emojiText).apply(matcher -> {
 				final String g0 = matcher.group(0);
 				final EmojiId emojiId = EmojiId.StandardEmojiId.fromUtf(g0);
-				if (emojiId!=null)
-					return new EmojiTextElement(emojiId, g0, String.format(":%s:", emojiId.getCacheName().replace(":", "::")));
+				if (emojiId!=null) {
+					final String id = String.format(":%s:", emojiId.getCacheName().replace(":", "::"));
+					return new EmojiTextElement(emojiId, id, id);
+				}
 				return null;
 			});
 			return emojiText;

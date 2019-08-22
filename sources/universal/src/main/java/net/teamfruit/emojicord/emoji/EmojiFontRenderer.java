@@ -38,13 +38,11 @@ public class EmojiFontRenderer {
 				final EmojiId emojiId = emojiElement.id;
 				if (emojiId!=null) {
 					final EmojiObject emoji = EmojiObject.EmojiObjectCache.instance.getEmojiObject(emojiId);
-					if (shadow)
-						return true;
-					else {
+					if (!shadow) {
 						Compat.CompatMinecraft.getMinecraft().renderEngine.bindTexture(emoji.getResourceLocationForBinding());
 						renderEmoji(fontRenderer, emoji);
-						return true;
 					}
+					return c==EmojiContext.EMOJI_REPLACE_CHARACTOR;
 				}
 			}
 		}

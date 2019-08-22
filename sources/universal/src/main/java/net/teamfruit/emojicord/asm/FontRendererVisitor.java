@@ -50,21 +50,21 @@ public class FontRendererVisitor extends ClassVisitor {
 				  +   istore 20 [net.teamfruit.emojicord.emoji.EmojiFontRenderer.italicStyle]
 				  +   istore 21 [character]
 				  +   astore 22 [this]
-
+				
 				 446  iload_3 [charIndex]
 				 447  putstatic net.teamfruit.emojicord.emoji.EmojiFontRenderer.index : int [181]
 				 450  iload_2 [shadow]
 				 451  putstatic net.teamfruit.emojicord.emoji.EmojiFontRenderer.shadow : boolean [183]
-
+				
 				  +   aload 22 [this]
 				  +   iload 21 [character]
 				  +   iload 20 [net.teamfruit.emojicord.emoji.EmojiFontRenderer.italicStyle]
 				 461  invokespecial net.teamfruit.emojicord.emoji.EmojiFontRenderer.renderChar(char, boolean) : float [185]
 				  +   fstore 23 [offset]
-
+				
 				 466  iconst_0
 				 467  putstatic net.teamfruit.emojicord.emoji.EmojiFontRenderer.shadow : boolean [183]
-
+				
 				  +   fload 23 [offset]
 				 }
 				 464  fstore 8 [offset]
@@ -131,7 +131,7 @@ public class FontRendererVisitor extends ClassVisitor {
 				 9  -
 				*/
 				super.visitVarInsn(Opcodes.ILOAD, 1);
-				super.visitIntInsn(Opcodes.BIPUSH, '?');
+				super.visitIntInsn(Opcodes.BIPUSH, '\u0000');
 				final Label label = new Label();
 				super.visitJumpInsn(Opcodes.IF_ICMPNE, label);
 				super.visitIntInsn(Opcodes.BIPUSH, 10);
