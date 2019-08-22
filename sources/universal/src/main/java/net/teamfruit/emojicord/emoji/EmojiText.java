@@ -91,11 +91,11 @@ public class EmojiText {
 	}
 
 	public static class EmojiTextElement {
-		public final EmojiId id;
+		public final @Nullable EmojiId id;
 		public final String raw;
 		public final String encoded;
 
-		public EmojiTextElement(final EmojiId id, final String raw, final String encoded) {
+		public EmojiTextElement(final @Nullable EmojiId id, final String raw, final String encoded) {
 			this.id = id;
 			this.raw = raw;
 			this.encoded = encoded;

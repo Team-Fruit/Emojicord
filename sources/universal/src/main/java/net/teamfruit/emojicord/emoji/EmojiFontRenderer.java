@@ -7,6 +7,7 @@ import net.teamfruit.emojicord.CoreInvoke;
 import net.teamfruit.emojicord.EmojicordConfig;
 import net.teamfruit.emojicord.compat.Compat;
 import net.teamfruit.emojicord.compat.OpenGL;
+import net.teamfruit.emojicord.emoji.EmojiText.EmojiTextElement;
 
 @CoreInvoke
 public class EmojiFontRenderer {
@@ -23,7 +24,7 @@ public class EmojiFontRenderer {
 	@CoreInvoke
 	public static String updateEmojiContext(final String text) {
 		if (EmojicordConfig.renderEnabled) {
-			CurrentContext = EmojiContext.EmojiContextLoader.getEmojiFormattedString(text, isTextFieldRendering);
+			CurrentContext = EmojiContext.EmojiContextCache.instance.getContext(text);
 			return CurrentContext.text;
 		}
 		return text;
@@ -32,15 +33,20 @@ public class EmojiFontRenderer {
 	@CoreInvoke
 	public static boolean renderEmojiChar(final FontRenderer fontRenderer, final char c, final boolean italic) {
 		if (EmojicordConfig.renderEnabled) {
-			final EmojiObject emoji = CurrentContext.emojis.get(index);
-			if (emoji!=null)
-				if (shadow)
-					return true;
-				else {
-					Compat.CompatMinecraft.getMinecraft().renderEngine.bindTexture(emoji.getResourceLocationForBinding());
-					renderEmoji(fontRenderer, emoji);
-					return true;
+			final EmojiTextElement emojiElement = CurrentContext.emojis.get(index);
+			if (emojiElement!=null) {
+				final EmojiId emojiId = emojiElement.id;
+				if (emojiId!=null) {
+					final EmojiObject emoji = EmojiObject.EmojiObjectCache.instance.getEmojiObject(emojiId);
+					if (shadow)
+						return true;
+					else {
+						Compat.CompatMinecraft.getMinecraft().renderEngine.bindTexture(emoji.getResourceLocationForBinding());
+						renderEmoji(fontRenderer, emoji);
+						return true;
+					}
 				}
+			}
 		}
 		return false;
 	}

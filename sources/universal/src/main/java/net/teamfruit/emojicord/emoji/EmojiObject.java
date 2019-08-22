@@ -190,7 +190,7 @@ public class EmojiObject {
 					}
 				});
 
-		public EmojiObject getEmojiObject(final EmojiId name) {
+		public @Nonnull EmojiObject getEmojiObject(final @Nonnull EmojiId name) {
 			return this.EMOJI_ID_MAP.getUnchecked(name);
 		}
 	}

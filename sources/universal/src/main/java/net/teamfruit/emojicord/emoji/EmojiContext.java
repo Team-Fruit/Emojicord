@@ -1,11 +1,9 @@
 package net.teamfruit.emojicord.emoji;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
 
-import org.apache.commons.lang3.math.NumberUtils;
+import javax.annotation.Nonnull;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -13,9 +11,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Maps;
 
 import io.netty.util.internal.StringUtil;
-import net.teamfruit.emojicord.compat.Compat;
 import net.teamfruit.emojicord.emoji.EmojiText.EmojiTextElement;
-import net.teamfruit.emojicord.emoji.EmojiText.EmojiTextParser;
 
 public class EmojiContext {
 	public final String text;
@@ -27,35 +23,13 @@ public class EmojiContext {
 	}
 
 	public static class EmojiContextLoader {
-		public static EmojiContext getEmojiFormattedString(String text, final boolean isTextFieldRendering) {
-			final Map<Integer, EmojiTextElement> emojiMap = Maps.newHashMap();
+		public static EmojiContext getEmojiFormattedString(final String text) {
 			if (!StringUtil.isNullOrEmpty(text)) {
-				Compat.CompatMinecraft.getMinecraft().mcProfiler.startSection("emojicordParse");
-				final EmojiText emojiPair = EmojiText.createParsed(text);
-				text = emojiPair.text;
-				final Matcher matcher = EmojiText.placeHolderPattern.matcher(text);
-				final StringBuffer sb = new StringBuffer();
-				final List<EmojiTextElement> emojis = emojiPair.emojis;
-				while (matcher.find()) {
-					final int emojiIndex = NumberUtils.toInt(matcher.group(1), -1);
-					if (0<=emojiIndex&&emojiIndex<emojis.size()) {
-						final EmojiTextElement entry = emojis.get(emojiIndex);
-						if (entry.id==null)
-							matcher.appendReplacement(sb, entry.raw);
-						else {
-							matcher.appendReplacement(sb, "?");
-							final int index = sb.length()-"?".length();
-							emojiMap.put(index, entry);
-							if (isTextFieldRendering)
-								sb.append(entry.raw);
-						}
-					}
-				}
-				matcher.appendTail(sb);
-				text = sb.toString();
-				Compat.CompatMinecraft.getMinecraft().mcProfiler.endSection();
+				final EmojiText emojiText = EmojiText.createParsed(text);
+				final EmojiContext context = emojiText.getEmojiContext();
+				return context;
 			}
-			return new EmojiContext(text, emojiMap);
+			return new EmojiContext("", Maps.newHashMap());
 		}
 	}
 
@@ -67,20 +41,16 @@ public class EmojiContext {
 		private EmojiContextCache() {
 		}
 
-		private final LoadingCache<String, EmojiText> EMOJI_TEXT_MAP = CacheBuilder.newBuilder()
+		private final LoadingCache<String, EmojiContext> EMOJI_TEXT_MAP = CacheBuilder.newBuilder()
 				.expireAfterAccess(LIFETIME_SEC, TimeUnit.SECONDS)
-				.build(new CacheLoader<String, EmojiText>() {
+				.build(new CacheLoader<String, EmojiContext>() {
 					@Override
-					public EmojiText load(final String key) throws Exception {
-						EmojiText emojiText = EmojiText.createUnparsed(key);
-						emojiText = EmojiTextParser.escape(emojiText);
-						emojiText = EmojiTextParser.encode(emojiText);
-						emojiText = EmojiTextParser.parse(emojiText);
-						return emojiText;
+					public EmojiContext load(final String key) throws Exception {
+						return EmojiContextLoader.getEmojiFormattedString(key);
 					}
 				});
 
-		public EmojiText getEmojiText(final String text) {
+		public @Nonnull EmojiContext getContext(final String text) {
 			return this.EMOJI_TEXT_MAP.getUnchecked(text);
 		}
 	}
