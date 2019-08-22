@@ -1,6 +1,6 @@
 package net.teamfruit.emojicord.emoji;
 
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,10 +11,8 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 
 import net.teamfruit.emojicord.emoji.StandardEmojiIdDictionary.StandardEmojiIdRepository;
 
@@ -34,6 +32,27 @@ public class EmojiText {
 		return new EmojiText(text, ImmutableList.of());
 	}
 
+	public static EmojiText createEscaped(final String text) {
+		EmojiText emojiText = EmojiText.createUnparsed(text);
+		emojiText = EmojiTextParser.escape(emojiText);
+		return emojiText;
+	}
+
+	public static EmojiText createEncoded(final String text) {
+		EmojiText emojiText = EmojiText.createUnparsed(text);
+		emojiText = EmojiTextParser.escape(emojiText);
+		emojiText = EmojiTextParser.encode(emojiText);
+		return emojiText;
+	}
+
+	public static EmojiText createParsed(final String text) {
+		EmojiText emojiText = EmojiText.createUnparsed(text);
+		emojiText = EmojiTextParser.escape(emojiText);
+		emojiText = EmojiTextParser.encode(emojiText);
+		emojiText = EmojiTextParser.parse(emojiText);
+		return emojiText;
+	}
+
 	public String getEncoded() {
 		final Matcher matcher = placeHolderPattern.matcher(this.text);
 		final StringBuffer sb = new StringBuffer();
@@ -46,6 +65,29 @@ public class EmojiText {
 		}
 		matcher.appendTail(sb);
 		return sb.toString();
+	}
+
+	public EmojiContext getEmojiContext() {
+		final Map<Integer, EmojiTextElement> emojiMap = Maps.newHashMap();
+		final Matcher matcher = EmojiText.placeHolderPattern.matcher(this.text);
+		final StringBuffer sb = new StringBuffer();
+		while (matcher.find()) {
+			final int emojiIndex = NumberUtils.toInt(matcher.group(1), -1);
+			if (0<=emojiIndex&&emojiIndex<this.emojis.size()) {
+				final EmojiTextElement entry = this.emojis.get(emojiIndex);
+				if (entry.id==null)
+					matcher.appendReplacement(sb, entry.raw);
+				else {
+					matcher.appendReplacement(sb, "?");
+					final int index = sb.length()-"?".length();
+					emojiMap.put(index, entry);
+					//if (isTextFieldRendering)
+					//	sb.append(entry.raw);
+				}
+			}
+		}
+		matcher.appendTail(sb);
+		return new EmojiContext(sb.toString(), emojiMap);
 	}
 
 	public static class EmojiTextElement {
@@ -202,32 +244,6 @@ public class EmojiText {
 				return null;
 			});
 			return emojiText;
-		}
-	}
-
-	public static class EmojiTextCache {
-		public static final long LIFETIME_SEC = 5;
-
-		public static final EmojiTextCache instance = new EmojiTextCache();
-
-		private EmojiTextCache() {
-		}
-
-		private final LoadingCache<String, EmojiText> EMOJI_TEXT_MAP = CacheBuilder.newBuilder()
-				.expireAfterAccess(LIFETIME_SEC, TimeUnit.SECONDS)
-				.build(new CacheLoader<String, EmojiText>() {
-					@Override
-					public EmojiText load(final String key) throws Exception {
-						EmojiText emojiText = EmojiText.createUnparsed(key);
-						emojiText = EmojiTextParser.escape(emojiText);
-						emojiText = EmojiTextParser.encode(emojiText);
-						emojiText = EmojiTextParser.parse(emojiText);
-						return emojiText;
-					}
-				});
-
-		public EmojiText getEmojiText(final String text) {
-			return this.EMOJI_TEXT_MAP.getUnchecked(text);
 		}
 	}
 }
