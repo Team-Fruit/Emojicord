@@ -1,6 +1,6 @@
 package net.teamfruit.emojicord.emoji;
 
-import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -25,10 +25,12 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalNotification;
 
 import net.minecraft.client.renderer.texture.SimpleTexture;
-import net.minecraft.client.renderer.texture.TextureUtil;
-import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
+import net.teamfruit.emojicord.Log;
 import net.teamfruit.emojicord.compat.Compat;
+import net.teamfruit.emojicord.compat.Compat.CompatResourceManager;
+import net.teamfruit.emojicord.compat.Compat.CompatSimpleTexture;
+import net.teamfruit.emojicord.compat.Compat.CompatTexture;
 import net.teamfruit.emojicord.util.Downloader;
 import net.teamfruit.emojicord.util.ThreadUtils;
 
@@ -54,7 +56,7 @@ public class EmojiObject {
 		if (this.img==null) {
 			this.img = new DownloadImageData(this.id.getCache(), this.id.getRemote(), loading_texture);
 			this.resourceLocation = this.id.getResourceLocation();
-			Compat.CompatMinecraft.getMinecraft().renderEngine.loadTexture(this.resourceLocation, this.img);
+			Compat.CompatMinecraft.getMinecraft().getTextureManager().loadTexture(this.resourceLocation, this.img);
 		}
 	}
 
@@ -74,12 +76,13 @@ public class EmojiObject {
 		}
 	}
 
-	public class DownloadImageData extends SimpleTexture {
+	public class DownloadImageData extends CompatSimpleTexture {
 		private final File cacheFile;
 		private final String imageUrl;
-		private BufferedImage bufferedImage;
+		private byte[] imageData;
 		private boolean downloading;
 		private boolean textureUploaded;
+		private final CompatTexture texture;
 
 		public DownloadImageData(
 				final File cacheFileIn, final String imageUrlIn,
@@ -88,17 +91,24 @@ public class EmojiObject {
 			super(textureResourceLocation);
 			this.cacheFile = cacheFileIn;
 			this.imageUrl = imageUrlIn;
+			this.texture = CompatTexture.getTexture(this);
 		}
 
 		private void checkTextureUploaded() {
-			if (!this.textureUploaded&&this.bufferedImage!=null) {
+			if (!this.textureUploaded&&this.imageData!=null) {
 				if (this.textureLocation!=null)
 					deleteGlTexture();
 
 				//final DynamicImageTexture texture = DynamicImageTexture.createSized(this.bufferedImage);
 				//texture.load();
 				//this.glTextureId = texture.getId();
-				TextureUtil.uploadTextureImage(super.getGlTextureId(), this.bufferedImage);
+				//TextureUtil.uploadTextureImage(super.getGlTextureId(), this.imageData);
+				try {
+					this.texture.uploadTexture(new ByteArrayInputStream(this.imageData));
+				} catch (final IOException e) {
+					Log.log.warn("Failed to load texture: ", e);
+				}
+				this.imageData = null;
 				this.textureUploaded = true;
 			}
 		}
@@ -109,18 +119,20 @@ public class EmojiObject {
 			return super.getGlTextureId();
 		}
 
-		public void setBufferedImage(final BufferedImage bufferedImageIn) {
-			this.bufferedImage = bufferedImageIn;
+		public void setImageData(final byte[] imageDataIn) {
+			this.imageData = imageDataIn;
 		}
 
 		@Override
-		public void loadTexture(final IResourceManager resourceManager) throws IOException {
-			if (this.bufferedImage==null&&this.textureLocation!=null)
+		public void loadTexture(final CompatResourceManager resourceManager) throws IOException {
+			if (this.textureUploaded)
+				return;
+			if (this.imageData==null&&this.textureLocation!=null)
 				super.loadTexture(resourceManager);
 			if (!this.downloading)
 				if (this.cacheFile!=null&&this.cacheFile.isFile())
 					try {
-						this.bufferedImage = TextureUtil.readBufferedImage(FileUtils.openInputStream(this.cacheFile));
+						this.imageData = IOUtils.toByteArray(FileUtils.openInputStream(this.cacheFile));
 					} catch (final IOException ioexception) {
 						loadTextureFromServer();
 					}
@@ -147,16 +159,15 @@ public class EmojiObject {
 
 					final int statusCode = response.getStatusLine().getStatusCode();
 					if (statusCode==HttpStatus.SC_OK) {
-						BufferedImage bufferedimage;
+						byte[] imageData;
 						if (DownloadImageData.this.cacheFile!=null) {
 							FileUtils.copyInputStreamToFile(entity.getContent(),
 									DownloadImageData.this.cacheFile);
-							bufferedimage = TextureUtil
-									.readBufferedImage(FileUtils.openInputStream(DownloadImageData.this.cacheFile));
+							imageData = IOUtils.toByteArray(FileUtils.openInputStream(DownloadImageData.this.cacheFile));
 						} else
-							bufferedimage = TextureUtil.readBufferedImage(entity.getContent());
+							imageData = IOUtils.toByteArray(entity.getContent());
 
-						setBufferedImage(bufferedimage);
+						setImageData(imageData);
 					} else {
 						EmojiObject.this.resourceLocation = EmojiObject.noSignal_texture;
 						EmojiObject.this.deleteOldTexture = true;

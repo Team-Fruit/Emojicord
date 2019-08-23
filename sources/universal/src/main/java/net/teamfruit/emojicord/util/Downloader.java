@@ -60,7 +60,7 @@ public class Downloader {
 					SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER) {
 				@Override
 				protected void prepareSocket(final @Nullable SSLSocket socket) throws IOException {
-					if (socket != null) {
+					if (socket!=null) {
 						final String[] enabledCipherSuites = socket.getEnabledCipherSuites();
 
 						final List<String> asList = new ArrayList<>(Arrays.asList(enabledCipherSuites));
@@ -84,20 +84,20 @@ public class Downloader {
 		} catch (final KeyStoreException e) {
 		}
 
-		if (registry != null)
+		if (registry!=null)
 			this.manager = new PoolingHttpClientConnectionManager(registry);
 		else
 			this.manager = new PoolingHttpClientConnectionManager();
 
 		final Builder requestConfig = RequestConfig.custom();
 
-		if (timeout > 0) {
+		if (timeout>0) {
 			requestConfig.setConnectTimeout(timeout);
 			requestConfig.setSocketTimeout(timeout);
 		}
 
-		final Proxy proxy = Compat.CompatMinecraft.getMinecraft().getProxy();
-		if (proxy != null && !Proxy.NO_PROXY.equals(proxy)) {
+		final Proxy proxy = Compat.CompatMinecraft.getMinecraft().getMinecraftObj().getProxy();
+		if (proxy!=null&&!Proxy.NO_PROXY.equals(proxy)) {
 			final SocketAddress saddr = proxy.address();
 			if (saddr instanceof InetSocketAddress) {
 				final InetSocketAddress inetsaddr = (InetSocketAddress) saddr;

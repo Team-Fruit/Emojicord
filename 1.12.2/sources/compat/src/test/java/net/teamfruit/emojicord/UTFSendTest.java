@@ -46,9 +46,9 @@ public class UTFSendTest {
 	@SubscribeEvent
 	public void tick(final ClientTickEvent ev) {
 		Timer.tick();
-		if (this.lines == null)
+		if (this.lines==null)
 			this.lines = ReflectionHelper.getPrivateValue(GuiNewChat.class,
-					CompatMinecraft.getMinecraft().ingameGUI.getChatGUI(), "field_146252_h", "chatLines");
+					CompatMinecraft.getMinecraft().getMinecraftObj().ingameGUI.getChatGUI(), "field_146252_h", "chatLines");
 		{
 			String chatMsg = null;
 			if (!this.lines.isEmpty())
@@ -58,11 +58,11 @@ public class UTFSendTest {
 				final int chatState = NumberUtils.toInt(StringUtils.substringBetween(chatMsg, "|[", "]|"), -1);
 				final String str1 = StringUtils.substringAfter(chatMsg, "]|");
 				final String str2 = StringUtils.substringAfter(this.sent.get(chatState), "]|");
-				if (chatState != -1 && !StringUtils.isEmpty(str1) && !StringUtils.isEmpty(str2)) {
-					Log.log.info("Encoded: " + str2);
-					Log.log.info("Returned: " + str1);
+				if (chatState!=-1&&!StringUtils.isEmpty(str1)&&!StringUtils.isEmpty(str2)) {
+					Log.log.info("Encoded: "+str2);
+					Log.log.info("Returned: "+str1);
 					final boolean eq = StringUtils.equals(str1, str2);
-					Log.log.info("Result: " + eq);
+					Log.log.info("Result: "+eq);
 					this.success.addAll(Lists.charactersOf(str2));
 					if (!eq) {
 						final String diff = StringUtils.difference(str1, str2);
@@ -75,16 +75,16 @@ public class UTFSendTest {
 				}
 			}
 		}
-		if (this.timer.getTime() > .1f)
-			if (this.state < 0 && Keyboard.isKeyDown(Keyboard.KEY_BACKSLASH))
+		if (this.timer.getTime()>.1f)
+			if (this.state<0&&Keyboard.isKeyDown(Keyboard.KEY_BACKSLASH))
 				state(2);
-			else if (0 <= this.state && this.state < 512) {
+			else if (0<=this.state&&this.state<512) {
 				final StringBuilder sb = new StringBuilder();
-				for (int i = 0; i < 128; i++) {
-					final int code = i + this.state * 128;
+				for (int i = 0; i<128; i++) {
+					final int code = i+this.state*128;
 					if (Character.isDefined(code)) {
 						final char[] chars = Character.toChars(code);
-						if (chars.length == 1 && chars[0] != '§')
+						if (chars.length==1&&chars[0]!='§')
 							sb.append(chars);
 						else
 							for (final char c : chars)
@@ -92,15 +92,15 @@ public class UTFSendTest {
 					}
 				}
 
-				final String send = "|[" + this.state + "]|" + sb.toString();
+				final String send = "|["+this.state+"]|"+sb.toString();
 				final String msg = net.minecraftforge.event.ForgeEventFactory.onClientSendMessage(send);
 				if (msg.isEmpty())
 					return;
-				CompatMinecraft.getMinecraft().player.sendChatMessage(msg);
+				CompatMinecraft.getMinecraft().getMinecraftObj().player.sendChatMessage(msg);
 				//CompatMinecraft.getMinecraft().ingameGUI.getChatGUI().addToSentMessages(msg);
 				this.sent.put(this.state, msg);
-				state(this.state + 1);
-			} else if (this.state == 512) {
+				state(this.state+1);
+			} else if (this.state==512) {
 				{
 					final StringBuilder sb = new StringBuilder();
 					for (final Character c : this.failure)
@@ -118,7 +118,7 @@ public class UTFSendTest {
 						e.printStackTrace();
 					}
 				}
-				state(this.state + 1);
+				state(this.state+1);
 			}
 	}
 }

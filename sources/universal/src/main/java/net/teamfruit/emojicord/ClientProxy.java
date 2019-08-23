@@ -2,16 +2,12 @@ package net.teamfruit.emojicord;
 
 import javax.annotation.Nonnull;
 
-import net.minecraft.client.Minecraft;
 import net.minecraftforge.common.MinecraftForge;
-import net.teamfruit.emojicord.compat.Compat.CompatMinecraft;
 import net.teamfruit.emojicord.emoji.DiscordEmojiIdDictionary;
 import net.teamfruit.emojicord.emoji.Endpoint;
 import net.teamfruit.emojicord.emoji.EventHandler;
 
 public class ClientProxy extends CommonProxy {
-	public static final Minecraft MC = CompatMinecraft.getMinecraft();
-
 	@Override
 	public void preInit(final @Nonnull CompatFMLPreInitializationEvent event) {
 		super.preInit(event);

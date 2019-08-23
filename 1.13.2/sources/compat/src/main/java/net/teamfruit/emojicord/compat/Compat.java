@@ -1,6 +1,5 @@
 package net.teamfruit.emojicord.compat;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,7 +11,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.Validate;
-import org.lwjgl.opengl.GL11;
 
 import com.google.common.collect.Lists;
 
@@ -20,6 +18,7 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.GameSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.ChatLine;
@@ -29,8 +28,9 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.texture.TextureUtil;
@@ -38,8 +38,6 @@ import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.client.renderer.tileentity.TileEntitySignRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.client.resources.IResourceManager;
-import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -55,7 +53,9 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.CPacketCustomPayload;
 import net.minecraft.network.play.client.CPacketUpdateSign;
+import net.minecraft.resources.IResourceManager;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PlayerList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.EnumFacing;
@@ -63,6 +63,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
@@ -75,8 +76,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.model.IModel;
 import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.ConfigElement;
-import net.minecraftforge.common.config.Property;
-import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.client.IModGuiFactory;
 import net.minecraftforge.fml.client.config.GuiConfig;
 import net.minecraftforge.fml.client.config.IConfigElement;
@@ -116,7 +115,7 @@ public class Compat {
 		}
 
 		public static @Nonnull CompatMinecraft getMinecraft() {
-			return new CompatMinecraft(FMLClientHandler.instance().getClient());
+			return new CompatMinecraft(Minecraft.getInstance());
 		}
 
 		public @Nonnull CompatFontRenderer getFontRenderer() {
@@ -151,7 +150,7 @@ public class Compat {
 		}
 
 		public File getGameDir() {
-			return this.mc.mcDataDir;
+			return this.mc.gameDir;
 		}
 	}
 
@@ -200,6 +199,30 @@ public class Compat {
 
 		public int getAnisotropicFiltering() {
 			return 0;
+		}
+	}
+
+	public static class CompatMovingObjectPosition {
+		private final RayTraceResult movingPos;
+
+		public CompatMovingObjectPosition(final RayTraceResult movingPos) {
+			this.movingPos = movingPos;
+		}
+
+		public static @Nullable CompatMovingObjectPosition getMovingPos() {
+			final RayTraceResult movingPos = CompatMinecraft.getMinecraft().objectMouseOver;
+			return movingPos==null ? null : new CompatMovingObjectPosition(movingPos);
+		}
+
+		public @Nullable CompatBlockPos getMovingBlockPos() {
+			final BlockPos pos = this.movingPos.getBlockPos();
+			if (pos!=null)
+				return new CompatBlockPos(pos);
+			return null;
+		}
+
+		public CompatEnumFacing getSideHit() {
+			return CompatEnumFacing.fromFacing(this.movingPos.sideHit);
 		}
 	}
 
@@ -266,7 +289,7 @@ public class Compat {
 
 	public static class CompatSoundHandler {
 		public static void playSound(final @Nonnull ResourceLocation location, final float volume) {
-			CompatMinecraft.getMinecraft().getMinecraftObj().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(new SoundEvent(location), volume));
+			CompatMinecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(new SoundEvent(location), volume));
 		}
 	}
 
@@ -442,15 +465,20 @@ public class Compat {
 		}
 
 		public void sendClient() {
-			CompatMinecraft.getMinecraft().getMinecraftObj().ingameGUI.getChatGUI().printChatMessage(this.component);
+			CompatMinecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(this.component);
 		}
 
 		public void sendClientWithId(final int id) {
-			CompatMinecraft.getMinecraft().getMinecraftObj().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(this.component, id);
+			CompatMinecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(this.component, id);
 		}
 
 		public void sendPlayer(final @Nonnull ICommandSender target) {
 			target.sendMessage(this.component);
+		}
+
+		public void sendBroadcast() {
+			final PlayerList sender = CompatMinecraft.getMinecraftServer().getPlayerList();
+			sender.sendMessage(this.component);
 		}
 	}
 
@@ -585,7 +613,7 @@ public class Compat {
 		}
 
 		public CompatSimpleNetworkWrapper(final Object network) {
-			this((SimpleNetworkWrapper) network);
+			this(network);
 		}
 
 		public void sendToServer(final CompatMessage message) {
@@ -601,7 +629,7 @@ public class Compat {
 		}
 
 		public CompatMessage(final Object message) {
-			this((IMessage) message);
+			this(message);
 		}
 	}
 
@@ -1028,17 +1056,21 @@ public class Compat {
 		}
 
 		public void bindTexture() {
-			OpenGL.glBindTexture(GL11.GL_TEXTURE_2D, this.texture.getGlTextureId());
+			this.texture.bindTexture();
 		}
 
 		public void uploadTexture(final InputStream image) throws IOException {
 			this.texture.deleteGlTexture();
+			try (
+					NativeImage nativeimage = NativeImage.read(image);
+			) {
+				final boolean blur = true;
+				final boolean clamp = false;
 
-			final BufferedImage bufferedimage = TextureUtil.readBufferedImage(image);
-			final boolean blur = true;
-			final boolean clamp = false;
-
-			TextureUtil.uploadTextureImageAllocate(this.texture.getRawGlTextureId(), bufferedimage, blur, clamp);
+				bindTexture();
+				TextureUtil.allocateTextureImpl(this.texture.getRawGlTextureId(), 0, nativeimage.getWidth(), nativeimage.getHeight());
+				nativeimage.uploadTextureSub(0, 0, 0, 0, 0, nativeimage.getWidth(), nativeimage.getHeight(), blur, clamp, false);
+			}
 		}
 	}
 
