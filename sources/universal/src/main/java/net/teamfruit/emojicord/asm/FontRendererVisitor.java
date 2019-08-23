@@ -151,19 +151,41 @@ public class FontRendererVisitor extends ClassVisitor {
 		public void visitCode() {
 			{
 				/*
-				 0  aload_0 [this]
-				 1  iload_1 [c]
-				 2  iload_2 [italic]
-				 3  invokestatic net.teamfruit.emojicord.emoji.EmojiFontRenderer.renderEmojiChar(net.minecraft.client.gui.FontRenderer, char, boolean) : boolean [206]
+				 0  iload_1 [c]
+				 1  iload_2 [italic]
+				 2  aload_0 [fontRenderer]
+				 3  getfield net.minecraft.client.gui.FontRenderer.posX : float [49]
+				 6  aload_0 [fontRenderer]
+				 7  getfield net.minecraft.client.gui.FontRenderer.posY : float [55]
+				10  aload_0 [fontRenderer]
+				11  getfield net.minecraft.client.gui.FontRenderer.red : float [58]
+				14  aload_0 [fontRenderer]
+				15  getfield net.minecraft.client.gui.FontRenderer.green : float [61]
+				18  aload_0 [fontRenderer]
+				19  getfield net.minecraft.client.gui.FontRenderer.blue : float [64]
+				22  aload_0 [fontRenderer]
+				23  getfield net.minecraft.client.gui.FontRenderer.alpha : float [67]
+				26  invokestatic net.teamfruit.emojicord.emoji.EmojiFontRenderer.renderEmojiChar(char, boolean, float, float, float, float, float, float) : boolean [70]
 				 6  ifeq 12
 				 9  ldc <Float 10.0> [21]
 				11  freturn
 				12  -
 				*/
-				super.visitVarInsn(Opcodes.ALOAD, 0);
 				super.visitVarInsn(Opcodes.ILOAD, 1);
 				super.visitVarInsn(Opcodes.ILOAD, 2);
-				super.visitMethodInsn(Opcodes.INVOKESTATIC, ClassName.of("net.teamfruit.emojicord.emoji.EmojiFontRenderer").getBytecodeName(), "renderEmojiChar", DescHelper.toDescMethod(boolean.class, ClassName.of("net.minecraft.client.gui.FontRenderer").getBytecodeName(), char.class, boolean.class), false);
+				super.visitVarInsn(Opcodes.ALOAD, 0);
+				super.visitFieldInsn(Opcodes.GETFIELD, ClassName.of("net.minecraft.client.gui.FontRenderer").getBytecodeName(), ASMDeobfNames.FontRendererPosX.name(), DescHelper.toDesc(float.class));
+				super.visitVarInsn(Opcodes.ALOAD, 0);
+				super.visitFieldInsn(Opcodes.GETFIELD, ClassName.of("net.minecraft.client.gui.FontRenderer").getBytecodeName(), ASMDeobfNames.FontRendererPosY.name(), DescHelper.toDesc(float.class));
+				super.visitVarInsn(Opcodes.ALOAD, 0);
+				super.visitFieldInsn(Opcodes.GETFIELD, ClassName.of("net.minecraft.client.gui.FontRenderer").getBytecodeName(), ASMDeobfNames.FontRendererRed.name(), DescHelper.toDesc(float.class));
+				super.visitVarInsn(Opcodes.ALOAD, 0);
+				super.visitFieldInsn(Opcodes.GETFIELD, ClassName.of("net.minecraft.client.gui.FontRenderer").getBytecodeName(), ASMDeobfNames.FontRendererGreen.name(), DescHelper.toDesc(float.class));
+				super.visitVarInsn(Opcodes.ALOAD, 0);
+				super.visitFieldInsn(Opcodes.GETFIELD, ClassName.of("net.minecraft.client.gui.FontRenderer").getBytecodeName(), ASMDeobfNames.FontRendererBlue.name(), DescHelper.toDesc(float.class));
+				super.visitVarInsn(Opcodes.ALOAD, 0);
+				super.visitFieldInsn(Opcodes.GETFIELD, ClassName.of("net.minecraft.client.gui.FontRenderer").getBytecodeName(), ASMDeobfNames.FontRendererAlpha.name(), DescHelper.toDesc(float.class));
+				super.visitMethodInsn(Opcodes.INVOKESTATIC, ClassName.of("net.teamfruit.emojicord.emoji.EmojiFontRenderer").getBytecodeName(), "renderEmojiChar", DescHelper.toDescMethod(boolean.class, char.class, boolean.class, float.class, float.class, float.class, float.class, float.class, float.class), false);
 				final Label label = new Label();
 				super.visitJumpInsn(Opcodes.IFEQ, label);
 				super.visitLdcInsn(10.0F);

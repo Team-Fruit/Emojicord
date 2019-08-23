@@ -2,10 +2,8 @@ package net.teamfruit.emojicord;
 
 import javax.annotation.Nonnull;
 
-import net.minecraftforge.common.MinecraftForge;
 import net.teamfruit.emojicord.emoji.DiscordEmojiIdDictionary;
 import net.teamfruit.emojicord.emoji.Endpoint;
-import net.teamfruit.emojicord.emoji.EventHandler;
 
 public class ClientProxy extends CommonProxy {
 	@Override
@@ -24,7 +22,7 @@ public class ClientProxy extends CommonProxy {
 		if (Endpoint.loadGateway())
 			Endpoint.loadStandardEmojis();
 
-		MinecraftForge.EVENT_BUS.register(new EventHandler());
+		new EventHandler().registerHandler();
 
 		//MC.fontRenderer = new EmojiFontRenderer(MC);
 	}

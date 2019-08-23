@@ -2,7 +2,6 @@ package net.teamfruit.emojicord.emoji;
 
 import org.lwjgl.opengl.GL11;
 
-import net.minecraft.client.gui.FontRenderer;
 import net.teamfruit.emojicord.CoreInvoke;
 import net.teamfruit.emojicord.EmojicordConfig;
 import net.teamfruit.emojicord.compat.Compat;
@@ -30,11 +29,6 @@ public class EmojiFontRenderer {
 			return CurrentContext.text;
 		}
 		return text;
-	}
-
-	@CoreInvoke
-	public static boolean renderEmojiChar(final FontRenderer fontRenderer, final char c, final boolean italic) {
-		return renderEmojiChar(c, italic, fontRenderer.posX, fontRenderer.posY, fontRenderer.red, fontRenderer.green, fontRenderer.blue, fontRenderer.alpha);
 	}
 
 	@CoreInvoke
