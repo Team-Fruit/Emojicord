@@ -1,88 +1,93 @@
 package net.teamfruit.emojicord;
 
 import java.io.File;
-import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.logging.log4j.Logger;
 
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.Mod.Instance;
-import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.network.NetworkCheckHandler;
-import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.teamfruit.emojicord.compat.CompatProxy;
 import net.teamfruit.emojicord.compat.CompatProxy.CompatFMLInitializationEvent;
 import net.teamfruit.emojicord.compat.CompatProxy.CompatFMLPostInitializationEvent;
 import net.teamfruit.emojicord.compat.CompatProxy.CompatFMLPreInitializationEvent;
 
-@Mod(modid = Reference.MODID, name = Reference.NAME, version = Reference.VERSION)
+@Mod(value = Reference.MODID)
 public class Emojicord {
-	@Instance(Reference.MODID)
 	public static @Nullable Emojicord instance;
 
-	@SidedProxy(serverSide = Reference.PROXY_SERVER, clientSide = Reference.PROXY_CLIENT)
-	public static @Nullable CompatProxy proxy;
+	public static @Nullable CompatProxy proxy = DistExecutor.<CompatProxy> runForDist(() -> () -> {
+		try {
+			return (CompatProxy) Class.forName(Reference.PROXY_CLIENT).newInstance();
+		} catch (InstantiationException|IllegalAccessException|ClassNotFoundException e) {
+			throw new RuntimeException("Could not load proxy class: ", e);
+		}
+	}, () -> () -> {
+		try {
+			return (CompatProxy) Class.forName(Reference.PROXY_SERVER).newInstance();
+		} catch (InstantiationException|IllegalAccessException|ClassNotFoundException e) {
+			throw new RuntimeException("Could not load proxy class: ", e);
+		}
+	});
 
-	@NetworkCheckHandler
-	public boolean checkModList(final @Nonnull Map<String, String> versions, final @Nonnull Side side) {
-		return true;
+	public Emojicord() {
+		instance = this;
+
 	}
 
-	@EventHandler
-	public void preInit(final @Nonnull FMLPreInitializationEvent event) {
+	@SubscribeEvent
+	public void preInit(final @Nonnull FMLCommonSetupEvent event) {
 		if (proxy!=null)
 			proxy.preInit(new CompatFMLPreInitializationEventImpl(event));
 	}
 
-	@EventHandler
-	public void init(final @Nonnull FMLInitializationEvent event) {
+	@SubscribeEvent
+	public void init(final @Nonnull FMLCommonSetupEvent event) {
 		if (proxy!=null)
 			proxy.init(new CompatFMLInitializationEventImpl(event));
 	}
 
-	@EventHandler
-	public void postInit(final @Nonnull FMLPostInitializationEvent event) {
+	@SubscribeEvent
+	public void postInit(final @Nonnull FMLLoadCompleteEvent event) {
 		if (proxy!=null)
 			proxy.postInit(new CompatFMLPostInitializationEventImpl(event));
 	}
 
 	private static class CompatFMLPreInitializationEventImpl implements CompatFMLPreInitializationEvent {
-		private final @Nonnull FMLPreInitializationEvent event;
+		//private final @Nonnull FMLCommonSetupEvent event;
 
-		public CompatFMLPreInitializationEventImpl(final FMLPreInitializationEvent event) {
-			this.event = event;
+		public CompatFMLPreInitializationEventImpl(final FMLCommonSetupEvent event) {
+			//this.event = event;
 		}
 
 		@Override
 		public Logger getModLog() {
-			return this.event.getModLog();
+			return Log.log;
 		}
 
 		@Override
 		public File getSuggestedConfigurationFile() {
-			return this.event.getSuggestedConfigurationFile();
+			return null;
 		}
 
 		@Override
 		public File getSourceFile() {
-			return this.event.getSourceFile();
+			return null;
 		}
 	}
 
 	private static class CompatFMLInitializationEventImpl implements CompatFMLInitializationEvent {
-		public CompatFMLInitializationEventImpl(final FMLInitializationEvent event) {
+		public CompatFMLInitializationEventImpl(final FMLCommonSetupEvent event) {
 		}
 	}
 
 	private static class CompatFMLPostInitializationEventImpl implements CompatFMLPostInitializationEvent {
-		public CompatFMLPostInitializationEventImpl(final FMLPostInitializationEvent event) {
+		public CompatFMLPostInitializationEventImpl(final FMLLoadCompleteEvent event) {
 		}
 	}
 }
