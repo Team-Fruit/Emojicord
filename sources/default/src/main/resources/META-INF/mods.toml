@@ -1,0 +1,28 @@
+modLoader="javafml"
+loaderVersion="[25,)"
+issueTrackerURL="https://github.com/Team-Fruit/Emojicord/issues"
+
+[[mods]]
+modId="emojicord"
+version="${file.jarVersion}"
+displayName="Emojicord"
+displayURL="https://www.teamfruit.net/"
+logoFile="assets/emojicord/textures/logo.png"
+authors="Kamesuta"
+description='''
+Discord Emojis in Minecraft
+'''
+
+[[dependencies.emojicord]]
+    modId="forge"
+    mandatory=true
+    versionRange="[25.0.210,)"
+    ordering="NONE"
+    side="CLIENT"
+
+[[dependencies.emojicord]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.13.2]"
+    ordering="NONE"
+    side="CLIENT"

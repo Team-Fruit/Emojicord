@@ -95,13 +95,28 @@ sourceSets {
 	}
 }
 
-eclipse {
-	classpath {
-		defaultOutputDir = file('bin')
-		file.whenMerged {
-			entries.each { entry ->
-				if (entry.kind == 'src' && entry.hasProperty('output')) {
-					entry.output = null
+if (!project.forgegradle.contains('3.+')) {
+	eclipse {
+		classpath {
+			defaultOutputDir = file('bin')
+			file.whenMerged {
+				entries.each { entry ->
+					if (entry.kind == 'src' && entry.hasProperty('output')) {
+						entry.output = null
+					}
+				}
+			}
+		}
+	}
+} else {
+	eclipse {
+		classpath {
+			//defaultOutputDir = file('bin')
+			file.whenMerged {
+				entries.each { entry ->
+					if (entry.kind == 'src' && entry.hasProperty('output')) {
+						entry.output = 'bin/bootstrap_main'
+					}
 				}
 			}
 		}
@@ -185,6 +200,9 @@ minecraft {
 
 				mods {
 					create(project.modid) {
+						//sourceSets.each {
+						//	source(it)
+						//}
 						source sourceSets.bootstrap_main
 					}
 				}
@@ -204,6 +222,9 @@ minecraft {
 
 				mods {
 					create(project.modid) {
+						//sourceSets.each {
+						//	source(it)
+						//}
 						source sourceSets.bootstrap_main
 					}
 				}
@@ -234,7 +255,9 @@ task setupSourceSets {
 	}
 
 	if (project.forgegradle.contains('3.+'))
-		[tasks.getByName("eclipseClasspath"), tasks.getByName("ideaModule")]*.dependsOn 'setupSourceSets'
+		gradle.projectsEvaluated {
+			prepareRuns.dependsOn 'setupSourceSets'
+		}
 	else
 		[tasks.eclipseClasspath, tasks.ideaModule]*.dependsOn 'setupSourceSets'
 }
