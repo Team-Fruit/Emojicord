@@ -2,7 +2,7 @@ package net.teamfruit.emojicord.asm.lib;
 
 import javax.annotation.Nonnull;
 
-import net.minecraft.launchwrapper.Launch;
+import net.teamfruit.emojicord.compat.Compat.CompatFMLDeobfuscatingRemapper;
 
 public class RefName {
 	private final @Nonnull String mcpName;
@@ -35,8 +35,7 @@ public class RefName {
 	}
 
 	public static boolean useSrgNames() {
-		final Boolean deobfuscated = (Boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
-		return deobfuscated==null||!deobfuscated;
+		return CompatFMLDeobfuscatingRemapper.useSrgNames();
 	}
 
 	public static @Nonnull RefName deobName(final @Nonnull String mcpName, final @Nonnull String srgName) {

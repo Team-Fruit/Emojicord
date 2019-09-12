@@ -24,7 +24,7 @@ public class EmojiFontRenderer {
 
 	@CoreInvoke
 	public static String updateEmojiContext(final String text) {
-		if (EmojicordConfig.renderEnabled) {
+		if (EmojicordConfig.spec.isAvailable()&&EmojicordConfig.RENDER.renderEnabled.get()) {
 			CurrentContext = EmojiContext.EmojiContextCache.instance.getContext(text);
 			return CurrentContext.text;
 		}
@@ -33,7 +33,7 @@ public class EmojiFontRenderer {
 
 	@CoreInvoke
 	public static boolean renderEmojiChar(final char c, final boolean italic, final float x, final float y, final float red, final float green, final float blue, final float alpha) {
-		if (EmojicordConfig.renderEnabled) {
+		if (EmojicordConfig.spec.isAvailable()&&EmojicordConfig.RENDER.renderEnabled.get()) {
 			final EmojiTextElement emojiElement = CurrentContext.emojis.get(index);
 			if (emojiElement!=null) {
 				final EmojiId emojiId = emojiElement.id;

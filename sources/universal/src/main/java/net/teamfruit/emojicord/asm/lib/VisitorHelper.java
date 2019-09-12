@@ -15,8 +15,9 @@ import org.apache.commons.lang3.Validate;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.tree.ClassNode;
 
-import net.minecraft.launchwrapper.Launch;
+import net.teamfruit.emojicord.compat.Compat.CompatFMLDeobfuscatingRemapper;
 
 public class VisitorHelper {
 
@@ -89,8 +90,17 @@ public class VisitorHelper {
 		}
 	}
 
+	public static ClassNode apply(final @Nonnull ClassNode node, final @Nonnull TransformProvider context) {
+		final ClassVisitor mod = context.createVisitor(node.name, node);
+		try {
+			node.accept(mod);
+			return node;
+		} catch (final StopTransforming e) {
+			return node;
+		}
+	}
+
 	public static boolean useSrgNames() {
-		final Boolean deobfuscated = (Boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
-		return deobfuscated==null||!deobfuscated;
+		return CompatFMLDeobfuscatingRemapper.useSrgNames();
 	}
 }

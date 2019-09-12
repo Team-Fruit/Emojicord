@@ -1,20 +1,32 @@
 package net.teamfruit.emojicord;
 
-import net.minecraftforge.common.config.Config;
-import net.minecraftforge.common.config.Config.LangKey;
-import net.minecraftforge.common.config.Config.Name;
+import net.teamfruit.emojicord.compat.CompatConfigSpec;
 
-@Config(modid = "emojiful", name = "Emojiful")
 public class EmojicordConfig {
-	@Name("render.enabled")
-	@LangKey("config.emojicord.render.enabled")
-	public static boolean renderEnabled = true;
+	private static final CompatConfigSpec.Builder BUILDER = new CompatConfigSpec.Builder();
+	public static final Render RENDER = new Render(BUILDER);
+	public static final CompatConfigSpec spec = BUILDER.build();
 
-	@Name("render.mipmap.enabled")
-	@LangKey("config.emojicord.render.mipmap.enabled")
-	public static boolean renderMipmapEnabled = true;
+	public static class Render {
+		public final CompatConfigSpec.ConfigValue<Boolean> renderEnabled;
+		public final CompatConfigSpec.ConfigValue<Boolean> renderMipmapEnabled;
+		public final CompatConfigSpec.ConfigValue<Boolean> renderMipmapFastResize;
 
-	@Name("render.mipmap.fastresize")
-	@LangKey("config.emojicord.render.mipmap.fastresize")
-	public static boolean renderMipmapFastResize = false;
+		public Render(final CompatConfigSpec.Builder builder) {
+			builder.push("Render");
+			this.renderEnabled = builder
+					.comment("Enables/Disables emoji rendering")
+					.translation("config.emojicord.render.enabled")
+					.define("Enabled", true);
+			this.renderMipmapEnabled = builder
+					.comment("Enables/Disables emoji mipmap")
+					.translation("config.emojicord.render.mipmap.enabled")
+					.define("Mipmap.Enabled", true);
+			this.renderMipmapFastResize = builder
+					.comment("Enables/Disables emoji faster resize")
+					.translation("config.emojicord.render.mipmap.fastresize")
+					.define("Mipmap.Fastresize", true);
+			builder.pop();
+		}
+	}
 }

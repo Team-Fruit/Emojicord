@@ -50,6 +50,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.launchwrapper.Launch;
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
@@ -84,6 +85,7 @@ import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import net.minecraftforge.fml.relauncher.Side;
 
 public class Compat {
 	public static class CompatFMLDeobfuscatingRemapper {
@@ -101,6 +103,11 @@ public class Compat {
 
 		public static @Nonnull String mapMethodName(@Nonnull final String owner, @Nonnull final String name, @Nonnull final String desc) {
 			return FMLDeobfuscatingRemapper.INSTANCE.mapMethodName(owner, name, desc);
+		}
+
+		public static boolean useSrgNames() {
+			final Boolean deobfuscated = (Boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
+			return deobfuscated==null||!deobfuscated;
 		}
 	}
 
@@ -1070,6 +1077,35 @@ public class Compat {
 
 		public void loadTexture(final CompatResourceManager manager) throws IOException {
 			super.loadTexture(manager.getManagerObj());
+		}
+	}
+
+	public enum CompatSide {
+		COMMON,
+		CLIENT,
+		SERVER,
+		;
+
+		public Side toSide() {
+			switch (this) {
+				case CLIENT:
+					return Side.CLIENT;
+				case SERVER:
+					return Side.SERVER;
+				default:
+					return Side.SERVER;
+			}
+		}
+
+		public static CompatSide fromSide(final Side type) {
+			switch (type) {
+				case CLIENT:
+					return CLIENT;
+				case SERVER:
+					return SERVER;
+				default:
+					return COMMON;
+			}
 		}
 	}
 }

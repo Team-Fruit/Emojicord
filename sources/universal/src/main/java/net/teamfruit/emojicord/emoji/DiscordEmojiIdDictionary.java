@@ -84,6 +84,8 @@ public class DiscordEmojiIdDictionary {
 			final File groupsDir = new File(dictDir, "mappings");
 			final File manifestFile = new File(dictDir, "indexes.json");
 
+			groupsDir.mkdirs();
+
 			final List<EmojiDiscordList> lists = Lists.newArrayList();
 			for (final File dictFile : FileUtils.listFiles(groupsDir, new String[] { "json" }, true)) {
 				final EmojiDiscordList emojiList = DataUtils.loadFile(dictFile, EmojiDiscordList.class,

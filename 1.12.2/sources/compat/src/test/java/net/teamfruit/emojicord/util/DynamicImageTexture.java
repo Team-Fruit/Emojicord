@@ -59,7 +59,7 @@ public abstract class DynamicImageTexture implements ImageTexture {
 			final @Nonnull BufferedImage image, final int width,
 			final int height
 	) {
-		if (EmojicordConfig.renderMipmapEnabled)
+		if (EmojicordConfig.RENDER.renderMipmapEnabled.get())
 			return MipmapDynamicTexture.createFromImage(image, width, height,
 					CompatMinecraft.getMinecraft().getSettings().getSettingsObj().mipmapLevels);
 		else
@@ -67,7 +67,7 @@ public abstract class DynamicImageTexture implements ImageTexture {
 	}
 
 	public static @Nonnull DynamicImageTexture createSized(final @Nonnull BufferedImage image) {
-		if (EmojicordConfig.renderMipmapEnabled)
+		if (EmojicordConfig.RENDER.renderMipmapEnabled.get())
 			return MipmapDynamicTexture.createFromSizedImage(image,
 					CompatMinecraft.getMinecraft().getSettings().getSettingsObj().mipmapLevels);
 		else
@@ -129,7 +129,7 @@ public abstract class DynamicImageTexture implements ImageTexture {
 			final BufferedImage s = new BufferedImage(width, height, image.getType());
 			final Graphics2D g = s.createGraphics();
 			g.drawImage(image.getScaledInstance(width, height,
-					EmojicordConfig.renderMipmapFastResize ? java.awt.Image.SCALE_FAST : java.awt.Image.SCALE_SMOOTH),
+					EmojicordConfig.RENDER.renderMipmapFastResize.get() ? java.awt.Image.SCALE_FAST : java.awt.Image.SCALE_SMOOTH),
 					0, 0, null);
 			g.dispose();
 			return createFromSizedImage(s);
@@ -220,7 +220,7 @@ public abstract class DynamicImageTexture implements ImageTexture {
 			final BufferedImage s = new BufferedImage(nwidth, nheight, image.getType());
 			final Graphics2D g = s.createGraphics();
 			g.drawImage(image.getScaledInstance(nwidth, nheight,
-					EmojicordConfig.renderMipmapFastResize ? java.awt.Image.SCALE_FAST : java.awt.Image.SCALE_SMOOTH),
+					EmojicordConfig.RENDER.renderMipmapFastResize.get() ? java.awt.Image.SCALE_FAST : java.awt.Image.SCALE_SMOOTH),
 					0, 0, null);
 			g.dispose();
 			return createFromSizedImage(s, miplevel);

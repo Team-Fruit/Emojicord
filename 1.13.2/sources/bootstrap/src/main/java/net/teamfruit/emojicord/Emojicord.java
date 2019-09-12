@@ -10,8 +10,10 @@ import org.apache.logging.log4j.Logger;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.teamfruit.emojicord.compat.Compat.CompatSide;
 import net.teamfruit.emojicord.compat.CompatProxy;
 import net.teamfruit.emojicord.compat.CompatProxy.CompatFMLInitializationEvent;
 import net.teamfruit.emojicord.compat.CompatProxy.CompatFMLPostInitializationEvent;
@@ -38,16 +40,21 @@ public class Emojicord {
 	public Emojicord() {
 		instance = this;
 
+		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::preInit);
+		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::init);
+		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::postInit);
+
+		EmojicordConfig.spec.registerConfigDefine(CompatSide.CLIENT);
 	}
 
 	@SubscribeEvent
-	public void preInit(final @Nonnull FMLCommonSetupEvent event) {
+	public void preInit(final @Nonnull FMLClientSetupEvent event) {
 		if (proxy!=null)
 			proxy.preInit(new CompatFMLPreInitializationEventImpl(event));
 	}
 
 	@SubscribeEvent
-	public void init(final @Nonnull FMLCommonSetupEvent event) {
+	public void init(final @Nonnull FMLClientSetupEvent event) {
 		if (proxy!=null)
 			proxy.init(new CompatFMLInitializationEventImpl(event));
 	}
@@ -61,7 +68,7 @@ public class Emojicord {
 	private static class CompatFMLPreInitializationEventImpl implements CompatFMLPreInitializationEvent {
 		//private final @Nonnull FMLCommonSetupEvent event;
 
-		public CompatFMLPreInitializationEventImpl(final FMLCommonSetupEvent event) {
+		public CompatFMLPreInitializationEventImpl(final FMLClientSetupEvent event) {
 			//this.event = event;
 		}
 
@@ -82,7 +89,7 @@ public class Emojicord {
 	}
 
 	private static class CompatFMLInitializationEventImpl implements CompatFMLInitializationEvent {
-		public CompatFMLInitializationEventImpl(final FMLCommonSetupEvent event) {
+		public CompatFMLInitializationEventImpl(final FMLClientSetupEvent event) {
 		}
 	}
 

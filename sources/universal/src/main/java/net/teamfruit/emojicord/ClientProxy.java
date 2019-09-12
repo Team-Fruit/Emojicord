@@ -2,6 +2,7 @@ package net.teamfruit.emojicord;
 
 import javax.annotation.Nonnull;
 
+import net.teamfruit.emojicord.compat.Compat.CompatSide;
 import net.teamfruit.emojicord.emoji.DiscordEmojiIdDictionary;
 import net.teamfruit.emojicord.emoji.Endpoint;
 
@@ -10,7 +11,7 @@ public class ClientProxy extends CommonProxy {
 	public void preInit(final @Nonnull CompatFMLPreInitializationEvent event) {
 		super.preInit(event);
 
-		Log.log = event.getModLog();
+		EmojicordConfig.spec.registerConfigHandler(CompatSide.CLIENT, event.getSuggestedConfigurationFile());
 	}
 
 	@Override

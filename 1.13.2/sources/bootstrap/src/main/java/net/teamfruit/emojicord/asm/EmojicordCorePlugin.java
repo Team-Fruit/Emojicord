@@ -1,35 +1,43 @@
 package net.teamfruit.emojicord.asm;
 
-import java.util.Map;
+import java.util.List;
+import java.util.Set;
 
-import javax.annotation.Nullable;
+import com.google.common.collect.Lists;
 
-import net.teamfruit.emojicord.Reference;
+import cpw.mods.modlauncher.api.IEnvironment;
+import cpw.mods.modlauncher.api.ITransformationService;
+import cpw.mods.modlauncher.api.ITransformer;
+import cpw.mods.modlauncher.api.IncompatibleEnvironmentException;
+import net.teamfruit.emojicord.Log;
 
-public class EmojicordCorePlugin implements IFMLLoadingPlugin {
+public class EmojicordCorePlugin implements ITransformationService {
 	@Override
-	public @Nullable String[] getASMTransformerClass() {
-		return new String[] {
-				Reference.TRANSFORMER
-		};
+	public void beginScanning(final IEnvironment environment) {
 	}
 
 	@Override
-	public @Nullable String getModContainerClass() {
-		return null;
+	public String name() {
+		return getClass().getSimpleName();
 	}
 
 	@Override
-	public @Nullable String getSetupClass() {
-		return null;
+	public void initialize(final IEnvironment environment) {
 	}
 
 	@Override
-	public void injectData(final @Nullable Map<String, Object> data) {
+	public void onLoad(final IEnvironment env, final Set<String> otherServices) throws IncompatibleEnvironmentException {
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
-	public @Nullable String getAccessTransformerClass() {
-		return null;
+	public List<ITransformer> transformers() {
+		try {
+			//return Lists.newArrayList((ITransformer) Class.forName(Reference.TRANSFORMER).newInstance());
+			return Lists.newArrayList((ITransformer) Class.forName("net.teamfruit.emojicord.asm.EmojicordNodeTransformer").newInstance());
+		} catch (InstantiationException|IllegalAccessException|ClassNotFoundException e) {
+			Log.log.error("Failed to load transformer", e);
+		}
+		return Lists.newArrayList();
 	}
 }

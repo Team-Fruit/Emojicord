@@ -8,7 +8,13 @@ public class Locations {
 	public static final Locations instance = new Locations();
 
 	public File getMinecraftDirectory() {
-		return Compat.CompatMinecraft.getMinecraft().getGameDir();
+		final File gameDir = Compat.CompatMinecraft.getMinecraft().getGameDir();
+		//try {
+		//	gameDir = gameDir.getCanonicalFile();
+		//} catch (final IOException e) {
+		//	Log.log.error("Cannot get game directory: ", e);
+		//}
+		return gameDir;
 	}
 
 	public File getEmojicordDirectory() {
