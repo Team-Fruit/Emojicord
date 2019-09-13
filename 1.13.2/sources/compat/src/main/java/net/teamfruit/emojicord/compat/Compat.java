@@ -48,7 +48,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.launchwrapper.Launch;
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
@@ -81,7 +80,6 @@ import net.minecraftforge.fml.client.IModGuiFactory;
 import net.minecraftforge.fml.client.config.GuiConfig;
 import net.minecraftforge.fml.client.config.IConfigElement;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.config.ModConfig;
@@ -90,24 +88,23 @@ import net.minecraftforge.fml.loading.FMLPaths;
 public class Compat {
 	public static class CompatFMLDeobfuscatingRemapper {
 		public static @Nonnull String mapMethodDesc(@Nonnull final String desc) {
-			return FMLDeobfuscatingRemapper.INSTANCE.mapMethodDesc(desc);
+			return desc;
 		}
 
 		public static @Nonnull String mapFieldName(@Nonnull final String owner, @Nonnull final String name, @Nonnull final String desc) {
-			return FMLDeobfuscatingRemapper.INSTANCE.mapFieldName(owner, name, desc);
+			return name;
 		}
 
 		public static @Nonnull String unmap(@Nonnull final String typeName) {
-			return FMLDeobfuscatingRemapper.INSTANCE.unmap(typeName);
+			return typeName;
 		}
 
 		public static @Nonnull String mapMethodName(@Nonnull final String owner, @Nonnull final String name, @Nonnull final String desc) {
-			return FMLDeobfuscatingRemapper.INSTANCE.mapMethodName(owner, name, desc);
+			return name;
 		}
 
 		public static boolean useSrgNames() {
-			final Boolean deobfuscated = (Boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
-			return deobfuscated==null||!deobfuscated;
+			return false;
 		}
 	}
 

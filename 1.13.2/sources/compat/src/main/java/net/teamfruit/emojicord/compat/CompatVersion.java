@@ -20,7 +20,7 @@ public enum CompatVersion {
 	}
 
 	public static @Nonnull CompatVersion version() {
-		return V11;
+		return V13;
 	}
 
 	public static boolean isVersion(final CompatVersion version) {

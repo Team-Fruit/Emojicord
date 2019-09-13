@@ -78,13 +78,14 @@ public class VisitorHelper {
 		return cw.toByteArray();
 	}
 
-	public static ClassNode apply(final @Nonnull ClassNode node, final @Nonnull TransformProvider context) {
-		final ClassVisitor mod = context.createVisitor(node.name, node);
+	public static ClassNode apply(final @Nonnull ClassNode cr, final @Nonnull TransformProvider context) {
+		final ClassNode cw = new ClassNode(Opcodes.ASM5);
+		final ClassVisitor mod = context.createVisitor(cr.name, cw);
 		try {
-			node.accept(mod);
-			return node;
+			cr.accept(mod);
+			return cw;
 		} catch (final StopTransforming e) {
-			return node;
+			return cr;
 		}
 	}
 

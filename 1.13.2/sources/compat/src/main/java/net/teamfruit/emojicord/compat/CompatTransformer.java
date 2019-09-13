@@ -21,23 +21,25 @@ public abstract class CompatTransformer implements ITransformer<ClassNode> {
 	}
 
 	public static class DeferredTransform {
-		public final String targetname;
+		private final String targetname;
 
 		public DeferredTransform(final String thisname, final String targetname) {
 			this.targetname = targetname;
+		}
+
+		public boolean shouldDefer() {
+			try {
+				Class.forName(this.targetname, false, getClass().getClassLoader());
+				return true;
+			} catch (final ClassNotFoundException e) {
+			}
+			return false;
 		}
 	}
 
 	@Override
 	public TransformerVoteResult castVote(final ITransformerVotingContext context) {
-		boolean nothing = true;
-		for (final String name : targetNames())
-			try {
-				Class.forName(name, false, getClass().getClassLoader());
-				nothing = false;
-			} catch (final ClassNotFoundException e) {
-			}
-		return nothing ? TransformerVoteResult.YES : TransformerVoteResult.DEFER;
+		return Arrays.stream(deferredTransforms()).anyMatch(DeferredTransform::shouldDefer) ? TransformerVoteResult.DEFER : TransformerVoteResult.YES;
 	}
 
 	@Override

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.ListIterator;
 
 import org.apache.commons.lang3.StringUtils;
+import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
 
@@ -77,9 +78,9 @@ public abstract class CompatTransformer implements IClassTransformer {
 
 		if (Arrays.stream(targetNames()).anyMatch(transformedName::equals))
 			try {
-				final ClassNode node = VisitorHelper.read(bytes, 0);
+				ClassNode node = VisitorHelper.read(bytes, ClassReader.SKIP_FRAMES);
 
-				transform(node, new CompatTransformerVotingContext());
+				node = transform(node, new CompatTransformerVotingContext());
 
 				bytes = VisitorHelper.write(node, ClassWriter.COMPUTE_FRAMES);
 			} catch (final Exception e) {
