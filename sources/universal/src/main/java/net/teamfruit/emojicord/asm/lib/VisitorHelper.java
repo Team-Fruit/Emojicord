@@ -15,35 +15,29 @@ import org.apache.commons.lang3.Validate;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
 
 import net.teamfruit.emojicord.compat.Compat.CompatFMLDeobfuscatingRemapper;
 
 public class VisitorHelper {
 
-	public abstract static class TransformProvider {
-		private final int writerFlags;
-		private final int readerFlags;
-
-		public TransformProvider(final int writerFlags) {
-			this.writerFlags = writerFlags;
-			this.readerFlags = 0;
-		}
-
-		public TransformProvider(final int writerFlags, final int readerFlags) {
-			this.writerFlags = writerFlags;
-			this.readerFlags = readerFlags;
-		}
-
+	public static interface TransformProvider {
 		public abstract @Nonnull ClassVisitor createVisitor(@Nonnull String name, @Nonnull ClassVisitor cv);
 	}
 
-	public static byte[] apply(final @Nonnull byte[] bytes, final @Nonnull String name, final @Nonnull TransformProvider context) {
+	public static ClassNode read(final @Nonnull byte[] bytes, final int readerFlags) {
 		Validate.notNull(bytes);
 		final ClassReader cr = new ClassReader(bytes);
+		final ClassNode node = new ClassNode(Opcodes.ASM5);
+		cr.accept(node, readerFlags);
+		return node;
+	}
+
+	public static byte[] write(final @Nonnull ClassNode node, final int writerFlags) {
 		// ASMライブラリのクラスでのgetClass().getClassLoader()はForgeのクラスを見つけることができない可能性があります。
 		// インナークラスを作成してgetClass().getClassLoader()をLaunchClassLoaderにしましょう。
-		final ClassWriter cw = new ClassWriter(cr, context.writerFlags) {
+		final ClassWriter cw = new ClassWriter(writerFlags) {
 			@Override
 			protected String getCommonSuperClass(final @Nullable String type1, final @Nullable String type2) {
 				if (type1==null||type2==null)
@@ -80,14 +74,8 @@ public class VisitorHelper {
 				}
 			}
 		};
-		final ClassVisitor mod = context.createVisitor(name, cw);
-
-		try {
-			cr.accept(mod, context.readerFlags);
-			return cw.toByteArray();
-		} catch (final StopTransforming e) {
-			return bytes;
-		}
+		node.accept(cw);
+		return cw.toByteArray();
 	}
 
 	public static ClassNode apply(final @Nonnull ClassNode node, final @Nonnull TransformProvider context) {
