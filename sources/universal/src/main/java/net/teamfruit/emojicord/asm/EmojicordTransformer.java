@@ -14,15 +14,15 @@ public class EmojicordTransformer extends CompatTransformer {
 
 		try {
 			if (transformedName.equals("net.minecraft.client.gui.GuiTextField"))
-				return VisitorHelper.apply(input, (name, cv) -> {
-					Log.log.info(String.format("Patching GuiTextField (class: %s)", name));
-					return new GuiTextFieldVisitor(name, cv);
+				return VisitorHelper.transform(input, node -> {
+					Log.log.info(String.format("Patching GuiTextField (class: %s)", node.name));
+					return new GuiTextFieldTransform().apply(node);
 				});
 
 			if (transformedName.equals("net.minecraft.client.gui.FontRenderer"))
-				return VisitorHelper.apply(input, (name, cv) -> {
-					Log.log.info(String.format("Patching FontRenderer (class: %s)", name));
-					return new FontRendererVisitor(name, cv);
+				return VisitorHelper.transform(input, node -> {
+					Log.log.info(String.format("Patching FontRenderer (class: %s)", node.name));
+					return new FontRendererTransform().apply(node);
 				});
 		} catch (final Exception e) {
 			Log.log.fatal("Could not transform: ", e);

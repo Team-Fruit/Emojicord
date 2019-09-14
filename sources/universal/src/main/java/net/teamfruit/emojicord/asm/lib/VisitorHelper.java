@@ -23,7 +23,7 @@ import net.teamfruit.emojicord.compat.Compat.CompatFMLDeobfuscatingRemapper;
 public class VisitorHelper {
 
 	public static interface TransformProvider {
-		public abstract @Nonnull ClassVisitor createVisitor(@Nonnull String name, @Nonnull ClassVisitor cv);
+		public abstract @Nonnull ClassVisitor createVisitor(@Nonnull String name, @Nonnull ClassVisitor cv) throws StopTransforming;
 	}
 
 	public static ClassNode read(final @Nonnull byte[] bytes, final int readerFlags) {
@@ -35,6 +35,7 @@ public class VisitorHelper {
 	}
 
 	public static byte[] write(final @Nonnull ClassNode node, final int writerFlags) {
+		Validate.notNull(node);
 		// ASMライブラリのクラスでのgetClass().getClassLoader()はForgeのクラスを見つけることができない可能性があります。
 		// インナークラスを作成してgetClass().getClassLoader()をLaunchClassLoaderにしましょう。
 		final ClassWriter cw = new ClassWriter(writerFlags) {
@@ -78,6 +79,12 @@ public class VisitorHelper {
 		return cw.toByteArray();
 	}
 
+	// Memo:
+	// ASM Core API to Tree API
+	// Regex: super\.visit(.*)Insn\(Opcodes\.(.+)\);
+	// Replace: insertion.add(new $1InsnNode(Opcodes.$2));
+
+	// ASM Core API
 	public static ClassNode apply(final @Nonnull ClassNode cr, final @Nonnull TransformProvider context) {
 		final ClassNode cw = new ClassNode(Opcodes.ASM5);
 		final ClassVisitor mod = context.createVisitor(cr.name, cw);
@@ -87,6 +94,11 @@ public class VisitorHelper {
 		} catch (final StopTransforming e) {
 			return cr;
 		}
+	}
+
+	// ASM Tree API
+	public static ClassNode transform(final @Nonnull ClassNode node, final @Nonnull NodeTransformer context) {
+		return Validate.notNull(context.apply(node));
 	}
 
 	public static boolean useSrgNames() {

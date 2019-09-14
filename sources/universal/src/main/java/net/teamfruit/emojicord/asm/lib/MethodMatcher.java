@@ -8,11 +8,15 @@
  */
 package net.teamfruit.emojicord.asm.lib;
 
+import java.util.function.Predicate;
+
 import javax.annotation.Nonnull;
+
+import org.objectweb.asm.tree.MethodNode;
 
 import net.teamfruit.emojicord.compat.Compat.CompatFMLDeobfuscatingRemapper;
 
-public class MethodMatcher {
+public class MethodMatcher implements Predicate<MethodNode> {
 	private final @Nonnull ClassName clsName;
 	private final @Nonnull String description;
 	private final @Nonnull RefName refname;;
@@ -33,6 +37,11 @@ public class MethodMatcher {
 			return false;
 		final String unmappedName = CompatFMLDeobfuscatingRemapper.mapMethodName(this.clsName.getBytecodeName(), methodName, methodDesc);
 		return unmappedName.equals(this.refname.srgName());
+	}
+
+	@Override
+	public boolean test(final MethodNode node) {
+		return match(node.name, node.desc);
 	}
 
 	@Override
