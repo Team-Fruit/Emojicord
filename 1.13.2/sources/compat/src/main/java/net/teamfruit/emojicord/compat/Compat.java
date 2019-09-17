@@ -25,6 +25,8 @@ import net.minecraft.client.gui.ChatLine;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiNewChat;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.fonts.IGlyph;
+import net.minecraft.client.gui.fonts.TexturedGlyph;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
@@ -1135,6 +1137,39 @@ public class Compat {
 				default:
 					return COMMON;
 			}
+		}
+	}
+
+	public static abstract class CompatGlyph extends TexturedGlyph implements IGlyph {
+		private final float width;
+
+		public CompatGlyph(final ResourceLocation texture, final float width, final float height) {
+			super(texture, 0, 1, 0, 1, 0, width, 0+3, height+3);
+			this.width = width;
+		}
+
+		@Override
+		public float getAdvance() {
+			return this.width;
+		}
+
+		@Override
+		public float getBoldOffset() {
+			return 0;
+		}
+
+		@Override
+		public float getShadowOffset() {
+			return 0;
+		}
+
+		public void onRender(final TextureManager textureManager, final boolean hasShadow, final float x, final float y, final BufferBuilder vbuilder, final float red, final float green, final float blue, final float alpha) {
+			super.render(textureManager, hasShadow, x, y, vbuilder, red, green, blue, alpha);
+		}
+
+		@Override
+		public void render(final TextureManager textureManager, final boolean hasShadow, final float x, final float y, final BufferBuilder vbuilder, final float red, final float green, final float blue, final float alpha) {
+			onRender(textureManager, hasShadow, x, y, vbuilder, red, green, blue, alpha);
 		}
 	}
 }

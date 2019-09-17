@@ -4,14 +4,13 @@ import javax.annotation.Nullable;
 
 import org.lwjgl.opengl.GL11;
 
-import net.minecraft.client.gui.fonts.IGlyph;
-import net.minecraft.client.gui.fonts.TexturedGlyph;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.ResourceLocation;
 import net.teamfruit.emojicord.CoreInvoke;
 import net.teamfruit.emojicord.EmojicordConfig;
 import net.teamfruit.emojicord.compat.Compat;
+import net.teamfruit.emojicord.compat.Compat.CompatGlyph;
 import net.teamfruit.emojicord.compat.Compat.CompatVertex;
 import net.teamfruit.emojicord.compat.CompatBaseVertex;
 import net.teamfruit.emojicord.compat.OpenGL;
@@ -72,33 +71,18 @@ public class EmojiFontRenderer {
 		return null;
 	}
 
-	public static class EmojiGlyph extends TexturedGlyph implements IGlyph {
+	public static class EmojiGlyph extends CompatGlyph {
 		private static final float GlyphWidth = 10;
 		private static final float GlyphHeight = 10;
 
 		public EmojiGlyph(final ResourceLocation texture) {
-			super(texture, 0, 1, 0, 1, 0, GlyphWidth, 0+3, GlyphHeight+3);
+			super(texture, GlyphWidth, GlyphHeight);
 		}
 
 		@Override
-		public float getAdvance() {
-			return GlyphWidth;
-		}
-
-		@Override
-		public float getBoldOffset() {
-			return 0;
-		}
-
-		@Override
-		public float getShadowOffset() {
-			return 0;
-		}
-
-		@Override
-		public void render(final TextureManager textureManager, final boolean hasShadow, final float x, final float y, final BufferBuilder vbuilder, final float red, final float green, final float blue, final float alpha) {
+		public void onRender(final TextureManager textureManager, final boolean hasShadow, final float x, final float y, final BufferBuilder vbuilder, final float red, final float green, final float blue, final float alpha) {
 			if (!shadow)
-				super.render(textureManager, hasShadow, x, y, vbuilder, red, green, blue, alpha);
+				super.onRender(textureManager, hasShadow, x, y, vbuilder, red, green, blue, alpha);
 		}
 	}
 

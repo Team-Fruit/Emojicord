@@ -330,33 +330,52 @@ public class FontRenderer implements AutoCloseable {
 		}
 	}
 
-	public int getStringWidth(final String p_78256_1_) {
-		if (p_78256_1_==null)
+	public int getStringWidth(final String text) {
+		if (text==null)
 			return 0;
 
-		float lvt_2_1_ = 0.0f;
-		boolean lvt_3_1_ = false;
+		float width = 0.0f;
+		boolean bold = false;
 
-		for (int index = 0; index<p_78256_1_.length(); ++index) {
-			final char character = p_78256_1_.charAt(index);
+		for (int index = 0; index<text.length(); ++index) {
+			final char character = text.charAt(index);
 
-			if (character=='§'&&index<p_78256_1_.length()-1) {
-				final TextFormatting lvt_6_1_ = TextFormatting.fromFormattingCode(p_78256_1_.charAt(++index));
+			if (character=='§'&&index<text.length()-1) {
+				final TextFormatting formatting = TextFormatting.fromFormattingCode(text.charAt(++index));
 
-				if (lvt_6_1_==TextFormatting.BOLD)
-					lvt_3_1_ = true;
+				if (formatting==TextFormatting.BOLD)
+					bold = true;
 
-				else if (lvt_6_1_!=null&&lvt_6_1_.isNormalStyle())
-					lvt_3_1_ = false;
+				else if (formatting!=null&&formatting.isNormalStyle())
+					bold = false;
 			} else {
 				final EmojiGlyph emojiGlyph = EmojiFontRenderer.getEmojiGlyph(character, index);
-				IGlyph glyph = this.font.findGlyph(character);
-				if (emojiGlyph!=null)
-					glyph = emojiGlyph;
-				lvt_2_1_ += glyph.getAdvance(lvt_3_1_);
+				width += (emojiGlyph!=null ? emojiGlyph : this.font.findGlyph(character)).getAdvance(bold);
 			}
 		}
-		return MathHelper.ceil(lvt_2_1_);
+		return MathHelper.ceil(width);
+	}
+
+	public int getStringWidth2(final String text) {
+		if (text==null)
+			return 0;
+		float width = 0.0f;
+		boolean bold = false;
+
+		for (int index = 0; index<text.length(); ++index) {
+			final char character = text.charAt(index);
+
+			if (character=='§'&&index<text.length()-1) {
+				final TextFormatting formatting = TextFormatting.fromFormattingCode(text.charAt(++index));
+
+				if (formatting==TextFormatting.BOLD)
+					bold = true;
+				else if (formatting!=null&&formatting.isNormalStyle())
+					bold = false;
+			} else
+				width += this.font.findGlyph(character).getAdvance(bold);
+		}
+		return MathHelper.ceil(width);
 	}
 
 	private float getCharWidth(final char p_211125_1_) {

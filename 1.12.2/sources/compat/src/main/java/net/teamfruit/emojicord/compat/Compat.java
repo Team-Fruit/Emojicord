@@ -1108,4 +1108,12 @@ public class Compat {
 			}
 		}
 	}
+
+	public static abstract class CompatGlyph {
+		public CompatGlyph(final ResourceLocation texture, final float width, final float height) {
+		}
+
+		public void onRender(final TextureManager textureManager, final boolean hasShadow, final float x, final float y, final BufferBuilder vbuilder, final float red, final float green, final float blue, final float alpha) {
+		}
+	}
 }
