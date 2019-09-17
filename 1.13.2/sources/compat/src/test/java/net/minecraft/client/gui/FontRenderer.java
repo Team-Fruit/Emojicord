@@ -1,5 +1,6 @@
 package net.minecraft.client.gui;
 
+/*
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -590,3 +591,4 @@ public class FontRenderer implements AutoCloseable {
 		}
 	}
 }
+*/

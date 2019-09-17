@@ -82,7 +82,7 @@ public class EmojiFontRenderer {
 		@Override
 		public void onRender(final TextureManager textureManager, final boolean hasShadow, final float x, final float y, final BufferBuilder vbuilder, final float red, final float green, final float blue, final float alpha) {
 			if (!shadow)
-				super.onRender(textureManager, hasShadow, x, y, vbuilder, red, green, blue, alpha);
+				super.onRender(textureManager, hasShadow, x, y, vbuilder, 1, 1, 1, alpha);
 		}
 	}
 

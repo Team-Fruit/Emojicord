@@ -10,6 +10,7 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.Validate;
 
 import com.google.common.collect.Lists;
@@ -20,7 +21,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.GameSettings;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.PositionedSoundRecord;
+import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.gui.ChatLine;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiNewChat;
@@ -32,6 +33,7 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.renderer.texture.MissingTextureSprite;
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -41,10 +43,7 @@ import net.minecraft.client.renderer.tileentity.TileEntitySignRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommand;
-import net.minecraft.command.ICommandSender;
+import net.minecraft.command.ICommandSource;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -56,8 +55,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.CPacketCustomPayload;
 import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.resources.IResourceManager;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.EnumFacing;
@@ -73,17 +70,12 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
-import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.EnumLightType;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.IModel;
-import net.minecraftforge.common.config.ConfigCategory;
-import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.fml.client.IModGuiFactory;
-import net.minecraftforge.fml.client.config.GuiConfig;
 import net.minecraftforge.fml.client.config.IConfigElement;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
 
@@ -169,7 +161,7 @@ public class Compat {
 		}
 
 		public int drawString(final String msg, final float x, final float y, final int color, final boolean shadow) {
-			return this.font.drawString(msg, x, y, color, shadow);
+			return shadow ? this.font.drawStringWithShadow(msg, x, y, color) : this.font.drawString(msg, x, y, color);
 		}
 
 		public int drawString(final String msg, final float x, final float y, final int color) {
@@ -217,7 +209,7 @@ public class Compat {
 		}
 
 		public static @Nullable CompatMovingObjectPosition getMovingPos() {
-			final RayTraceResult movingPos = CompatMinecraft.getMinecraft().objectMouseOver;
+			final RayTraceResult movingPos = CompatMinecraft.getMinecraft().getMinecraftObj().objectMouseOver;
 			return movingPos==null ? null : new CompatMovingObjectPosition(movingPos);
 		}
 
@@ -296,7 +288,7 @@ public class Compat {
 
 	public static class CompatSoundHandler {
 		public static void playSound(final @Nonnull ResourceLocation location, final float volume) {
-			CompatMinecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(new SoundEvent(location), volume));
+			CompatMinecraft.getMinecraft().getMinecraftObj().getSoundHandler().play(SimpleSound.getMasterRecord(new SoundEvent(location), volume));
 		}
 	}
 
@@ -308,20 +300,20 @@ public class Compat {
 
 	public static abstract class CompatTileEntitySignRenderer extends TileEntitySignRenderer {
 		public void renderBaseTileEntityAt(final @Nullable TileEntitySign tile, final double x, final double y, final double z, final float partialTicks, final int destroy, final float alpha) {
-			super.render(tile, x, y, z, partialTicks, destroy, alpha);
+			super.render(tile, x, y, z, partialTicks, destroy);
 		}
 
 		public abstract void renderTileEntityAtCompat(final @Nullable TileEntitySign tile, final double x, final double y, final double z, final float partialTicks, final int destroy, final float alpha);
 
 		@Override
-		public void render(final @Nullable TileEntitySign tile, final double x, final double y, final double z, final float partialTicks, final int destroy, final float alpha) {
-			renderTileEntityAtCompat(tile, x, y, z, partialTicks, destroy, alpha);
+		public void render(final @Nullable TileEntitySign tile, final double x, final double y, final double z, final float partialTicks, final int destroy) {
+			renderTileEntityAtCompat(tile, x, y, z, partialTicks, destroy, 1f);
 		}
 	}
 
 	public static class CompatTileEntityRendererDispatcher {
 		public static void renderTileEntityAt(final @Nullable TileEntitySign tile, final double x, final double y, final double z, final float partialTicks, final int destroy, final float alpha) {
-			TileEntityRendererDispatcher.instance.render(tile, x, y, z, partialTicks, destroy, alpha);
+			TileEntityRendererDispatcher.instance.render(tile, x, y, z, partialTicks, destroy, true);
 		}
 	}
 
@@ -357,7 +349,7 @@ public class Compat {
 		}
 
 		public int getLightFor(final CompatBlockPos pos) {
-			return this.world.getLightFor(EnumSkyBlock.SKY, pos.pos);
+			return this.world.getLightFor(EnumLightType.SKY, pos.pos);
 		}
 
 		public CompatBlockState getBlockState(final CompatBlockPos pos) {
@@ -401,12 +393,12 @@ public class Compat {
 		}
 
 		public boolean canPlaceBlockAt(final CompatWorld world, final CompatBlockPos pos) {
-			return this.block.canPlaceBlockAt(world.getWorldObj(), pos.pos);
+			throw new NotImplementedException("canPlaceBlockAt");
 		}
 	}
 
 	public static class CompatBlocks {
-		public static final Block STANDING_SIGN = Blocks.STANDING_SIGN;
+		public static final Block STANDING_SIGN = Blocks.SIGN;
 		public static final Block WALL_SIGN = Blocks.WALL_SIGN;
 	}
 
@@ -420,7 +412,7 @@ public class Compat {
 		}
 
 		public static float getChatScale(final GuiNewChat chat) {
-			return chat.getChatScale();
+			return (float) chat.getScale();
 		}
 	}
 
@@ -456,11 +448,11 @@ public class Compat {
 		}
 
 		public String getUnformattedText() {
-			return this.component.getUnformattedText();
+			return this.component.getUnformattedComponentText();
 		}
 
 		public static CompatTextComponent jsonToComponent(final String json) {
-			return new CompatTextComponent(ITextComponent.Serializer.jsonToComponent(json));
+			return new CompatTextComponent(ITextComponent.Serializer.fromJson(json));
 		}
 
 		public static CompatTextComponent fromText(final String text) {
@@ -472,20 +464,19 @@ public class Compat {
 		}
 
 		public void sendClient() {
-			CompatMinecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessage(this.component);
+			CompatMinecraft.getMinecraft().getMinecraftObj().ingameGUI.getChatGUI().printChatMessage(this.component);
 		}
 
 		public void sendClientWithId(final int id) {
-			CompatMinecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(this.component, id);
+			CompatMinecraft.getMinecraft().getMinecraftObj().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(this.component, id);
 		}
 
-		public void sendPlayer(final @Nonnull ICommandSender target) {
+		public void sendPlayer(final @Nonnull ICommandSource target) {
 			target.sendMessage(this.component);
 		}
 
 		public void sendBroadcast() {
-			final PlayerList sender = CompatMinecraft.getMinecraftServer().getPlayerList();
-			sender.sendMessage(this.component);
+			throw new NotImplementedException("sendBroadcast");
 		}
 	}
 
@@ -613,30 +604,31 @@ public class Compat {
 	}
 
 	public static class CompatSimpleNetworkWrapper {
-		private final SimpleNetworkWrapper network;
+		//private final SimpleNetworkWrapper network;
 
-		public CompatSimpleNetworkWrapper(final SimpleNetworkWrapper network) {
-			this.network = network;
-		}
+		//public CompatSimpleNetworkWrapper(final SimpleNetworkWrapper network) {
+		//	this.network = network;
+		//}
 
 		public CompatSimpleNetworkWrapper(final Object network) {
-			this(network);
+			//this(network);
 		}
 
 		public void sendToServer(final CompatMessage message) {
-			this.network.sendToServer(message.message);
+			throw new NotImplementedException("sendToServer");
+			//this.network.sendToServer(message.message);
 		}
 	}
 
 	public static class CompatMessage {
-		public final IMessage message;
+		//public final IMessage message;
 
-		public CompatMessage(final IMessage message) {
-			this.message = message;
-		}
+		//public CompatMessage(final IMessage message) {
+		//	this.message = message;
+		//}
 
 		public CompatMessage(final Object message) {
-			this(message);
+			//this(message);
 		}
 	}
 
@@ -669,7 +661,12 @@ public class Compat {
 			final List<ITextComponent> lines = Lists.transform(clines, input -> {
 				return input==null ? null : input.component;
 			});
-			return new CompatC12PacketUpdateSign(new CPacketUpdateSign(pos.pos, lines.toArray(new ITextComponent[lines.size()])));
+			return new CompatC12PacketUpdateSign(new CPacketUpdateSign(
+					pos.pos,
+					lines.stream().skip(0).findFirst().orElseGet(() -> new TextComponentString("")),
+					lines.stream().skip(1).findFirst().orElseGet(() -> new TextComponentString("")),
+					lines.stream().skip(2).findFirst().orElseGet(() -> new TextComponentString("")),
+					lines.stream().skip(3).findFirst().orElseGet(() -> new TextComponentString(""))));
 		}
 	}
 
@@ -679,7 +676,7 @@ public class Compat {
 		}
 
 		public static CompatC17PacketCustomPayload create(final String channel, final String data) {
-			return new CompatC17PacketCustomPayload(new CPacketCustomPayload(channel, new PacketBuffer(Unpooled.buffer()).writeString(data)));
+			return new CompatC17PacketCustomPayload(new CPacketCustomPayload(new ResourceLocation(channel), new PacketBuffer(Unpooled.buffer()).writeString(data)));
 		}
 	}
 
@@ -736,10 +733,10 @@ public class Compat {
 	}
 
 	public static class CompatTextureUtil {
-		public static final DynamicTexture missingTexture = TextureUtil.MISSING_TEXTURE;
+		public static final DynamicTexture missingTexture = MissingTextureSprite.getDynamicTexture();
 
 		public static void processPixelValues(final int[] pixel, final int displayWidth, final int displayHeight) {
-			TextureUtil.processPixelValues(pixel, displayWidth, displayHeight);
+			throw new NotImplementedException("processPixelValues");
 		}
 
 		public static void allocateTextureImpl(final int id, final int miplevel, final int width, final int height, final float anisotropicFiltering) {
@@ -747,9 +744,8 @@ public class Compat {
 		}
 	}
 
-	public static class CompatGuiConfig extends GuiConfig {
+	public static class CompatGuiConfig {
 		public CompatGuiConfig(final GuiScreen parentScreen, final List<CompatConfigElement> configElements, final String modID, final boolean allRequireWorldRestart, final boolean allRequireMcRestart, final String title) {
-			super(parentScreen, CompatConfigElement.getConfigElements(configElements), modID, allRequireWorldRestart, allRequireMcRestart, GuiConfig.getAbridgedConfigPath(title));
 		}
 	}
 
@@ -764,13 +760,13 @@ public class Compat {
 			return Lists.transform(elements, t -> t==null ? null : t.element);
 		}
 
-		public static CompatConfigElement fromCategory(final ConfigCategory category) {
-			return new CompatConfigElement(new ConfigElement(category));
-		}
-
-		public static CompatConfigElement fromProperty(final Property prop) {
-			return new CompatConfigElement(new ConfigElement(prop));
-		}
+		//public static CompatConfigElement fromCategory(final ConfigCategory category) {
+		//	throw new NotImplementedException("fromCategory");
+		//}
+		//
+		//public static CompatConfigElement fromProperty(final Property prop) {
+		//	return new CompatConfigElement(new ConfigElement(prop));
+		//}
 	}
 
 	public static abstract class CompatModGuiFactory implements IModGuiFactory {
@@ -794,119 +790,121 @@ public class Compat {
 		public abstract GuiScreen createConfigGuiCompat(GuiScreen parentScreen);
 	}
 
+	/*
 	public static class CompatCommand {
 		public static @Nonnull String getCommandName(final ICommand command) {
 			return command.getName();
 		}
-
+	
 		public static @Nullable List<String> getCommandAliases(final ICommand command) {
 			return command.getAliases();
 		}
-
+	
 		public static @Nonnull String getCommandUsage(final ICommand command, final @Nullable ICommandSender sender) {
 			return command.getUsage(sender);
 		}
 	}
-
+	
 	public static class CompatCommandSender {
 		public static boolean canCommandSenderUseCommand(final ICommandSender sender, final int level, final String name) {
 			return sender.canUseCommand(level, name);
 		}
 	}
-
+	
 	public static abstract class CompatRootCommand extends CommandBase implements ICommand {
 		@Override
 		public @Nullable List<String> getTabCompletions(final MinecraftServer server, final @Nullable ICommandSender sender, final @Nullable String[] args, final @Nullable BlockPos pos) {
 			return addTabCompletionOptionCompat(sender, args);
 		}
-
+	
 		public @Nullable abstract List<String> addTabCompletionOptionCompat(final @Nullable ICommandSender sender, final @Nullable String[] args);
-
+	
 		@Override
 		public @Nonnull String getName() {
 			return getCommandNameCompat();
 		}
-
+	
 		public abstract @Nonnull String getCommandNameCompat();
-
+	
 		@Override
 		public @Nullable List<String> getAliases() {
 			return getCommandAliasesCompat();
 		}
-
+	
 		public abstract @Nullable List<String> getCommandAliasesCompat();
-
+	
 		@Override
 		public @Nonnull String getUsage(final @Nullable ICommandSender sender) {
 			return getCommandUsageCompat(sender);
 		}
-
+	
 		public abstract @Nonnull String getCommandUsageCompat(final @Nullable ICommandSender sender);
-
+	
 		@Override
 		public void execute(final MinecraftServer server, final ICommandSender sender, final String[] args) throws CommandException {
 			processCommandCompat(sender, args);
 		}
-
+	
 		public abstract void processCommandCompat(final @Nullable ICommandSender sender, final @Nullable String[] args) throws CommandException;
 	}
-
+	
 	public static abstract class CompatSubCommand implements ICommand {
 		@Override
 		public @Nullable List<String> getTabCompletions(final MinecraftServer server, final @Nullable ICommandSender sender, final @Nullable String[] args, final @Nullable BlockPos pos) {
 			return addTabCompletionOptionCompat(sender, args);
 		}
-
+	
 		public @Nullable abstract List<String> addTabCompletionOptionCompat(final @Nullable ICommandSender sender, final @Nullable String[] args);
-
+	
 		@Override
 		public @Nonnull String getName() {
 			return getCommandNameCompat();
 		}
-
+	
 		public abstract @Nonnull String getCommandNameCompat();
-
+	
 		@Override
 		public @Nullable List<String> getAliases() {
 			return getCommandAliasesCompat();
 		}
-
+	
 		public abstract @Nullable List<String> getCommandAliasesCompat();
-
+	
 		@Override
 		public @Nonnull String getUsage(final @Nullable ICommandSender sender) {
 			return getCommandUsageCompat(sender);
 		}
-
+	
 		public abstract @Nonnull String getCommandUsageCompat(final @Nullable ICommandSender sender);
-
+	
 		@Override
 		public void execute(final MinecraftServer server, final ICommandSender sender, final String[] args) throws CommandException {
 			processCommandCompat(sender, args);
 		}
-
+	
 		public abstract void processCommandCompat(final @Nullable ICommandSender sender, final @Nullable String[] args) throws CommandException;
-
+	
 		@Override
 		public boolean checkPermission(final MinecraftServer server, final ICommandSender sender) {
 			return canCommandSenderUseCommandCompat(sender);
 		}
-
+	
 		public abstract boolean canCommandSenderUseCommandCompat(final @Nullable ICommandSender sender);
-
+	
 		public abstract int compare(final @Nullable ICommand command);
-
+	
 		@Override
 		public int compareTo(final @Nullable ICommand command) {
 			return compare(command);
 		}
 	}
-
+	
 	public static class CompatCommandBase {
 		public static String buildString(final ICommandSender sender, final String[] args, final int startPos) {
 			return CommandBase.buildString(args, startPos);
 		}
 	}
+	*/
 
 	public static class CompatMathHelper {
 		public static int floor_float(final float value) {
@@ -944,7 +942,7 @@ public class Compat {
 
 		@SuppressWarnings("deprecation")
 		public static String translateToLocal(final String text) {
-			return net.minecraft.util.text.translation.I18n.translateToLocal(text);
+			return I18n.format(text);
 		}
 	}
 
