@@ -6,7 +6,7 @@ import javax.annotation.Nonnull;
 
 import org.apache.logging.log4j.Logger;
 
-public interface CompatProxy {
+public interface CompatBaseProxy {
 	public static interface CompatFMLPreInitializationEvent {
 		Logger getModLog();
 

@@ -963,11 +963,11 @@ public class Compat {
 	}
 
 	public static class CompatVertex {
-		private static class WVertexImpl implements WVertex {
+		private static class CompatBaseVertexImpl implements CompatBaseVertex {
 			public static final @Nonnull Tessellator t = Tessellator.getInstance();
 			public static final @Nonnull BufferBuilder w = t.getBuffer();
 
-			public WVertexImpl() {
+			public CompatBaseVertexImpl() {
 			}
 
 			@Override
@@ -977,14 +977,14 @@ public class Compat {
 			}
 
 			@Override
-			public @Nonnull WVertex begin(final int mode) {
+			public @Nonnull CompatBaseVertex begin(final int mode) {
 				w.begin(mode, DefaultVertexFormats.POSITION);
 				init();
 				return this;
 			}
 
 			@Override
-			public @Nonnull WVertex beginTexture(final int mode) {
+			public @Nonnull CompatBaseVertex beginTexture(final int mode) {
 				w.begin(mode, DefaultVertexFormats.POSITION_TEX);
 				init();
 				return this;
@@ -997,7 +997,7 @@ public class Compat {
 			private boolean stack;
 
 			@Override
-			public @Nonnull WVertex pos(final double x, final double y, final double z) {
+			public @Nonnull CompatBaseVertex pos(final double x, final double y, final double z) {
 				endVertex();
 				w.pos(x, y, z);
 				this.stack = true;
@@ -1005,24 +1005,24 @@ public class Compat {
 			}
 
 			@Override
-			public @Nonnull WVertex tex(final double u, final double v) {
+			public @Nonnull CompatBaseVertex tex(final double u, final double v) {
 				w.tex(u, v);
 				return this;
 			}
 
 			@Override
-			public @Nonnull WVertex color(final float red, final float green, final float blue, final float alpha) {
+			public @Nonnull CompatBaseVertex color(final float red, final float green, final float blue, final float alpha) {
 				return this.color((int) (red*255.0F), (int) (green*255.0F), (int) (blue*255.0F), (int) (alpha*255.0F));
 			}
 
 			@Override
-			public @Nonnull WVertex color(final int red, final int green, final int blue, final int alpha) {
+			public @Nonnull CompatBaseVertex color(final int red, final int green, final int blue, final int alpha) {
 				w.putColorRGBA(0, red, green, blue, alpha);
 				return this;
 			}
 
 			@Override
-			public @Nonnull WVertex normal(final float nx, final float ny, final float nz) {
+			public @Nonnull CompatBaseVertex normal(final float nx, final float ny, final float nz) {
 				w.normal(nx, ny, nz);
 				return this;
 			}
@@ -1040,8 +1040,8 @@ public class Compat {
 			}
 		}
 
-		public static @Nonnull WVertex getWVertex() {
-			return new WVertexImpl();
+		public static @Nonnull CompatBaseVertex getTessellator() {
+			return new CompatBaseVertexImpl();
 		}
 	}
 
@@ -1072,7 +1072,6 @@ public class Compat {
 				final boolean blur = true;
 				final boolean clamp = false;
 
-				bindTexture();
 				TextureUtil.allocateTextureImpl(this.texture.getRawGlTextureId(), 0, nativeimage.getWidth(), nativeimage.getHeight());
 				nativeimage.uploadTextureSub(0, 0, 0, 0, 0, nativeimage.getWidth(), nativeimage.getHeight(), blur, clamp, false);
 			}

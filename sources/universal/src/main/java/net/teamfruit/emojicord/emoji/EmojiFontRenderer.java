@@ -1,13 +1,20 @@
 package net.teamfruit.emojicord.emoji;
 
+import javax.annotation.Nullable;
+
 import org.lwjgl.opengl.GL11;
 
+import net.minecraft.client.gui.fonts.IGlyph;
+import net.minecraft.client.gui.fonts.TexturedGlyph;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.util.ResourceLocation;
 import net.teamfruit.emojicord.CoreInvoke;
 import net.teamfruit.emojicord.EmojicordConfig;
 import net.teamfruit.emojicord.compat.Compat;
 import net.teamfruit.emojicord.compat.Compat.CompatVertex;
+import net.teamfruit.emojicord.compat.CompatBaseVertex;
 import net.teamfruit.emojicord.compat.OpenGL;
-import net.teamfruit.emojicord.compat.WVertex;
 import net.teamfruit.emojicord.emoji.EmojiText.EmojiTextElement;
 
 @CoreInvoke
@@ -50,6 +57,51 @@ public class EmojiFontRenderer {
 		return false;
 	}
 
+	@CoreInvoke
+	public static @Nullable EmojiGlyph getEmojiGlyph(final char c, final int index) {
+		if (EmojicordConfig.spec.isAvailable()&&EmojicordConfig.RENDER.renderEnabled.get()) {
+			final EmojiTextElement emojiElement = CurrentContext.emojis.get(index);
+			if (emojiElement!=null) {
+				final EmojiId emojiId = emojiElement.id;
+				if (emojiId!=null) {
+					final EmojiObject emoji = EmojiObject.EmojiObjectCache.instance.getEmojiObject(emojiId);
+					return new EmojiGlyph(emoji.getResourceLocationForBinding());
+				}
+			}
+		}
+		return null;
+	}
+
+	public static class EmojiGlyph extends TexturedGlyph implements IGlyph {
+		private static final float GlyphWidth = 10;
+		private static final float GlyphHeight = 10;
+
+		public EmojiGlyph(final ResourceLocation texture) {
+			super(texture, 0, 1, 0, 1, 0, GlyphWidth, 0+3, GlyphHeight+3);
+		}
+
+		@Override
+		public float getAdvance() {
+			return GlyphWidth;
+		}
+
+		@Override
+		public float getBoldOffset() {
+			return 0;
+		}
+
+		@Override
+		public float getShadowOffset() {
+			return 0;
+		}
+
+		@Override
+		public void render(final TextureManager textureManager, final boolean hasShadow, final float x, final float y, final BufferBuilder vbuilder, final float red, final float green, final float blue, final float alpha) {
+			if (!shadow)
+				super.render(textureManager, hasShadow, x, y, vbuilder, red, green, blue, alpha);
+		}
+	}
+
 	public static void renderEmoji(final EmojiObject emoji, final float x, final float y, final float red, final float green, final float blue, final float alpha) {
 		final float textureSize = 16.0F;
 		final float textureX = 0.0F/textureSize;
@@ -70,7 +122,7 @@ public class EmojiFontRenderer {
 		//OpenGL.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
 		//OpenGL.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
 		//OpenGL.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
-		final WVertex bufferbuilder = CompatVertex.getWVertex();
+		final CompatBaseVertex bufferbuilder = CompatVertex.getTessellator();
 		bufferbuilder.beginTexture(GL11.GL_QUADS);
 		bufferbuilder.pos(x-offsetX, y-offsetY, 0.0F).tex(textureX, textureY);
 		bufferbuilder.pos(x-offsetX, y+size-offsetY, 0.0F).tex(textureX, textureY+textureOffset);

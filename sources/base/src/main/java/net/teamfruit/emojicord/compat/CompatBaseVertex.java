@@ -2,7 +2,7 @@ package net.teamfruit.emojicord.compat;
 
 import javax.annotation.Nonnull;
 
-public interface WVertex {
+public interface CompatBaseVertex {
 
 	/**
 	 * 実際に描画します
@@ -15,7 +15,7 @@ public interface WVertex {
 	 * @return this
 	 */
 	@Nonnull
-	WVertex begin(int mode);
+	CompatBaseVertex begin(int mode);
 
 	/**
 	 * テクスチャ描画を開始します。
@@ -23,7 +23,7 @@ public interface WVertex {
 	 * @return this
 	 */
 	@Nonnull
-	WVertex beginTexture(int mode);
+	CompatBaseVertex beginTexture(int mode);
 
 	/**
 	 * 頂点の設定を開始します。
@@ -35,7 +35,7 @@ public interface WVertex {
 	 * @return this
 	 */
 	@Nonnull
-	WVertex pos(double x, double y, double z);
+	CompatBaseVertex pos(double x, double y, double z);
 
 	/**
 	 * テクスチャのマッピング
@@ -44,7 +44,7 @@ public interface WVertex {
 	 * @return this
 	 */
 	@Nonnull
-	WVertex tex(double u, double v);
+	CompatBaseVertex tex(double u, double v);
 
 	/**
 	 * 頂点の色
@@ -55,7 +55,7 @@ public interface WVertex {
 	 * @return this
 	 */
 	@Nonnull
-	WVertex color(float red, float green, float blue, float alpha);
+	CompatBaseVertex color(float red, float green, float blue, float alpha);
 
 	/**
 	 * 頂点の色
@@ -66,7 +66,7 @@ public interface WVertex {
 	 * @return this
 	 */
 	@Nonnull
-	WVertex color(int red, int green, int blue, int alpha);
+	CompatBaseVertex color(int red, int green, int blue, int alpha);
 
 	/**
 	 * 法線
@@ -76,7 +76,7 @@ public interface WVertex {
 	 * @return
 	 */
 	@Nonnull
-	WVertex normal(float nx, float ny, float nz);
+	CompatBaseVertex normal(float nx, float ny, float nz);
 
 	/**
 	 * オフセット

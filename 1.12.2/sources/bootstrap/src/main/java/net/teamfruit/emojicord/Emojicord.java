@@ -17,10 +17,10 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.network.NetworkCheckHandler;
 import net.minecraftforge.fml.relauncher.Side;
-import net.teamfruit.emojicord.compat.CompatProxy;
-import net.teamfruit.emojicord.compat.CompatProxy.CompatFMLInitializationEvent;
-import net.teamfruit.emojicord.compat.CompatProxy.CompatFMLPostInitializationEvent;
-import net.teamfruit.emojicord.compat.CompatProxy.CompatFMLPreInitializationEvent;
+import net.teamfruit.emojicord.compat.CompatBaseProxy;
+import net.teamfruit.emojicord.compat.CompatBaseProxy.CompatFMLInitializationEvent;
+import net.teamfruit.emojicord.compat.CompatBaseProxy.CompatFMLPostInitializationEvent;
+import net.teamfruit.emojicord.compat.CompatBaseProxy.CompatFMLPreInitializationEvent;
 
 @Mod(modid = Reference.MODID, name = Reference.NAME, version = Reference.VERSION)
 public class Emojicord {
@@ -28,7 +28,7 @@ public class Emojicord {
 	public static @Nullable Emojicord instance;
 
 	@SidedProxy(serverSide = Reference.PROXY_SERVER, clientSide = Reference.PROXY_CLIENT)
-	public static @Nullable CompatProxy proxy;
+	public static @Nullable CompatBaseProxy proxy;
 
 	@NetworkCheckHandler
 	public boolean checkModList(final @Nonnull Map<String, String> versions, final @Nonnull Side side) {

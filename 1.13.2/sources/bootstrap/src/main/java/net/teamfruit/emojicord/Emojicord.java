@@ -14,24 +14,24 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.teamfruit.emojicord.compat.Compat.CompatSide;
-import net.teamfruit.emojicord.compat.CompatProxy;
-import net.teamfruit.emojicord.compat.CompatProxy.CompatFMLInitializationEvent;
-import net.teamfruit.emojicord.compat.CompatProxy.CompatFMLPostInitializationEvent;
-import net.teamfruit.emojicord.compat.CompatProxy.CompatFMLPreInitializationEvent;
+import net.teamfruit.emojicord.compat.CompatBaseProxy;
+import net.teamfruit.emojicord.compat.CompatBaseProxy.CompatFMLInitializationEvent;
+import net.teamfruit.emojicord.compat.CompatBaseProxy.CompatFMLPostInitializationEvent;
+import net.teamfruit.emojicord.compat.CompatBaseProxy.CompatFMLPreInitializationEvent;
 
 @Mod(value = Reference.MODID)
 public class Emojicord {
 	public static @Nullable Emojicord instance;
 
-	public static @Nullable CompatProxy proxy = DistExecutor.<CompatProxy> runForDist(() -> () -> {
+	public static @Nullable CompatBaseProxy proxy = DistExecutor.<CompatBaseProxy> runForDist(() -> () -> {
 		try {
-			return (CompatProxy) Class.forName(Reference.PROXY_CLIENT).newInstance();
+			return (CompatBaseProxy) Class.forName(Reference.PROXY_CLIENT).newInstance();
 		} catch (InstantiationException|IllegalAccessException|ClassNotFoundException e) {
 			throw new RuntimeException("Could not load proxy class: ", e);
 		}
 	}, () -> () -> {
 		try {
-			return (CompatProxy) Class.forName(Reference.PROXY_SERVER).newInstance();
+			return (CompatBaseProxy) Class.forName(Reference.PROXY_SERVER).newInstance();
 		} catch (InstantiationException|IllegalAccessException|ClassNotFoundException e) {
 			throw new RuntimeException("Could not load proxy class: ", e);
 		}

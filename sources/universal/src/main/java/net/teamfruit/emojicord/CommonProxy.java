@@ -2,9 +2,9 @@ package net.teamfruit.emojicord;
 
 import javax.annotation.Nonnull;
 
-import net.teamfruit.emojicord.compat.CompatProxy;
+import net.teamfruit.emojicord.compat.CompatBaseProxy;
 
-public class CommonProxy implements CompatProxy {
+public class CommonProxy implements CompatBaseProxy {
 	@Override
 	public void preInit(final @Nonnull CompatFMLPreInitializationEvent event) {
 	}
