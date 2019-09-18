@@ -193,7 +193,11 @@ public class EmojiObject {
 		private final LoadingCache<EmojiId, EmojiObject> EMOJI_ID_MAP = CacheBuilder.newBuilder()
 				.expireAfterAccess(EMOJI_LIFETIME_SEC, TimeUnit.SECONDS)
 				.removalListener(
-						(final RemovalNotification<EmojiId, EmojiObject> notification) -> notification.getValue().delete())
+						(final RemovalNotification<EmojiId, EmojiObject> notification) -> {
+							final EmojiObject nvalue = notification.getValue();
+							if (nvalue!=null)
+								nvalue.delete();
+						})
 				.build(new CacheLoader<EmojiId, EmojiObject>() {
 					@Override
 					public EmojiObject load(final EmojiId key) throws Exception {

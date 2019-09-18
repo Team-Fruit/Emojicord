@@ -5,12 +5,13 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Maps;
 
-import io.netty.util.internal.StringUtil;
 import net.teamfruit.emojicord.emoji.EmojiText.EmojiTextElement;
 
 public class EmojiContext {
@@ -26,7 +27,7 @@ public class EmojiContext {
 
 	public static class EmojiContextLoader {
 		public static EmojiContext getEmojiFormattedString(final String text) {
-			if (!StringUtil.isNullOrEmpty(text)) {
+			if (!StringUtils.isEmpty(text)) {
 				final EmojiText emojiText = EmojiText.createParsed(text);
 				final EmojiContext context = emojiText.getEmojiContext();
 				return context;

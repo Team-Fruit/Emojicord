@@ -123,7 +123,7 @@ public abstract class EmojiId {
 		}
 
 		public static @Nullable EmojiId fromDecimalId(final String id) {
-			if (!NumberUtils.isCreatable(id))
+			if (!NumberUtils.isDigits(id))
 				return null;
 			return DiscordEmojiId.fromDecimalId(NumberUtils.toLong(id));
 		}

@@ -6,8 +6,6 @@ import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 
-import com.google.common.collect.Streams;
-
 import net.teamfruit.emojicord.asm.lib.ClassName;
 import net.teamfruit.emojicord.asm.lib.DescHelper;
 import net.teamfruit.emojicord.asm.lib.MethodMatcher;
@@ -29,7 +27,7 @@ public class GuiTextFieldTransform implements NodeTransformer {
 					insertion.add(new FieldInsnNode(Opcodes.PUTSTATIC, ClassName.of("net.teamfruit.emojicord.emoji.EmojiFontRenderer").getBytecodeName(), "isTextFieldRendering", DescHelper.toDesc(boolean.class)));
 					method.instructions.insert(insertion);
 				}
-				Streams.stream(method.instructions.iterator()).filter(e -> {
+				stream(method.instructions).filter(e -> {
 					return e instanceof InsnNode&&e.getOpcode()==Opcodes.IRETURN;
 				}).forEach(marker -> {
 					{

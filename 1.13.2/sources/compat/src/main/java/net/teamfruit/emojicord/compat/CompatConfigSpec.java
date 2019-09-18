@@ -5,17 +5,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Streams;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
+import net.teamfruit.emojicord.compat.Compat.CompatConfiguration;
 import net.teamfruit.emojicord.compat.Compat.CompatSide;
 
 /*
@@ -25,6 +24,7 @@ import net.teamfruit.emojicord.compat.Compat.CompatSide;
 
 public class CompatConfigSpec {
 	private final ForgeConfigSpec spec;
+	private File location;
 
 	private CompatConfigSpec(final ForgeConfigSpec spec) {
 		this.spec = spec;
@@ -46,7 +46,20 @@ public class CompatConfigSpec {
 		void onConfigChanged();
 	}
 
+	public CompatConfiguration configure(final CompatConfiguration config) {
+		return config;
+	}
+
+	public CompatConfiguration getConfiguration() {
+		return new CompatConfiguration();
+	}
+
+	public File getConfigFile() {
+		return this.location;
+	}
+
 	public CompatConfigHandler registerConfigHandler(final CompatSide side, final File location) {
+		this.location = location;
 		return () -> {
 		};
 	}
@@ -57,13 +70,20 @@ public class CompatConfigSpec {
 		private List<String> currentPath = new ArrayList<>();
 		private List<ConfigValue<?>> values = new ArrayList<>();
 
+		private List<String> concat(final List<String> lhs, final List<String> rhs) {
+			final List<String> list = Lists.newArrayList();
+			list.addAll(lhs);
+			list.addAll(rhs);
+			return list;
+		}
+
 		//string
 		public StringValue define(final String path, final String defaultValue) {
 			return defineString(split(path), () -> defaultValue);
 		}
 
 		public StringValue defineString(final List<String> path, final Supplier<String> defaultSupplier) {
-			final List<String> newpath = Streams.concat(this.currentPath.stream(), path.stream()).collect(Collectors.toList());
+			final List<String> newpath = concat(this.currentPath, path);
 			final StringValue ret = new StringValue(this, newpath, defaultSupplier, this.context);
 			this.values.add(ret);
 			this.context = new BuilderContext();
@@ -76,7 +96,7 @@ public class CompatConfigSpec {
 		}
 
 		private BooleanValue defineBoolean(final List<String> path, final Supplier<Boolean> defaultSupplier) {
-			final List<String> newpath = Streams.concat(this.currentPath.stream(), path.stream()).collect(Collectors.toList());
+			final List<String> newpath = concat(this.currentPath, path);
 			final BooleanValue ret = new BooleanValue(this, newpath, defaultSupplier, this.context);
 			this.values.add(ret);
 			this.context = new BuilderContext();
@@ -89,7 +109,7 @@ public class CompatConfigSpec {
 		}
 
 		private IntValue defineInt(final List<String> path, final Supplier<Integer> defaultSupplier) {
-			final List<String> newpath = Streams.concat(this.currentPath.stream(), path.stream()).collect(Collectors.toList());
+			final List<String> newpath = concat(this.currentPath, path);
 			final IntValue ret = new IntValue(this, newpath, defaultSupplier, this.context);
 			this.values.add(ret);
 			this.context = new BuilderContext();
@@ -102,7 +122,7 @@ public class CompatConfigSpec {
 		}
 
 		private DoubleValue defineDouble(final List<String> path, final Supplier<Double> defaultSupplier) {
-			final List<String> newpath = Streams.concat(this.currentPath.stream(), path.stream()).collect(Collectors.toList());
+			final List<String> newpath = concat(this.currentPath, path);
 			final DoubleValue ret = new DoubleValue(this, newpath, defaultSupplier, this.context);
 			this.values.add(ret);
 			this.context = new BuilderContext();

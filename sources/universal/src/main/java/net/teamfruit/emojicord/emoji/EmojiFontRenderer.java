@@ -4,12 +4,12 @@ import javax.annotation.Nullable;
 
 import org.lwjgl.opengl.GL11;
 
-import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.ResourceLocation;
 import net.teamfruit.emojicord.CoreInvoke;
 import net.teamfruit.emojicord.EmojicordConfig;
 import net.teamfruit.emojicord.compat.Compat;
+import net.teamfruit.emojicord.compat.Compat.CompatBufferBuilder;
 import net.teamfruit.emojicord.compat.Compat.CompatGlyph;
 import net.teamfruit.emojicord.compat.Compat.CompatVertex;
 import net.teamfruit.emojicord.compat.CompatBaseVertex;
@@ -80,7 +80,7 @@ public class EmojiFontRenderer {
 		}
 
 		@Override
-		public void onRender(final TextureManager textureManager, final boolean hasShadow, final float x, final float y, final BufferBuilder vbuilder, final float red, final float green, final float blue, final float alpha) {
+		public void onRender(final TextureManager textureManager, final boolean hasShadow, final float x, final float y, final CompatBufferBuilder vbuilder, final float red, final float green, final float blue, final float alpha) {
 			if (!shadow)
 				super.onRender(textureManager, hasShadow, x, y, vbuilder, 1, 1, 1, alpha);
 		}

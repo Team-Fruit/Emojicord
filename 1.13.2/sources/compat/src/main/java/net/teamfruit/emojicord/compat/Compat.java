@@ -14,6 +14,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.Validate;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import io.netty.buffer.Unpooled;
 import net.minecraft.block.Block;
@@ -744,29 +745,53 @@ public class Compat {
 		}
 	}
 
-	public static class CompatGuiConfig {
+	public static class CompatGuiConfig extends GuiScreen {
 		public CompatGuiConfig(final GuiScreen parentScreen, final List<CompatConfigElement> configElements, final String modID, final boolean allRequireWorldRestart, final boolean allRequireMcRestart, final String title) {
 		}
 	}
 
-	public static class CompatConfigElement {
-		public final IConfigElement element;
+	public static class CompatConfiguration {
+		public CompatConfiguration() {
+		}
 
-		public CompatConfigElement(final IConfigElement element) {
-			this.element = element;
+		public Set<String> getCategoryNames() {
+			return Sets.newHashSet();
+		}
+
+		public CompatConfigCategory getCategory(final String category) {
+			return new CompatConfigCategory();
+		}
+	}
+
+	public static class CompatConfigCategory {
+		public CompatConfigCategory() {
+		}
+
+		public boolean isChild() {
+			return true;
+		}
+	}
+
+	public static class CompatConfigProperty {
+		public CompatConfigProperty() {
+		}
+	}
+
+	public static class CompatConfigElement {
+		public CompatConfigElement() {
 		}
 
 		public static List<IConfigElement> getConfigElements(final List<CompatConfigElement> elements) {
-			return Lists.transform(elements, t -> t==null ? null : t.element);
+			return Lists.newArrayList();
 		}
 
-		//public static CompatConfigElement fromCategory(final ConfigCategory category) {
-		//	throw new NotImplementedException("fromCategory");
-		//}
-		//
-		//public static CompatConfigElement fromProperty(final Property prop) {
-		//	return new CompatConfigElement(new ConfigElement(prop));
-		//}
+		public static CompatConfigElement fromCategory(final CompatConfigCategory category) {
+			return new CompatConfigElement();
+		}
+
+		public static CompatConfigElement fromProperty(final CompatConfigProperty prop) {
+			return new CompatConfigElement();
+		}
 	}
 
 	public static abstract class CompatModGuiFactory implements IModGuiFactory {
@@ -940,16 +965,15 @@ public class Compat {
 			return I18n.format(format, args);
 		}
 
-		@SuppressWarnings("deprecation")
 		public static String translateToLocal(final String text) {
 			return I18n.format(text);
 		}
 	}
 
-	public static class CompatModel {
-		public final IModel model;
+	public static class CompatModel<T extends IModel<T>> {
+		public final IModel<T> model;
 
-		public CompatModel(@Nonnull final IModel model) {
+		public CompatModel(@Nonnull final IModel<T> model) {
 			this.model = model;
 		}
 	}
@@ -1138,6 +1162,14 @@ public class Compat {
 		}
 	}
 
+	public static class CompatBufferBuilder {
+		public BufferBuilder vbuilder;
+
+		public CompatBufferBuilder(final BufferBuilder vbuilder) {
+			this.vbuilder = vbuilder;
+		}
+	}
+
 	public static abstract class CompatGlyph extends TexturedGlyph implements IGlyph {
 		private final float width;
 
@@ -1161,13 +1193,13 @@ public class Compat {
 			return 0;
 		}
 
-		public void onRender(final TextureManager textureManager, final boolean hasShadow, final float x, final float y, final BufferBuilder vbuilder, final float red, final float green, final float blue, final float alpha) {
-			super.render(textureManager, hasShadow, x, y, vbuilder, red, green, blue, alpha);
+		public void onRender(final TextureManager textureManager, final boolean hasShadow, final float x, final float y, final CompatBufferBuilder vbuilder, final float red, final float green, final float blue, final float alpha) {
+			super.render(textureManager, hasShadow, x, y, vbuilder.vbuilder, red, green, blue, alpha);
 		}
 
 		@Override
 		public void render(final TextureManager textureManager, final boolean hasShadow, final float x, final float y, final BufferBuilder vbuilder, final float red, final float green, final float blue, final float alpha) {
-			onRender(textureManager, hasShadow, x, y, vbuilder, red, green, blue, alpha);
+			onRender(textureManager, hasShadow, x, y, new CompatBufferBuilder(vbuilder), red, green, blue, alpha);
 		}
 	}
 }

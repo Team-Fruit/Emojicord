@@ -27,8 +27,8 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiNewChat;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.network.NetHandlerPlayClient;
-import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.SimpleTexture;
@@ -128,7 +128,7 @@ public class Compat {
 		}
 
 		public @Nonnull CompatFontRenderer getFontRenderer() {
-			return new CompatFontRenderer(this.mc.fontRenderer);
+			return new CompatFontRenderer(this.mc.fontRendererObj);
 		}
 
 		public @Nullable CompatWorld getWorld() {
@@ -286,20 +286,20 @@ public class Compat {
 
 	public static abstract class CompatTileEntitySignRenderer extends TileEntitySignRenderer {
 		public void renderBaseTileEntityAt(final @Nullable TileEntitySign tile, final double x, final double y, final double z, final float partialTicks, final int destroy, final float alpha) {
-			super.render(tile, x, y, z, partialTicks, destroy, alpha);
+			super.renderTileEntityAt(tile, x, y, z, partialTicks, destroy);
 		}
 
 		public abstract void renderTileEntityAtCompat(final @Nullable TileEntitySign tile, final double x, final double y, final double z, final float partialTicks, final int destroy, final float alpha);
 
 		@Override
-		public void render(final @Nullable TileEntitySign tile, final double x, final double y, final double z, final float partialTicks, final int destroy, final float alpha) {
-			renderTileEntityAtCompat(tile, x, y, z, partialTicks, destroy, alpha);
+		public void renderTileEntityAt(final @Nullable TileEntitySign tile, final double x, final double y, final double z, final float partialTicks, final int destroy) {
+			renderTileEntityAtCompat(tile, x, y, z, partialTicks, destroy, 1f);
 		}
 	}
 
 	public static class CompatTileEntityRendererDispatcher {
 		public static void renderTileEntityAt(final @Nullable TileEntitySign tile, final double x, final double y, final double z, final float partialTicks, final int destroy, final float alpha) {
-			TileEntityRendererDispatcher.instance.render(tile, x, y, z, partialTicks, destroy, alpha);
+			TileEntityRendererDispatcher.instance.renderTileEntityAt(tile, x, y, z, partialTicks, destroy);
 		}
 	}
 
@@ -788,9 +788,20 @@ public class Compat {
 			return null;
 		}
 
+		@SuppressWarnings("deprecation")
+		@Override
+		public RuntimeOptionGuiHandler getHandlerFor(final RuntimeOptionCategoryElement element) {
+			return null;
+		}
+
 		@Override
 		public boolean hasConfigGui() {
 			return mainConfigGuiClassCompat()!=null;
+		}
+
+		@Override
+		public @Nullable Class<? extends GuiScreen> mainConfigGuiClass() {
+			return mainConfigGuiClassCompat();
 		}
 
 		public abstract @Nullable Class<? extends GuiScreen> mainConfigGuiClassCompat();
@@ -976,7 +987,7 @@ public class Compat {
 	public static class CompatVertex {
 		private static class CompatBaseVertexImpl implements CompatBaseVertex {
 			public static final @Nonnull Tessellator t = Tessellator.getInstance();
-			public static final @Nonnull BufferBuilder w = t.getBuffer();
+			public static final @Nonnull VertexBuffer w = t.getBuffer();
 
 			public CompatBaseVertexImpl() {
 			}
