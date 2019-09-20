@@ -37,8 +37,13 @@ public abstract class CompatTransformer implements ITransformer<ClassNode> {
 		}
 	}
 
+	private boolean deferred = false;
+
 	@Override
 	public TransformerVoteResult castVote(final ITransformerVotingContext context) {
+		if (this.deferred)
+			return TransformerVoteResult.YES;
+		this.deferred = true;
 		return Arrays.stream(deferredTransforms()).anyMatch(DeferredTransform::shouldDefer) ? TransformerVoteResult.DEFER : TransformerVoteResult.YES;
 	}
 

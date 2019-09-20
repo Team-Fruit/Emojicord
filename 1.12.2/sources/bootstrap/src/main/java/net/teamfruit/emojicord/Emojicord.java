@@ -6,8 +6,6 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.apache.logging.log4j.Logger;
-
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
@@ -61,18 +59,8 @@ public class Emojicord {
 		}
 
 		@Override
-		public Logger getModLog() {
-			return this.event.getModLog();
-		}
-
-		@Override
 		public File getSuggestedConfigurationFile() {
 			return this.event.getSuggestedConfigurationFile();
-		}
-
-		@Override
-		public File getSourceFile() {
-			return this.event.getSourceFile();
 		}
 	}
 

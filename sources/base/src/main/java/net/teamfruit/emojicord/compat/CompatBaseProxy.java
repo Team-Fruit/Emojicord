@@ -4,15 +4,9 @@ import java.io.File;
 
 import javax.annotation.Nonnull;
 
-import org.apache.logging.log4j.Logger;
-
 public interface CompatBaseProxy {
 	public static interface CompatFMLPreInitializationEvent {
-		Logger getModLog();
-
 		File getSuggestedConfigurationFile();
-
-		File getSourceFile();
 	}
 
 	void preInit(final @Nonnull CompatFMLPreInitializationEvent event);

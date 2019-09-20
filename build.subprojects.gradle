@@ -350,7 +350,7 @@ ext.commonManifest = {
 	if (project.isProperty('extra_fmlcore'))
 		attributes 'FMLCorePlugin': project.extra_fmlcore
 	if (project.isProperty('extra_fmlmod'))
-		attributes 'FMLCorePluginContainsFMLMod': project.extra_fmlcore
+		attributes 'FMLCorePluginContainsFMLMod': project.extra_fmlmod
 	if (project.isProperty('extra_fmlat'))
 		attributes 'FMLAT': project.extra_fmlat
 

@@ -1,4 +1,4 @@
-package net.minecraft.client.gui;
+package net.teamfruit.emojicord.minecraft.client.gui;
 
 /*
 import java.util.Arrays;

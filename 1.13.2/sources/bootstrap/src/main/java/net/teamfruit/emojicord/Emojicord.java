@@ -5,15 +5,12 @@ import java.io.File;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.apache.logging.log4j.Logger;
-
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.teamfruit.emojicord.compat.Compat.CompatSide;
 import net.teamfruit.emojicord.compat.CompatBaseProxy;
 import net.teamfruit.emojicord.compat.CompatBaseProxy.CompatFMLInitializationEvent;
 import net.teamfruit.emojicord.compat.CompatBaseProxy.CompatFMLPostInitializationEvent;
@@ -44,13 +41,12 @@ public class Emojicord {
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::init);
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::postInit);
 
-		EmojicordConfig.spec.registerConfigDefine(CompatSide.CLIENT);
+		if (proxy!=null)
+			proxy.preInit(new CompatFMLPreInitializationEventImpl());
 	}
 
 	@SubscribeEvent
 	public void preInit(final @Nonnull FMLClientSetupEvent event) {
-		if (proxy!=null)
-			proxy.preInit(new CompatFMLPreInitializationEventImpl(event));
 	}
 
 	@SubscribeEvent
@@ -66,24 +62,11 @@ public class Emojicord {
 	}
 
 	private static class CompatFMLPreInitializationEventImpl implements CompatFMLPreInitializationEvent {
-		//private final @Nonnull FMLCommonSetupEvent event;
-
-		public CompatFMLPreInitializationEventImpl(final FMLClientSetupEvent event) {
-			//this.event = event;
-		}
-
-		@Override
-		public Logger getModLog() {
-			return Log.log;
+		public CompatFMLPreInitializationEventImpl() {
 		}
 
 		@Override
 		public File getSuggestedConfigurationFile() {
-			return null;
-		}
-
-		@Override
-		public File getSourceFile() {
 			return null;
 		}
 	}
