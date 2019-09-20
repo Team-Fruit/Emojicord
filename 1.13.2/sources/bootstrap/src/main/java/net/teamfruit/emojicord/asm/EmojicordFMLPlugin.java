@@ -1,38 +1,38 @@
 package net.teamfruit.emojicord.asm;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.FileVisitOption;
-import java.nio.file.Files;
+import java.lang.reflect.Field;
 import java.nio.file.Path;
-import java.util.Comparator;
+import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jline.utils.InputStreamReader;
 
-import com.google.common.base.Charsets;
-import com.google.common.base.Predicates;
 import com.google.common.collect.Lists;
 
 import cpw.mods.modlauncher.api.LamdbaExceptionUtils;
-import cpw.mods.modlauncher.serviceapi.ITransformerDiscoveryService;
+import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.fml.loading.LoadingModList;
 import net.minecraftforge.fml.loading.LogMarkers;
-import net.minecraftforge.fml.loading.StringUtils;
 import net.minecraftforge.fml.loading.moddiscovery.AbstractJarFileLocator;
+import net.minecraftforge.fml.loading.moddiscovery.BackgroundScanHandler;
 import net.minecraftforge.fml.loading.moddiscovery.ModFile;
+import net.minecraftforge.fml.loading.moddiscovery.ModFile.Type;
+import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
+import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 
+// Since FML does not load this mod that implements ITransformerService, load it manually.
 public class EmojicordFMLPlugin extends AbstractJarFileLocator {
-	private static final String SUFFIX = ".jar";
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final String SUFFIX = ".jar";
 	private final Path modFolder;
 
 	public EmojicordFMLPlugin() {
@@ -45,25 +45,23 @@ public class EmojicordFMLPlugin extends AbstractJarFileLocator {
 
 	@Override
 	public List<ModFile> scanMods() {
-		LOGGER.debug(LogMarkers.SCAN, "Scanning mods dir {} for Emojicord", this.modFolder);
-		final List<Path> excluded = new ModDirTransformerSearchDiscoverer(EmojicordCorePlugin.class.getName())
-				.candidates(FMLPaths.GAMEDIR.get());
-		return excluded.stream().sorted(Comparator.comparing((path) -> {
-			return StringUtils.toLowerCase(path.getFileName().toString());
-		})).filter(p -> {
-			return StringUtils.toLowerCase(p.getFileName().toString()).endsWith(SUFFIX);
-		}).map(p -> {
-			return new ModFile(p, this);
-		}).peek(f -> {
-			this.modJars.compute(f, (mf, fs) -> {
+		try {
+			final Path path = Paths.get(Validate.notNull(getClass().getProtectionDomain().getCodeSource()).getLocation().toURI());
+			final File file = path.toFile();
+			Validate.isTrue(file.isFile()&&path.toString().endsWith(SUFFIX));
+			final ModFile modFile = new ModFile(path, this);
+			this.modJars.compute(modFile, (mf, fs) -> {
 				return createFileSystem(mf);
 			});
-		}).collect(Collectors.toList());
+			return Lists.newArrayList(modFile);
+		} catch (final Exception e) {
+			throw new RuntimeException("Error during Emojicord discovery", e);
+		}
 	}
 
 	@Override
 	public String name() {
-		return "Emojicord in mods folder";
+		return "Emojicord Locator";
 	}
 
 	@Override
@@ -75,70 +73,55 @@ public class EmojicordFMLPlugin extends AbstractJarFileLocator {
 	public void initArguments(final Map<String, ?> arguments) {
 	}
 
-	public class ModDirTransformerSearchDiscoverer implements ITransformerDiscoveryService {
-		private final String serchService;
+	public LoadingModList discoverMods() {
+		LOGGER.debug(LogMarkers.SCAN, "Trying locator {}", this);
+		final Map<Type, List<ModFile>> modFiles = scanMods().stream().peek((mf) -> {
+			LOGGER.debug(LogMarkers.SCAN, "Found mod file {} of type {} with locator {}", mf.getFileName(), mf.getType(), mf.getLocator());
+		}).collect(Collectors.groupingBy(ModFile::getType));
 
-		public ModDirTransformerSearchDiscoverer(final String serchService) {
-			this.serchService = serchService;
-		}
+		FMLLoader.getLanguageLoadingProvider().addAdditionalLanguages(modFiles.get(Type.LANGPROVIDER));
+		final List<ModFile> mods = modFiles.getOrDefault(Type.MOD, Collections.emptyList());
 
-		// Parse a single line from the given configuration file, adding the name
-		// on the line to the names list.
-		//
-		private String parseLine(String ln) {
-			if (ln==null)
-				return null;
-			final int ci = ln.indexOf('#');
-			if (ci>=0)
-				ln = ln.substring(0, ci);
-			ln = ln.trim();
-			final int n = ln.length();
-			if (n!=0) {
-				if (ln.indexOf(' ')>=0||ln.indexOf('\t')>=0)
-					return null;
-				int cp = ln.codePointAt(0);
-				if (!Character.isJavaIdentifierStart(cp))
-					return null;
-				for (int i = Character.charCount(cp); i<n; i += Character.charCount(cp)) {
-					cp = ln.codePointAt(i);
-					if (!Character.isJavaIdentifierPart(cp)&&cp!='.')
-						return null;
-				}
-				return ln;
+		for (final Iterator<ModFile> loadingModList = mods.iterator(); loadingModList.hasNext();) {
+			final ModFile mod = loadingModList.next();
+			if (!(mod.getLocator().isValid(mod)&&mod.identifyMods())) {
+				LOGGER.warn(LogMarkers.SCAN, "File {} has been ignored - it is invalid", mod.getFilePath());
+				loadingModList.remove();
 			}
-			return null;
 		}
 
-		@Override
-		public List<Path> candidates(final Path gameDirectory) {
-			final Path modsDir = gameDirectory.resolve(FMLPaths.MODSDIR.relative());
-			final List<Path> paths = Lists.newArrayList();
-			try {
-				Files.walk(modsDir, 1, new FileVisitOption[0]).forEach(p -> {
-					if (Files.isRegularFile(p)&&p.toString().endsWith(".jar"))
-						try {
-							if (LamdbaExceptionUtils.uncheck(() -> Files.size(p))!=0L)
-								try (ZipFile ioe = new ZipFile(new File(p.toUri()))) {
-									final ZipEntry entry = ioe.getEntry("META-INF/services/cpw.mods.modlauncher.api.ITransformationService");
-									if (entry!=null)
-										try (BufferedReader reader = new BufferedReader(new InputStreamReader(ioe.getInputStream(entry), Charsets.UTF_8))) {
-											if (
-												reader.lines()
-														.map(this::parseLine)
-														.filter(Predicates.notNull())
-														.anyMatch(e -> Objects.equals(e, this.serchService))
-											)
-												paths.add(p);
-										}
-								}
-						} catch (final IOException e) {
-							LogManager.getLogger().error("Zip Error when loading jar file {}", p, e);
-						}
-				});
-			} catch (IllegalStateException|IOException e) {
-				LogManager.getLogger().error("Error during early discovery", e);
-			}
-			return paths;
+		LOGGER.debug(LogMarkers.SCAN, "Found {} mod files with {} mods", (Object[]) new Supplier[] { mods::size, () -> {
+			return Integer.valueOf(mods.stream().mapToInt((mf) -> {
+				return mf.getModInfos().size();
+			}).sum());
+		} });
+
+		final LoadingModList to = FMLLoader.getLoadingModList();
+		final BackgroundScanHandler backgroundScanHandler = new BackgroundScanHandler();
+		backgroundScanHandler.setLoadingModList(to);
+
+		final Map<String, ModFileInfo> fileById = LamdbaExceptionUtils.uncheck(() -> {
+			final Field field = LoadingModList.class.getDeclaredField("fileById");
+			field.setAccessible(true);
+			@SuppressWarnings("unchecked")
+			final Map<String, ModFileInfo> object = (Map<String, ModFileInfo>) field.get(to);
+			return object;
+		});
+
+		for (final ModFile file : mods) {
+			file.identifyLanguage();
+			file.getCoreMods().stream().forEach(FMLLoader.getCoreModProvider()::addCoreMod);
+			file.getAccessTransformer().ifPresent(path -> {
+				FMLLoader.addAccessTransformer(path, file);
+			});
+			backgroundScanHandler.submitForScanning(file);
+			to.getModFiles().add((ModFileInfo) file.getModFileInfo());
+			file.getModInfos().stream().map(ModInfo.class::cast).forEach(modinfo -> {
+				to.getMods().add(modinfo);
+				fileById.put(modinfo.getModId(), modinfo.getOwningFile());
+			});
 		}
+
+		return to;
 	}
 }
