@@ -38,7 +38,7 @@ public class DescHelper {
 			return Type.getDescriptor(clazz);
 		} else if (raw instanceof String) {
 			String desc = (String) raw;
-			desc = ClassName.SourcecodeToBytecodeName(desc);
+			desc = ClassName.of(desc).getBytecodeName();
 			desc = desc.matches("L.+;") ? desc : "L"+desc+";";
 			return desc;
 		} else if (raw instanceof ClassName) {

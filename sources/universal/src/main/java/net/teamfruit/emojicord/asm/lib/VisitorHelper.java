@@ -18,10 +18,7 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
 
-import net.teamfruit.emojicord.compat.Compat.CompatFMLDeobfuscatingRemapper;
-
 public class VisitorHelper {
-
 	public static interface TransformProvider {
 		public abstract @Nonnull ClassVisitor createVisitor(@Nonnull String name, @Nonnull ClassVisitor cv) throws StopTransforming;
 	}
@@ -47,13 +44,13 @@ public class VisitorHelper {
 				final ClassLoader classLoader = ClassWriter.class.getClassLoader();
 				try {
 					try {
-						c = Class.forName(ClassName.BytecodeToSourcecodeName(type1), false, classLoader);
-						d = Class.forName(ClassName.BytecodeToSourcecodeName(type2), false, classLoader);
+						c = Class.forName(ClassName.of(type1).getName(), false, classLoader);
+						d = Class.forName(ClassName.of(type2).getName(), false, classLoader);
 					} catch (final ClassNotFoundException e) {
 						final ClassLoader launchClassLoader = getClass().getClassLoader();
 						try {
-							c = Class.forName(ClassName.BytecodeToSourcecodeName(type1), false, launchClassLoader);
-							d = Class.forName(ClassName.BytecodeToSourcecodeName(type2), false, launchClassLoader);
+							c = Class.forName(ClassName.of(type1).getName(), false, launchClassLoader);
+							d = Class.forName(ClassName.of(type2).getName(), false, launchClassLoader);
 						} catch (final ClassNotFoundException e1) {
 							throw new RuntimeException(String.format("ClassLoader: %s, LaunchClassLoader: %s", e.toString(), e1.toString()));
 						}
@@ -66,12 +63,12 @@ public class VisitorHelper {
 				if (d.isAssignableFrom(c))
 					return type2;
 				if (c.isInterface()||d.isInterface())
-					return ClassName.SourcecodeToBytecodeName("java.lang.Object");
+					return ClassName.of("java.lang.Object").getBytecodeName();
 				else {
 					do
 						c = c.getSuperclass();
 					while (!c.isAssignableFrom(d));
-					return ClassName.SourcecodeToBytecodeName(c.getName());
+					return ClassName.of(c.getName()).getBytecodeName();
 				}
 			}
 		};
@@ -99,9 +96,5 @@ public class VisitorHelper {
 	// ASM Tree API
 	public static ClassNode transform(final @Nonnull ClassNode node, final @Nonnull NodeTransformer context) {
 		return Validate.notNull(context.apply(node));
-	}
-
-	public static boolean useSrgNames() {
-		return CompatFMLDeobfuscatingRemapper.useSrgNames();
 	}
 }

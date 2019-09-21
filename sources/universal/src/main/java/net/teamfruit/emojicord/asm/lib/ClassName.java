@@ -2,8 +2,6 @@ package net.teamfruit.emojicord.asm.lib;
 
 import javax.annotation.Nonnull;
 
-import net.teamfruit.emojicord.compat.Compat.CompatFMLDeobfuscatingRemapper;
-
 public class ClassName {
 	private final @Nonnull String clsName;
 
@@ -11,24 +9,16 @@ public class ClassName {
 		return new ClassName(clsName);
 	}
 
-	public static @Nonnull ClassName fromBytecodeName(final @Nonnull String clsName) {
-		return new ClassName(BytecodeToSourcecodeName(clsName));
-	}
-
 	private ClassName(final @Nonnull String clsName) {
 		this.clsName = clsName;
 	}
 
-	public @Nonnull ClassName toMappedName() {
-		return fromBytecodeName(BytecodeToMappedName(getBytecodeName()));
-	}
-
 	public @Nonnull String getBytecodeName() {
-		return SourcecodeToBytecodeName(getName());
+		return SourcecodeToBytecodeName(this.clsName);
 	}
 
 	public @Nonnull String getName() {
-		return this.clsName;
+		return BytecodeToSourcecodeName(this.clsName);
 	}
 
 	@Override
@@ -53,21 +43,17 @@ public class ClassName {
 		return true;
 	}
 
-	public static @Nonnull String BytecodeToMappedName(final @Nonnull String clsName) {
-		return VisitorHelper.useSrgNames() ? CompatFMLDeobfuscatingRemapper.unmap(clsName) : clsName;
-	}
-
 	/**
 	 * replace {@code .} to {@code /}
 	 */
-	public static @Nonnull String SourcecodeToBytecodeName(final @Nonnull String clsName) {
+	private static @Nonnull String SourcecodeToBytecodeName(final @Nonnull String clsName) {
 		return clsName.replace('.', '/');
 	}
 
 	/**
 	 * replace {@code /} to {@code .}
 	 */
-	public static @Nonnull String BytecodeToSourcecodeName(final @Nonnull String clsName) {
+	private static @Nonnull String BytecodeToSourcecodeName(final @Nonnull String clsName) {
 		return clsName.replace('/', '.');
 	}
 }

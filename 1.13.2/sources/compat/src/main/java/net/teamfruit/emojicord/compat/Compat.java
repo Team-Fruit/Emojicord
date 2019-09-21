@@ -81,28 +81,6 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
 
 public class Compat {
-	public static class CompatFMLDeobfuscatingRemapper {
-		public static @Nonnull String mapMethodDesc(@Nonnull final String desc) {
-			return desc;
-		}
-
-		public static @Nonnull String mapFieldName(@Nonnull final String owner, @Nonnull final String name, @Nonnull final String desc) {
-			return name;
-		}
-
-		public static @Nonnull String unmap(@Nonnull final String typeName) {
-			return typeName;
-		}
-
-		public static @Nonnull String mapMethodName(@Nonnull final String owner, @Nonnull final String name, @Nonnull final String desc) {
-			return name;
-		}
-
-		public static boolean useSrgNames() {
-			return false;
-		}
-	}
-
 	public static class CompatMinecraft {
 		private final Minecraft mc;
 

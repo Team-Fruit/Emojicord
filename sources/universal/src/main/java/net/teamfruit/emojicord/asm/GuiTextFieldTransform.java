@@ -15,7 +15,7 @@ public class GuiTextFieldTransform implements NodeTransformer {
 	@Override
 	public ClassNode apply(final ClassNode node) {
 		{
-			final MethodMatcher matcher = new MethodMatcher(ClassName.fromBytecodeName(node.name), DescHelper.toDescMethod(void.class, int.class), ASMDeobfNames.GuiTextFieldDrawTextBox);
+			final MethodMatcher matcher = new MethodMatcher(ClassName.of("net.minecraft.client.gui.GuiTextField"), DescHelper.toDescMethod(void.class, int.class), ASMDeobfNames.GuiTextFieldDrawTextBox);
 			node.methods.stream().filter(matcher).forEach(method -> {
 				{
 					/*

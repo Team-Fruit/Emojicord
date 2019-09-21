@@ -12,9 +12,11 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nonnull;
 
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.FieldNode;
 
-import net.teamfruit.emojicord.compat.Compat.CompatFMLDeobfuscatingRemapper;
+import net.teamfruit.emojicord.compat.CompatFMLDeobfuscatingRemapper;
 
 public class FieldMatcher implements Predicate<FieldNode> {
 	private final @Nonnull ClassName clsName;
@@ -32,15 +34,19 @@ public class FieldMatcher implements Predicate<FieldNode> {
 			return false;
 		if (fieldName.equals(this.refname.mcpName()))
 			return true;
-		if (!VisitorHelper.useSrgNames())
+		if (CompatFMLDeobfuscatingRemapper.useMcpNames())
 			return false;
-		final String unmappedName = CompatFMLDeobfuscatingRemapper.mapFieldName(this.clsName.getBytecodeName(), fieldName, fieldDesc);
-		return unmappedName.equals(this.refname.srgName());
+		final String srgFieldName = CompatFMLDeobfuscatingRemapper.mapFieldName(CompatFMLDeobfuscatingRemapper.unmap(this.clsName.getBytecodeName()), fieldName, fieldDesc);
+		return srgFieldName.equals(this.refname.srgName());
 	}
 
 	@Override
 	public boolean test(final FieldNode node) {
 		return match(node.name, node.desc);
+	}
+
+	public Predicate<AbstractInsnNode> insnMatcher() {
+		return node -> node instanceof FieldInsnNode&&match(((FieldInsnNode) node).name, ((FieldInsnNode) node).desc);
 	}
 
 	@Override

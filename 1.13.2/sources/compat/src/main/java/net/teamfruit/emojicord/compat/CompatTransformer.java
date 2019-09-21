@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
+
 import org.objectweb.asm.tree.ClassNode;
 
 import cpw.mods.modlauncher.api.ITransformer;
@@ -11,6 +13,10 @@ import cpw.mods.modlauncher.api.ITransformerVotingContext;
 import cpw.mods.modlauncher.api.TransformerVoteResult;
 
 public abstract class CompatTransformer implements ITransformer<ClassNode> {
+	public abstract ClassNode read(@Nonnull byte[] bytes);
+
+	public abstract byte[] write(@Nonnull ClassNode node);
+
 	public abstract ClassNode transform(final ClassNode input, final CompatTransformerVotingContext context);
 
 	public abstract DeferredTransform[] deferredTransforms();

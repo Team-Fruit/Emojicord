@@ -2,7 +2,9 @@ package net.teamfruit.emojicord.asm.lib;
 
 import javax.annotation.Nonnull;
 
-import net.teamfruit.emojicord.compat.Compat.CompatFMLDeobfuscatingRemapper;
+import org.apache.commons.lang3.Validate;
+
+import net.teamfruit.emojicord.compat.CompatFMLDeobfuscatingRemapper;
 
 public class RefName {
 	private final @Nonnull String mcpName;
@@ -14,7 +16,7 @@ public class RefName {
 	}
 
 	public @Nonnull String name() {
-		return useSrgNames() ? this.srgName : this.mcpName;
+		return CompatFMLDeobfuscatingRemapper.useMcpNames() ? Validate.notEmpty(this.mcpName) : Validate.notEmpty(this.srgName);
 	}
 
 	public @Nonnull String mcpName() {
@@ -28,14 +30,6 @@ public class RefName {
 	@Override
 	public @Nonnull String toString() {
 		return String.format("[%s,%s]", this.mcpName, this.srgName);
-	}
-
-	public static boolean useMcpNames() {
-		return !useSrgNames();
-	}
-
-	public static boolean useSrgNames() {
-		return CompatFMLDeobfuscatingRemapper.useSrgNames();
 	}
 
 	public static @Nonnull RefName deobName(final @Nonnull String mcpName, final @Nonnull String srgName) {

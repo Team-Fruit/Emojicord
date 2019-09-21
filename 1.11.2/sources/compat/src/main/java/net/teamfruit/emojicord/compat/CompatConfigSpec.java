@@ -37,7 +37,7 @@ public class CompatConfigSpec {
 	}
 
 	public CompatConfiguration configure(final CompatConfiguration config) {
-		this.values.forEach(v -> v.apply(config.config));
+		this.values.forEach(v -> v.apply(config));
 		return this.config = config;
 	}
 
@@ -268,9 +268,9 @@ public class CompatConfigSpec {
 			return this.parent;
 		}
 
-		protected abstract Property applyDefine(Configuration builder);
+		protected abstract Property applyDefine(CompatConfiguration builder);
 
-		public void apply(final Configuration builder) {
+		public void apply(final CompatConfiguration builder) {
 			this.value = applyDefine(builder);
 		}
 	}
@@ -281,8 +281,8 @@ public class CompatConfigSpec {
 		}
 
 		@Override
-		protected Property applyDefine(final Configuration builder) {
-			final Property ret = builder.get(DOT_JOINER.join(this.path.subList(0, this.path.size()-1)), this.path.get(this.path.size()-1), this.defaultSupplier.get());
+		protected Property applyDefine(final CompatConfiguration builder) {
+			final Property ret = builder.config.get(DOT_JOINER.join(this.path.subList(0, this.path.size()-1)), this.path.get(this.path.size()-1), this.defaultSupplier.get());
 			this.builderContext.apply(ret);
 			return ret;
 		}
@@ -299,8 +299,8 @@ public class CompatConfigSpec {
 		}
 
 		@Override
-		protected Property applyDefine(final Configuration builder) {
-			final Property ret = builder.get(DOT_JOINER.join(this.path.subList(0, this.path.size()-1)), this.path.get(this.path.size()-1), this.defaultSupplier.get());
+		protected Property applyDefine(final CompatConfiguration builder) {
+			final Property ret = builder.config.get(DOT_JOINER.join(this.path.subList(0, this.path.size()-1)), this.path.get(this.path.size()-1), this.defaultSupplier.get());
 			this.builderContext.apply(ret);
 			return ret;
 		}
@@ -317,8 +317,8 @@ public class CompatConfigSpec {
 		}
 
 		@Override
-		protected Property applyDefine(final Configuration builder) {
-			final Property ret = builder.get(DOT_JOINER.join(this.path.subList(0, this.path.size()-1)), this.path.get(this.path.size()-1), this.defaultSupplier.get());
+		protected Property applyDefine(final CompatConfiguration builder) {
+			final Property ret = builder.config.get(DOT_JOINER.join(this.path.subList(0, this.path.size()-1)), this.path.get(this.path.size()-1), this.defaultSupplier.get());
 			this.builderContext.apply(ret);
 			return ret;
 		}
@@ -335,8 +335,8 @@ public class CompatConfigSpec {
 		}
 
 		@Override
-		protected Property applyDefine(final Configuration builder) {
-			final Property ret = builder.get(DOT_JOINER.join(this.path.subList(0, this.path.size()-1)), this.path.get(this.path.size()-1), this.defaultSupplier.get());
+		protected Property applyDefine(final CompatConfiguration builder) {
+			final Property ret = builder.config.get(DOT_JOINER.join(this.path.subList(0, this.path.size()-1)), this.path.get(this.path.size()-1), this.defaultSupplier.get());
 			this.builderContext.apply(ret);
 			return ret;
 		}

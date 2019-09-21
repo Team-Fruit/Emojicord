@@ -6,16 +6,22 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 
+import javax.annotation.Nonnull;
+
 import org.apache.commons.lang3.StringUtils;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.tree.ClassNode;
 
 import net.minecraft.launchwrapper.IClassTransformer;
-import net.teamfruit.emojicord.Log;
-import net.teamfruit.emojicord.asm.lib.VisitorHelper;
 
 public abstract class CompatTransformer implements IClassTransformer {
+	private static final Logger LOGGER = LogManager.getLogger();
+
+	public abstract ClassNode read(@Nonnull byte[] bytes);
+
+	public abstract byte[] write(@Nonnull ClassNode node);
+
 	public abstract ClassNode transform(final ClassNode input, final CompatTransformerVotingContext context);
 
 	public abstract DeferredTransform[] deferredTransforms();
@@ -59,10 +65,10 @@ public abstract class CompatTransformer implements IClassTransformer {
 					}
 					if (thistransformer>=0&&targettransformer>=0&&targettransformer>thistransformer) {
 						Collections.swap(transformers, thistransformer, targettransformer);
-						Log.log.info("The order of EmojicordTransformer and IntelliInputTransformer has been swapped while loading "+transformedName);
+						LOGGER.info("The order of EmojicordTransformer and IntelliInputTransformer has been swapped while loading "+transformedName);
 					}
 				} catch (final Exception e) {
-					Log.log.error(e.getMessage(), e);
+					LOGGER.error(e.getMessage(), e);
 				}
 			}
 		}
@@ -78,13 +84,13 @@ public abstract class CompatTransformer implements IClassTransformer {
 
 		if (Arrays.stream(targetNames()).anyMatch(transformedName::equals))
 			try {
-				ClassNode node = VisitorHelper.read(bytes, ClassReader.SKIP_FRAMES);
+				ClassNode node = read(bytes);
 
 				node = transform(node, new CompatTransformerVotingContext());
 
-				bytes = VisitorHelper.write(node, ClassWriter.COMPUTE_FRAMES);
+				bytes = write(node);
 			} catch (final Exception e) {
-				Log.log.fatal("Could not transform: ", e);
+				LOGGER.fatal("Could not transform: ", e);
 			}
 
 		return bytes;

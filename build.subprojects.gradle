@@ -88,6 +88,8 @@ sourceSets {
 		s.bootstrap.runtimeClasspath += s.base.output
 		s.compat.compileClasspath += s.base.output
 		s.compat.runtimeClasspath += s.base.output
+		s.compat.compileClasspath += s.bootstrap.output
+		s.compat.runtimeClasspath += s.bootstrap.output
 		s.universal.compileClasspath += s.base.output
 		s.universal.runtimeClasspath += s.base.output
 		s.universal.compileClasspath += s.compat.output
