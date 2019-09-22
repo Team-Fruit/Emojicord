@@ -12,6 +12,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -19,10 +20,6 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
 
 public class VisitorHelper {
-	public static interface TransformProvider {
-		public abstract @Nonnull ClassVisitor createVisitor(@Nonnull String name, @Nonnull ClassVisitor cv) throws StopTransforming;
-	}
-
 	public static ClassNode read(final @Nonnull byte[] bytes, final int readerFlags) {
 		Validate.notNull(bytes);
 		final ClassReader cr = new ClassReader(bytes);
@@ -76,25 +73,46 @@ public class VisitorHelper {
 		return cw.toByteArray();
 	}
 
-	// Memo:
+	// Note:
 	// ASM Core API to Tree API
 	// Regex: super\.visit(.*)Insn\(Opcodes\.(.+)\);
 	// Replace: insertion.add(new $1InsnNode(Opcodes.$2));
 
 	// ASM Core API
-	public static ClassNode apply(final @Nonnull ClassNode cr, final @Nonnull TransformProvider context) {
+	public static ClassNode apply(@Nonnull ClassNode node, final @Nonnull TransformProvider context) {
 		final ClassNode cw = new ClassNode(Opcodes.ASM5);
-		final ClassVisitor mod = context.createVisitor(cr.name, cw);
+		final ClassVisitor mod = context.createVisitor(node.name, cw);
 		try {
-			cr.accept(mod);
-			return cw;
+			node.accept(mod);
+			node = cw;
 		} catch (final StopTransforming e) {
-			return cr;
 		}
+		return node;
+	}
+
+	// ASM Core API
+	public static ClassNode apply(@Nonnull ClassNode node, final @Nonnull TransformProvider context, final @Nonnull Logger logger) {
+		final String name = context.getTransformClassName();
+		final String rawname = ClassName.of(node.name).getName();
+		logger.info(String.format("Patching %s (class: %s)", name, rawname));
+		node = apply(node, context);
+		logger.debug(String.format("Finished Patching %s (class: %s)", name, rawname));
+		return node;
 	}
 
 	// ASM Tree API
-	public static ClassNode transform(final @Nonnull ClassNode node, final @Nonnull NodeTransformer context) {
-		return Validate.notNull(context.apply(node));
+	public static ClassNode transform(@Nonnull ClassNode node, final @Nonnull NodeTransformer context) {
+		node = Validate.notNull(context.apply(node));
+		return node;
+	}
+
+	// ASM Tree API
+	public static ClassNode transform(@Nonnull ClassNode node, final @Nonnull NodeTransformer context, final @Nonnull Logger logger) {
+		final String name = context.getTransformClassName();
+		final String rawname = ClassName.of(node.name).getName();
+		logger.info(String.format("Patching %s (class: %s)", name, rawname));
+		node = transform(node, context);
+		logger.debug(String.format("Finished Patching %s (class: %s)", name, rawname));
+		return node;
 	}
 }

@@ -23,23 +23,21 @@ public class EmojicordTransformer extends CompatTransformer {
 		return VisitorHelper.write(node, ClassWriter.COMPUTE_FRAMES);
 	}
 
+	private final ClassMatcher guiscreenmatcher = new ClassMatcher(ClassName.of("net.minecraft.client.gui.GuiScreen"));
 	private final ClassMatcher guitextfieldmatcher = new ClassMatcher(ClassName.of("net.minecraft.client.gui.GuiTextField"));
 	private final ClassMatcher fontrenderermatcher = new ClassMatcher(ClassName.of("net.minecraft.client.gui.FontRenderer"));
 
 	@Override
 	public ClassNode transform(final ClassNode input, final CompatTransformerVotingContext context) {
 		try {
+			if (this.guiscreenmatcher.test(input))
+				return VisitorHelper.transform(input, new GuiScreenTransform(), Log.log);
+
 			if (this.guitextfieldmatcher.test(input))
-				return VisitorHelper.transform(input, node -> {
-					Log.log.info(String.format("Patching GuiTextField (class: %s)", node.name));
-					return new GuiTextFieldTransform().apply(node);
-				});
+				return VisitorHelper.transform(input, new GuiTextFieldTransform(), Log.log);
 
 			if (this.fontrenderermatcher.test(input))
-				return VisitorHelper.transform(input, node -> {
-					Log.log.info(String.format("Patching FontRenderer (class: %s)", node.name));
-					return new FontRendererTransform().apply(node);
-				});
+				return VisitorHelper.transform(input, new FontRendererTransform(), Log.log);
 		} catch (final Exception e) {
 			throw new RuntimeException("Could not transform: ", e);
 		}
@@ -57,6 +55,7 @@ public class EmojicordTransformer extends CompatTransformer {
 	}
 
 	String[] targetNames = {
+			"net.minecraft.client.gui.GuiScreen",
 			"net.minecraft.client.gui.GuiTextField",
 			"net.minecraft.client.gui.FontRenderer",
 	};
