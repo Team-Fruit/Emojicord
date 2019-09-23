@@ -7,15 +7,15 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.Lists;
 
-import net.minecraft.client.gui.GuiScreen;
 import net.teamfruit.emojicord.EmojicordConfig;
 import net.teamfruit.emojicord.Reference;
 import net.teamfruit.emojicord.compat.Compat.CompatConfigCategory;
 import net.teamfruit.emojicord.compat.Compat.CompatConfigElement;
 import net.teamfruit.emojicord.compat.Compat.CompatGuiConfig;
+import net.teamfruit.emojicord.compat.Compat.CompatScreen;
 
 public class ConfigGui extends CompatGuiConfig {
-	public ConfigGui(final @Nullable GuiScreen parent) {
+	public ConfigGui(final @Nullable CompatScreen parent) {
 		super(parent, getConfigElements(), Reference.MODID, false, false, EmojicordConfig.spec.getConfigFile().getName());
 	}
 

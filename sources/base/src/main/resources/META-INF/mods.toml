@@ -12,7 +12,7 @@ modId="emojicord"
 version="${file.jarVersion}"
 displayName="Emojicord"
 displayURL="https://www.teamfruit.net/"
-logoFile="assets/emojicord/textures/logo.png"
+logoFile="logo.png"
 authors="Kamesuta"
 description='''
 Discord Emojis in Minecraft

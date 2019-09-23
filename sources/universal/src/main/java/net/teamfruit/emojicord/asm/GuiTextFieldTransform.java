@@ -1,5 +1,7 @@
 package net.teamfruit.emojicord.asm;
 
+import java.util.function.Supplier;
+
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
@@ -8,14 +10,30 @@ import org.objectweb.asm.tree.InsnNode;
 
 import net.teamfruit.emojicord.asm.lib.ClassName;
 import net.teamfruit.emojicord.asm.lib.DescHelper;
+import net.teamfruit.emojicord.asm.lib.INodeTreeTransformer;
 import net.teamfruit.emojicord.asm.lib.MethodMatcher;
-import net.teamfruit.emojicord.asm.lib.NodeTransformer;
+import net.teamfruit.emojicord.asm.lib.VisitorHelper;
+import net.teamfruit.emojicord.compat.CompatBaseVersion;
+import net.teamfruit.emojicord.compat.CompatVersion;
 
-public class GuiTextFieldTransform implements NodeTransformer {
+public class GuiTextFieldTransform implements INodeTreeTransformer {
+	@Override
+	public ClassName getClassName() {
+		if (CompatVersion.version().older(CompatBaseVersion.V13))
+			return ClassName.of("net.minecraft.client.gui.GuiTextField");
+		else
+			return ClassName.of("net.minecraft.client.gui.widget.TextFieldWidget");
+	}
+
 	@Override
 	public ClassNode apply(final ClassNode node) {
 		{
-			final MethodMatcher matcher = new MethodMatcher(ClassName.of("net.minecraft.client.gui.GuiTextField"), DescHelper.toDescMethod(void.class, int.class), ASMDeobfNames.GuiTextFieldDrawTextBox);
+			final MethodMatcher matcher = ((Supplier<MethodMatcher>) () -> {
+				if (CompatVersion.version().older(CompatBaseVersion.V13))
+					return new MethodMatcher(getClassName(), DescHelper.toDescMethod(void.class, int.class), ASMDeobfNames.GuiTextFieldDrawTextBox);
+				else
+					return new MethodMatcher(getClassName(), DescHelper.toDescMethod(void.class, int.class, int.class, float.class), ASMDeobfNames.TextFieldWidgetRenderButton);
+			}).get();
 			node.methods.stream().filter(matcher).forEach(method -> {
 				{
 					/*
@@ -27,8 +45,8 @@ public class GuiTextFieldTransform implements NodeTransformer {
 					insertion.add(new FieldInsnNode(Opcodes.PUTSTATIC, ClassName.of("net.teamfruit.emojicord.emoji.EmojiFontRenderer").getBytecodeName(), "isTextFieldRendering", DescHelper.toDesc(boolean.class)));
 					method.instructions.insert(insertion);
 				}
-				stream(method.instructions).filter(e -> {
-					return e instanceof InsnNode&&e.getOpcode()==Opcodes.IRETURN;
+				VisitorHelper.stream(method.instructions).filter(e -> {
+					return e instanceof InsnNode&&e.getOpcode()==Opcodes.RETURN;
 				}).forEach(marker -> {
 					{
 						/*

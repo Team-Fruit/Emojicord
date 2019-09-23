@@ -231,6 +231,30 @@ minecraft {
 					}
 				}
 			}
+
+	        data {
+				taskName = "${project.name}_Data"
+
+				if (!project.isProperty('run_location'))
+					workingDirectory project.file('run')
+				else
+					workingDirectory project.file(run_location.replace('{modid}', project.modid).replace('{mcversion}', project.version_minecraft))
+
+				property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+
+	            // property 'forge.logging.console.level', 'debug'
+
+	            args '--mod', project.modid, '--all', '--output', file('src/generated/resources/')
+
+				mods {
+					create(project.modid) {
+						//sourceSets.each {
+						//	source(it)
+						//}
+						source sourceSets.bootstrap_main
+					}
+				}
+	        }
 		}
 	} else {
 		version = "${project.version_minecraft}-${project.version_forge}"

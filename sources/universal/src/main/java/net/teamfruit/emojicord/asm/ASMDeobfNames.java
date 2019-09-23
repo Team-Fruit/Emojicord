@@ -11,6 +11,7 @@ import net.teamfruit.emojicord.compat.CompatVersion;
 public class ASMDeobfNames {
 	public static final @Nonnull RefName GuiScreenSendMessage = RefName.deobName("sendChatMessage", "func_175281_b");
 	public static final @Nonnull RefName GuiTextFieldDrawTextBox = RefName.deobName("drawTextBox", "func_146194_f");
+	public static final @Nonnull RefName TextFieldWidgetRenderButton = RefName.deobName("renderButton", "renderButton");
 	public static final @Nonnull RefName FontRendererRenderStringAtPos = ((Supplier<RefName>) () -> {
 		if (CompatVersion.version().older(CompatBaseVersion.V11))
 			return RefName.deobName("renderStringAtPos", "func_78255_a");

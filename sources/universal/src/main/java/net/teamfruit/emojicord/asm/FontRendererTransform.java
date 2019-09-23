@@ -19,19 +19,25 @@ import org.objectweb.asm.tree.VarInsnNode;
 import net.teamfruit.emojicord.asm.lib.ClassName;
 import net.teamfruit.emojicord.asm.lib.DescHelper;
 import net.teamfruit.emojicord.asm.lib.MethodMatcher;
-import net.teamfruit.emojicord.asm.lib.NodeTransformer;
+import net.teamfruit.emojicord.asm.lib.INodeTreeTransformer;
+import net.teamfruit.emojicord.asm.lib.VisitorHelper;
 import net.teamfruit.emojicord.compat.CompatBaseVersion;
 import net.teamfruit.emojicord.compat.CompatVersion;
 
-public class FontRendererTransform implements NodeTransformer {
+public class FontRendererTransform implements INodeTreeTransformer {
+	@Override
+	public ClassName getClassName() {
+		return ClassName.of("net.minecraft.client.gui.FontRenderer");
+	}
+
 	@Override
 	public ClassNode apply(final ClassNode node) {
 		{
 			final MethodMatcher matcher = ((Supplier<MethodMatcher>) () -> {
 				if (CompatVersion.version().older(CompatBaseVersion.V11))
-					return new MethodMatcher(ClassName.of("net.minecraft.client.gui.FontRenderer"), DescHelper.toDescMethod(void.class, ClassName.of("java.lang.String"), boolean.class), ASMDeobfNames.FontRendererRenderStringAtPos);
+					return new MethodMatcher(getClassName(), DescHelper.toDescMethod(void.class, ClassName.of("java.lang.String"), boolean.class), ASMDeobfNames.FontRendererRenderStringAtPos);
 				else
-					return new MethodMatcher(ClassName.of("net.minecraft.client.gui.FontRenderer"), DescHelper.toDescMethod(float.class, ClassName.of("java.lang.String"), float.class, float.class, int.class, boolean.class), ASMDeobfNames.FontRendererRenderStringAtPos);
+					return new MethodMatcher(getClassName(), DescHelper.toDescMethod(float.class, ClassName.of("java.lang.String"), float.class, float.class, int.class, boolean.class), ASMDeobfNames.FontRendererRenderStringAtPos);
 			}).get();
 			node.methods.stream().filter(matcher).forEach(method -> {
 				{
@@ -48,8 +54,8 @@ public class FontRendererTransform implements NodeTransformer {
 				}
 
 				if (CompatVersion.version().older(CompatBaseVersion.V11)) {
-					final MethodMatcher matcher0 = new MethodMatcher(ClassName.of("net.minecraft.client.gui.FontRenderer"), DescHelper.toDescMethod(float.class, char.class, boolean.class), ASMDeobfNames.FontRendererRenderChar);
-					stream(method.instructions).filter(matcher0.insnMatcher()).findFirst().ifPresent(marker -> {
+					final MethodMatcher matcher0 = new MethodMatcher(getClassName(), DescHelper.toDescMethod(float.class, char.class, boolean.class), ASMDeobfNames.FontRendererRenderChar);
+					VisitorHelper.stream(method.instructions).filter(matcher0.insnMatcher()).findFirst().ifPresent(marker -> {
 						{
 							/*
 							 446  iload_3 [charIndex]
@@ -82,8 +88,8 @@ public class FontRendererTransform implements NodeTransformer {
 					});
 				} else {
 					final MethodMatcher matcher0 = new MethodMatcher(ClassName.of("net.minecraft.client.gui.fonts.Font"), DescHelper.toDescMethod(ClassName.of("net.minecraft.client.gui.fonts.IGlyph"), char.class), ASMDeobfNames.FontFindGlyph);
-					final Optional<AbstractInsnNode> marker0 = stream(method.instructions).filter(matcher0.insnMatcher()).findFirst();
-					final Optional<AbstractInsnNode> marker1 = stream(method.instructions).filter(e -> {
+					final Optional<AbstractInsnNode> marker0 = VisitorHelper.stream(method.instructions).filter(matcher0.insnMatcher()).findFirst();
+					final Optional<AbstractInsnNode> marker1 = VisitorHelper.stream(method.instructions).filter(e -> {
 						return e instanceof VarInsnNode&&e.getOpcode()==Opcodes.ASTORE&&((VarInsnNode) e).var==26;
 					}).findFirst();
 					if (marker0.isPresent()&&marker1.isPresent()) {
@@ -164,11 +170,11 @@ public class FontRendererTransform implements NodeTransformer {
 			});
 		}
 		if (CompatVersion.version().newer(CompatBaseVersion.V13)) {
-			final MethodMatcher matcher = new MethodMatcher(ClassName.of("net.minecraft.client.gui.FontRenderer"), DescHelper.toDescMethod(void.class, ClassName.of("net.minecraft.client.gui.fonts.TexturedGlyph"), boolean.class, boolean.class, float.class, float.class, float.class, ClassName.of("net.minecraft.client.renderer.BufferBuilder"), float.class, float.class, float.class, float.class), ASMDeobfNames.FontRendererRenderGlyph);
+			final MethodMatcher matcher = new MethodMatcher(getClassName(), DescHelper.toDescMethod(void.class, ClassName.of("net.minecraft.client.gui.fonts.TexturedGlyph"), boolean.class, boolean.class, float.class, float.class, float.class, ClassName.of("net.minecraft.client.renderer.BufferBuilder"), float.class, float.class, float.class, float.class), ASMDeobfNames.FontRendererRenderGlyph);
 			node.methods.stream().filter(matcher).forEach(method -> {
 				{
 					final MethodMatcher matcher0 = new MethodMatcher(ClassName.of("net.minecraft.client.gui.fonts.TexturedGlyph"), DescHelper.toDescMethod(void.class, ClassName.of("net.minecraft.client.renderer.texture.TextureManager"), boolean.class, float.class, float.class, ClassName.of("net.minecraft.client.renderer.BufferBuilder"), float.class, float.class, float.class, float.class), ASMDeobfNames.TexturedGlyphRender);
-					stream(method.instructions).filter(matcher0.insnMatcher()).skip(1).findFirst().ifPresent(marker -> {
+					VisitorHelper.stream(method.instructions).filter(matcher0.insnMatcher()).skip(1).findFirst().ifPresent(marker -> {
 						/*
 						 27  iconst_1
 						 28  putstatic net.teamfruit.emojicord.emoji.EmojiFontRenderer.shadow : boolean [351]
@@ -197,7 +203,7 @@ public class FontRendererTransform implements NodeTransformer {
 			});
 		}
 		{
-			final MethodMatcher matcher = new MethodMatcher(ClassName.of("net.minecraft.client.gui.FontRenderer"), DescHelper.toDescMethod(int.class, ClassName.of("java.lang.String")), ASMDeobfNames.FontRendererGetStringWidth);
+			final MethodMatcher matcher = new MethodMatcher(getClassName(), DescHelper.toDescMethod(int.class, ClassName.of("java.lang.String")), ASMDeobfNames.FontRendererGetStringWidth);
 			node.methods.stream().filter(matcher).forEach(method -> {
 				{
 					/*
@@ -214,7 +220,7 @@ public class FontRendererTransform implements NodeTransformer {
 
 				if (CompatVersion.version().newer(CompatBaseVersion.V13)) {
 					final MethodMatcher matcher0 = new MethodMatcher(ClassName.of("net.minecraft.client.gui.fonts.Font"), DescHelper.toDescMethod(ClassName.of("net.minecraft.client.gui.fonts.IGlyph"), char.class), ASMDeobfNames.FontFindGlyph);
-					stream(method.instructions).filter(matcher0.insnMatcher()).findFirst().ifPresent(marker0 -> {
+					VisitorHelper.stream(method.instructions).filter(matcher0.insnMatcher()).findFirst().ifPresent(marker0 -> {
 						{
 							/*
 							 *88  fload_2 [width]
@@ -288,9 +294,9 @@ public class FontRendererTransform implements NodeTransformer {
 		{
 			final MethodMatcher matcher = ((Supplier<MethodMatcher>) () -> {
 				if (CompatVersion.version().older(CompatBaseVersion.V11))
-					return new MethodMatcher(ClassName.of("net.minecraft.client.gui.FontRenderer"), DescHelper.toDescMethod(int.class, char.class), ASMDeobfNames.FontRendererGetCharWidth);
+					return new MethodMatcher(getClassName(), DescHelper.toDescMethod(int.class, char.class), ASMDeobfNames.FontRendererGetCharWidth);
 				else
-					return new MethodMatcher(ClassName.of("net.minecraft.client.gui.FontRenderer"), DescHelper.toDescMethod(float.class, char.class), ASMDeobfNames.FontRendererGetCharWidth);
+					return new MethodMatcher(getClassName(), DescHelper.toDescMethod(float.class, char.class), ASMDeobfNames.FontRendererGetCharWidth);
 			}).get();
 			node.methods.stream().filter(matcher).forEach(method -> {
 				{
@@ -320,7 +326,7 @@ public class FontRendererTransform implements NodeTransformer {
 			});
 		}
 		if (CompatVersion.version().older(CompatBaseVersion.V11)) {
-			final MethodMatcher matcher = new MethodMatcher(ClassName.of("net.minecraft.client.gui.FontRenderer"), DescHelper.toDescMethod(float.class, char.class, boolean.class), ASMDeobfNames.FontRendererRenderChar);
+			final MethodMatcher matcher = new MethodMatcher(getClassName(), DescHelper.toDescMethod(float.class, char.class, boolean.class), ASMDeobfNames.FontRendererRenderChar);
 			node.methods.stream().filter(matcher).forEach(method -> {
 				{
 					/*
@@ -348,17 +354,17 @@ public class FontRendererTransform implements NodeTransformer {
 					insertion.add(new VarInsnNode(Opcodes.ILOAD, 1));
 					insertion.add(new VarInsnNode(Opcodes.ILOAD, 2));
 					insertion.add(new VarInsnNode(Opcodes.ALOAD, 0));
-					insertion.add(new FieldInsnNode(Opcodes.GETFIELD, ClassName.of("net.minecraft.client.gui.FontRenderer").getBytecodeName(), ASMDeobfNames.FontRendererPosX.name(), DescHelper.toDesc(float.class)));
+					insertion.add(new FieldInsnNode(Opcodes.GETFIELD, getClassName().getBytecodeName(), ASMDeobfNames.FontRendererPosX.name(), DescHelper.toDesc(float.class)));
 					insertion.add(new VarInsnNode(Opcodes.ALOAD, 0));
-					insertion.add(new FieldInsnNode(Opcodes.GETFIELD, ClassName.of("net.minecraft.client.gui.FontRenderer").getBytecodeName(), ASMDeobfNames.FontRendererPosY.name(), DescHelper.toDesc(float.class)));
+					insertion.add(new FieldInsnNode(Opcodes.GETFIELD, getClassName().getBytecodeName(), ASMDeobfNames.FontRendererPosY.name(), DescHelper.toDesc(float.class)));
 					insertion.add(new VarInsnNode(Opcodes.ALOAD, 0));
-					insertion.add(new FieldInsnNode(Opcodes.GETFIELD, ClassName.of("net.minecraft.client.gui.FontRenderer").getBytecodeName(), ASMDeobfNames.FontRendererRed.name(), DescHelper.toDesc(float.class)));
+					insertion.add(new FieldInsnNode(Opcodes.GETFIELD, getClassName().getBytecodeName(), ASMDeobfNames.FontRendererRed.name(), DescHelper.toDesc(float.class)));
 					insertion.add(new VarInsnNode(Opcodes.ALOAD, 0));
-					insertion.add(new FieldInsnNode(Opcodes.GETFIELD, ClassName.of("net.minecraft.client.gui.FontRenderer").getBytecodeName(), ASMDeobfNames.FontRendererGreen.name(), DescHelper.toDesc(float.class)));
+					insertion.add(new FieldInsnNode(Opcodes.GETFIELD, getClassName().getBytecodeName(), ASMDeobfNames.FontRendererGreen.name(), DescHelper.toDesc(float.class)));
 					insertion.add(new VarInsnNode(Opcodes.ALOAD, 0));
-					insertion.add(new FieldInsnNode(Opcodes.GETFIELD, ClassName.of("net.minecraft.client.gui.FontRenderer").getBytecodeName(), ASMDeobfNames.FontRendererBlue.name(), DescHelper.toDesc(float.class)));
+					insertion.add(new FieldInsnNode(Opcodes.GETFIELD, getClassName().getBytecodeName(), ASMDeobfNames.FontRendererBlue.name(), DescHelper.toDesc(float.class)));
 					insertion.add(new VarInsnNode(Opcodes.ALOAD, 0));
-					insertion.add(new FieldInsnNode(Opcodes.GETFIELD, ClassName.of("net.minecraft.client.gui.FontRenderer").getBytecodeName(), ASMDeobfNames.FontRendererAlpha.name(), DescHelper.toDesc(float.class)));
+					insertion.add(new FieldInsnNode(Opcodes.GETFIELD, getClassName().getBytecodeName(), ASMDeobfNames.FontRendererAlpha.name(), DescHelper.toDesc(float.class)));
 					insertion.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ClassName.of("net.teamfruit.emojicord.emoji.EmojiFontRenderer").getBytecodeName(), "renderEmojiChar", DescHelper.toDescMethod(boolean.class, char.class, boolean.class, float.class, float.class, float.class, float.class, float.class, float.class), false));
 					final LabelNode label = new LabelNode();
 					insertion.add(new JumpInsnNode(Opcodes.IFEQ, label));

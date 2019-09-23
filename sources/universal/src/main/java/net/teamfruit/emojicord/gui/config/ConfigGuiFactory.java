@@ -3,8 +3,8 @@ package net.teamfruit.emojicord.gui.config;
 import javax.annotation.Nullable;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
 import net.teamfruit.emojicord.compat.Compat.CompatModGuiFactory;
+import net.teamfruit.emojicord.compat.Compat.CompatScreen;
 
 public class ConfigGuiFactory extends CompatModGuiFactory {
 	@Override
@@ -13,12 +13,12 @@ public class ConfigGuiFactory extends CompatModGuiFactory {
 	}
 
 	@Override
-	public @Nullable Class<? extends GuiScreen> mainConfigGuiClassCompat() {
+	public @Nullable Class<?> mainConfigGuiClassCompat() {
 		return ConfigGui.class;
 	}
 
 	@Override
-	public GuiScreen createConfigGuiCompat(final GuiScreen parentScreen) {
-		return new ConfigGui(parentScreen);
+	public CompatScreen createConfigGuiCompat(final CompatScreen parentScreen) {
+		return new CompatScreen(new ConfigGui(parentScreen));
 	}
 }

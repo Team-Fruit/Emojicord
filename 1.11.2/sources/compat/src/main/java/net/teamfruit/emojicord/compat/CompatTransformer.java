@@ -1,10 +1,10 @@
 package net.teamfruit.emojicord.compat;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 
@@ -26,7 +26,7 @@ public abstract class CompatTransformer implements IClassTransformer {
 
 	public abstract DeferredTransform[] deferredTransforms();
 
-	public abstract String[] targetNames();
+	public abstract Set<String> targetNames();
 
 	public static class CompatTransformerVotingContext {
 	}
@@ -82,7 +82,7 @@ public abstract class CompatTransformer implements IClassTransformer {
 		for (final DeferredTransform transform : deferredTransforms())
 			transform.transform(name, transformedName);
 
-		if (Arrays.stream(targetNames()).anyMatch(transformedName::equals))
+		if (targetNames().contains(transformedName))
 			try {
 				ClassNode node = read(bytes);
 

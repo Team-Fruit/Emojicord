@@ -6,7 +6,6 @@ import javax.annotation.Nonnull;
 
 import com.google.common.base.Strings;
 
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -16,6 +15,7 @@ import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.teamfruit.emojicord.CoreEvent;
 import net.teamfruit.emojicord.CoreInvoke;
+import net.teamfruit.emojicord.compat.Compat.CompatScreen;
 
 public class CompatEvents {
 	public static abstract class CompatHandler {
@@ -185,8 +185,8 @@ public class CompatEvents {
 				super(event);
 			}
 
-			public GuiScreen getGui() {
-				return this.event.getGui();
+			public CompatScreen getGui() {
+				return new CompatScreen(this.event.getGui());
 			}
 
 			public int getMouseX() {

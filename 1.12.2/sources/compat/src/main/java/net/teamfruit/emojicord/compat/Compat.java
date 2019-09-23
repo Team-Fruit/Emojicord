@@ -695,9 +695,25 @@ public class Compat {
 		}
 	}
 
+	public static class CompatScreen {
+		private GuiScreen screen;
+
+		public CompatScreen(final GuiScreen screen) {
+			this.screen = screen;
+		}
+
+		public CompatScreen(final CompatGuiConfig screen) {
+			this.screen = screen;
+		}
+
+		public GuiScreen getScreenObj() {
+			return this.screen;
+		}
+	}
+
 	public static class CompatGuiConfig extends GuiConfig {
-		public CompatGuiConfig(final GuiScreen parentScreen, final List<CompatConfigElement> configElements, final String modID, final boolean allRequireWorldRestart, final boolean allRequireMcRestart, final String title) {
-			super(parentScreen, CompatConfigElement.getConfigElements(configElements), modID, allRequireWorldRestart, allRequireMcRestart, GuiConfig.getAbridgedConfigPath(title));
+		public CompatGuiConfig(final CompatScreen parentScreen, final List<CompatConfigElement> configElements, final String modID, final boolean allRequireWorldRestart, final boolean allRequireMcRestart, final String title) {
+			super(parentScreen.getScreenObj(), CompatConfigElement.getConfigElements(configElements), modID, allRequireWorldRestart, allRequireMcRestart, GuiConfig.getAbridgedConfigPath(title));
 		}
 	}
 
@@ -768,14 +784,14 @@ public class Compat {
 			return mainConfigGuiClassCompat()!=null;
 		}
 
-		public abstract @Nullable Class<? extends GuiScreen> mainConfigGuiClassCompat();
+		public abstract @Nullable Class<?> mainConfigGuiClassCompat();
 
 		@Override
 		public GuiScreen createConfigGui(final GuiScreen parentScreen) {
-			return createConfigGuiCompat(parentScreen);
+			return createConfigGuiCompat(new CompatScreen(parentScreen)).screen;
 		}
 
-		public abstract GuiScreen createConfigGuiCompat(GuiScreen parentScreen);
+		public abstract CompatScreen createConfigGuiCompat(CompatScreen parentScreen);
 	}
 
 	public static class CompatCommand {
@@ -926,7 +942,6 @@ public class Compat {
 			return I18n.format(format, args);
 		}
 
-		@SuppressWarnings("deprecation")
 		public static String translateToLocal(final String text) {
 			return net.minecraft.util.text.translation.I18n.translateToLocal(text);
 		}

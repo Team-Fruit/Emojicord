@@ -8,16 +8,24 @@ import org.objectweb.asm.tree.VarInsnNode;
 
 import net.teamfruit.emojicord.asm.lib.ClassName;
 import net.teamfruit.emojicord.asm.lib.DescHelper;
+import net.teamfruit.emojicord.asm.lib.INodeTreeTransformer;
 import net.teamfruit.emojicord.asm.lib.MethodMatcher;
-import net.teamfruit.emojicord.asm.lib.NodeTransformer;
 import net.teamfruit.emojicord.compat.CompatBaseVersion;
 import net.teamfruit.emojicord.compat.CompatVersion;
 
-public class GuiScreenTransform implements NodeTransformer {
+public class GuiScreenTransform implements INodeTreeTransformer {
+	@Override
+	public ClassName getClassName() {
+		if (CompatVersion.version().older(CompatBaseVersion.V13))
+			return ClassName.of("net.minecraft.client.gui.GuiScreen");
+		else
+			return ClassName.of("net.minecraft.client.gui.screen.Screen");
+	}
+
 	@Override
 	public ClassNode apply(final ClassNode node) {
 		if (CompatVersion.version().older(CompatBaseVersion.V10)) {
-			final MethodMatcher matcher = new MethodMatcher(ClassName.of("net.minecraft.client.gui.GuiScreen"), DescHelper.toDescMethod(void.class, ClassName.of("java.lang.String"), boolean.class), ASMDeobfNames.GuiScreenSendMessage);
+			final MethodMatcher matcher = new MethodMatcher(getClassName(), DescHelper.toDescMethod(void.class, ClassName.of("java.lang.String"), boolean.class), ASMDeobfNames.GuiScreenSendMessage);
 			node.methods.stream().filter(matcher).forEach(method -> {
 				{
 					/*

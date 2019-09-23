@@ -8,6 +8,10 @@
  */
 package net.teamfruit.emojicord.asm.lib;
 
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -17,7 +21,9 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.InsnList;
 
 public class VisitorHelper {
 	public static ClassNode read(final @Nonnull byte[] bytes, final int readerFlags) {
@@ -73,13 +79,17 @@ public class VisitorHelper {
 		return cw.toByteArray();
 	}
 
+	public static <T> Stream<AbstractInsnNode> stream(final InsnList instructions) {
+		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(instructions.iterator(), 0), false);
+	}
+
 	// Note:
 	// ASM Core API to Tree API
 	// Regex: super\.visit(.*)Insn\(Opcodes\.(.+)\);
 	// Replace: insertion.add(new $1InsnNode(Opcodes.$2));
 
 	// ASM Core API
-	public static ClassNode apply(@Nonnull ClassNode node, final @Nonnull TransformProvider context) {
+	public static ClassNode apply(@Nonnull ClassNode node, final @Nonnull INodeCoreTransformer context) {
 		final ClassNode cw = new ClassNode(Opcodes.ASM5);
 		final ClassVisitor mod = context.createVisitor(node.name, cw);
 		try {
@@ -91,8 +101,8 @@ public class VisitorHelper {
 	}
 
 	// ASM Core API
-	public static ClassNode apply(@Nonnull ClassNode node, final @Nonnull TransformProvider context, final @Nonnull Logger logger) {
-		final String name = context.getTransformClassName();
+	public static ClassNode apply(@Nonnull ClassNode node, final @Nonnull INodeCoreTransformer context, final @Nonnull Logger logger) {
+		final String name = context.getSimpleName();
 		final String rawname = ClassName.of(node.name).getName();
 		logger.info(String.format("Patching %s (class: %s)", name, rawname));
 		node = apply(node, context);
@@ -101,14 +111,14 @@ public class VisitorHelper {
 	}
 
 	// ASM Tree API
-	public static ClassNode transform(@Nonnull ClassNode node, final @Nonnull NodeTransformer context) {
+	public static ClassNode transform(@Nonnull ClassNode node, final @Nonnull INodeTreeTransformer context) {
 		node = Validate.notNull(context.apply(node));
 		return node;
 	}
 
 	// ASM Tree API
-	public static ClassNode transform(@Nonnull ClassNode node, final @Nonnull NodeTransformer context, final @Nonnull Logger logger) {
-		final String name = context.getTransformClassName();
+	public static ClassNode transform(@Nonnull ClassNode node, final @Nonnull INodeTreeTransformer context, final @Nonnull Logger logger) {
+		final String name = context.getSimpleName();
 		final String rawname = ClassName.of(node.name).getName();
 		logger.info(String.format("Patching %s (class: %s)", name, rawname));
 		node = transform(node, context);

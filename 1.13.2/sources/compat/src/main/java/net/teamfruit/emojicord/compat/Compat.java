@@ -723,8 +723,25 @@ public class Compat {
 		}
 	}
 
+	public static class CompatScreen {
+		private GuiScreen screen;
+
+		public CompatScreen(final GuiScreen screen) {
+			this.screen = screen;
+		}
+
+		public CompatScreen(final CompatGuiConfig screen) {
+			this.screen = screen;
+		}
+
+		public GuiScreen getScreenObj() {
+			return this.screen;
+		}
+	}
+
 	public static class CompatGuiConfig extends GuiScreen {
-		public CompatGuiConfig(final GuiScreen parentScreen, final List<CompatConfigElement> configElements, final String modID, final boolean allRequireWorldRestart, final boolean allRequireMcRestart, final String title) {
+		public CompatGuiConfig(final CompatScreen parentScreen, final List<CompatConfigElement> configElements, final String modID, final boolean allRequireWorldRestart, final boolean allRequireMcRestart, final String title) {
+			super();
 		}
 	}
 
@@ -783,14 +800,14 @@ public class Compat {
 			return mainConfigGuiClassCompat()!=null;
 		}
 
-		public abstract @Nullable Class<? extends GuiScreen> mainConfigGuiClassCompat();
+		public abstract @Nullable Class<?> mainConfigGuiClassCompat();
 
 		@Override
 		public GuiScreen createConfigGui(final GuiScreen parentScreen) {
-			return createConfigGuiCompat(parentScreen);
+			return createConfigGuiCompat(new CompatScreen(parentScreen)).screen;
 		}
 
-		public abstract GuiScreen createConfigGuiCompat(GuiScreen parentScreen);
+		public abstract CompatScreen createConfigGuiCompat(CompatScreen parentScreen);
 	}
 
 	/*
