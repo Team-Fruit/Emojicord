@@ -28,8 +28,7 @@ import net.minecraft.client.gui.GuiNewChat;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
-import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -39,6 +38,7 @@ import net.minecraft.client.renderer.tileentity.TileEntitySignRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.resources.IResourceManager;
+import net.minecraft.client.resources.model.IBakedModel;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.command.CommandBase;
@@ -46,6 +46,8 @@ import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.event.ClickEvent;
+import net.minecraft.event.HoverEvent;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -53,26 +55,22 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.client.CPacketCustomPayload;
-import net.minecraft.network.play.client.CPacketUpdateSign;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.network.play.client.C12PacketUpdateSign;
+import net.minecraft.network.play.client.C17PacketCustomPayload;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntitySign;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.IChatComponent;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.event.ClickEvent;
-import net.minecraft.util.text.event.HoverEvent;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
-import net.minecraftforge.client.model.IModel;
 import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.common.config.Configuration;
@@ -85,6 +83,7 @@ import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
+import net.teamfruit.emojicord.CoreInvoke;
 
 public class Compat {
 	public static class CompatMinecraft {
@@ -125,7 +124,7 @@ public class Compat {
 		}
 
 		public @Nullable CompatNetHandlerPlayClient getConnection() {
-			final NetHandlerPlayClient connection = this.mc.getConnection();
+			final NetHandlerPlayClient connection = this.mc.getNetHandler();
 			return connection!=null ? new CompatNetHandlerPlayClient(connection) : null;
 		}
 
@@ -162,7 +161,7 @@ public class Compat {
 		}
 
 		public int getStringWidthWithoutFormattingCodes(final @Nullable String s) {
-			return getStringWidth(TextFormatting.getTextWithoutFormattingCodes(s));
+			return getStringWidth(EnumChatFormatting.getTextWithoutFormattingCodes(s));
 		}
 
 		public FontRenderer getFontRendererObj() {
@@ -249,7 +248,7 @@ public class Compat {
 
 	public static class CompatSoundHandler {
 		public static void playSound(final @Nonnull ResourceLocation location, final float volume) {
-			CompatMinecraft.getMinecraft().getMinecraftObj().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(new SoundEvent(location), volume));
+			CompatMinecraft.getMinecraft().getMinecraftObj().getSoundHandler().playSound(PositionedSoundRecord.create(location, volume));
 		}
 	}
 
@@ -290,11 +289,11 @@ public class Compat {
 		}
 
 		public @Nullable ItemStack getHeldItemMainhand() {
-			return this.player.getHeldItemMainhand();
+			return this.player.getCurrentEquippedItem();
 		}
 
 		public @Nullable ItemStack getHeldItemOffhand() {
-			return this.player.getHeldItemOffhand();
+			return null;
 		}
 	}
 
@@ -338,7 +337,7 @@ public class Compat {
 		}
 
 		public Material getMaterial() {
-			return this.blockstate.getMaterial();
+			return this.blockstate.getBlock().getMaterial();
 		}
 	}
 
@@ -359,12 +358,12 @@ public class Compat {
 	}
 
 	public static class CompatBlocks {
-		public static final Block STANDING_SIGN = Blocks.STANDING_SIGN;
-		public static final Block WALL_SIGN = Blocks.WALL_SIGN;
+		public static final Block STANDING_SIGN = Blocks.standing_sign;
+		public static final Block WALL_SIGN = Blocks.wall_sign;
 	}
 
 	public static class CompatItems {
-		public static final Item SIGN = Items.SIGN;
+		public static final Item SIGN = Items.sign;
 	}
 
 	public static class CompatGuiNewChat {
@@ -380,9 +379,9 @@ public class Compat {
 	public static class CompatTextComponent {
 		public static CompatTextComponent blank = fromText("");
 
-		public final ITextComponent component;
+		public final IChatComponent component;
 
-		public CompatTextComponent(final ITextComponent component) {
+		public CompatTextComponent(final IChatComponent component) {
 			this.component = component;
 		}
 
@@ -392,11 +391,11 @@ public class Compat {
 			return list;
 		}
 
-		private void getLinksFromChat0(final @Nonnull List<CompatClickEvent> list, final @Nonnull ITextComponent pchat) {
+		private void getLinksFromChat0(final @Nonnull List<CompatClickEvent> list, final @Nonnull IChatComponent pchat) {
 			final List<?> chats = pchat.getSiblings();
 			for (final Object o : chats) {
-				final ITextComponent chat = (ITextComponent) o;
-				final ClickEvent ev = chat.getStyle().getClickEvent();
+				final IChatComponent chat = (IChatComponent) o;
+				final ClickEvent ev = chat.getChatStyle().getChatClickEvent();
 				if (ev!=null&&ev.getAction()==ClickEvent.Action.OPEN_URL)
 					list.add(new CompatClickEvent(ev));
 				getLinksFromChat0(list, chat);
@@ -404,7 +403,7 @@ public class Compat {
 		}
 
 		public CompatTextComponent setChatStyle(final CompatTextStyle style) {
-			this.component.setStyle(style.style);
+			this.component.setChatStyle(style.style);
 			return this;
 		}
 
@@ -413,15 +412,15 @@ public class Compat {
 		}
 
 		public static CompatTextComponent jsonToComponent(final String json) {
-			return new CompatTextComponent(ITextComponent.Serializer.jsonToComponent(json));
+			return new CompatTextComponent(IChatComponent.Serializer.jsonToComponent(json));
 		}
 
 		public static CompatTextComponent fromText(final String text) {
-			return new CompatTextComponent(new TextComponentString(text));
+			return new CompatTextComponent(new ChatComponentText(text));
 		}
 
 		public static CompatTextComponent fromTranslation(final String text, final Object... params) {
-			return new CompatTextComponent(new TextComponentTranslation(text, params));
+			return new CompatTextComponent(new ChatComponentTranslation(text, params));
 		}
 
 		public void sendClient() {
@@ -492,9 +491,9 @@ public class Compat {
 	}
 
 	public static class CompatTextStyle {
-		public final Style style;
+		public final ChatStyle style;
 
-		public CompatTextStyle(final Style style) {
+		public CompatTextStyle(final ChatStyle style) {
 			this.style = style;
 		}
 
@@ -504,16 +503,16 @@ public class Compat {
 		}
 
 		public static CompatTextStyle create() {
-			return new CompatTextStyle(new Style());
+			return new CompatTextStyle(new ChatStyle());
 		}
 
 		public CompatTextStyle setChatHoverEvent(final CompatHoverEvent event) {
-			this.style.setHoverEvent(event.event);
+			this.style.setChatHoverEvent(event.event);
 			return this;
 		}
 
 		public CompatTextStyle setChatClickEvent(final CompatClickEvent event) {
-			this.style.setClickEvent(event.event);
+			this.style.setChatClickEvent(event.event);
 			return this;
 		}
 	}
@@ -525,32 +524,33 @@ public class Compat {
 	}
 
 	public static enum CompatTextFormatting {
-		BLACK(TextFormatting.BLACK),
-		DARK_BLUE(TextFormatting.DARK_BLUE),
-		DARK_GREEN(TextFormatting.DARK_GREEN),
-		DARK_AQUA(TextFormatting.DARK_AQUA),
-		DARK_RED(TextFormatting.DARK_RED),
-		DARK_PURPLE(TextFormatting.DARK_PURPLE),
-		GOLD(TextFormatting.GOLD),
-		GRAY(TextFormatting.GRAY),
-		DARK_GRAY(TextFormatting.DARK_GRAY),
-		BLUE(TextFormatting.BLUE),
-		GREEN(TextFormatting.GREEN),
-		AQUA(TextFormatting.AQUA),
-		RED(TextFormatting.RED),
-		LIGHT_PURPLE(TextFormatting.LIGHT_PURPLE),
-		YELLOW(TextFormatting.YELLOW),
-		WHITE(TextFormatting.WHITE),
-		OBFUSCATED(TextFormatting.OBFUSCATED),
-		BOLD(TextFormatting.BOLD),
-		STRIKETHROUGH(TextFormatting.STRIKETHROUGH),
-		UNDERLINE(TextFormatting.UNDERLINE),
-		ITALIC(TextFormatting.ITALIC),
-		RESET(TextFormatting.RESET),;
+		BLACK(EnumChatFormatting.BLACK),
+		DARK_BLUE(EnumChatFormatting.DARK_BLUE),
+		DARK_GREEN(EnumChatFormatting.DARK_GREEN),
+		DARK_AQUA(EnumChatFormatting.DARK_AQUA),
+		DARK_RED(EnumChatFormatting.DARK_RED),
+		DARK_PURPLE(EnumChatFormatting.DARK_PURPLE),
+		GOLD(EnumChatFormatting.GOLD),
+		GRAY(EnumChatFormatting.GRAY),
+		DARK_GRAY(EnumChatFormatting.DARK_GRAY),
+		BLUE(EnumChatFormatting.BLUE),
+		GREEN(EnumChatFormatting.GREEN),
+		AQUA(EnumChatFormatting.AQUA),
+		RED(EnumChatFormatting.RED),
+		LIGHT_PURPLE(EnumChatFormatting.LIGHT_PURPLE),
+		YELLOW(EnumChatFormatting.YELLOW),
+		WHITE(EnumChatFormatting.WHITE),
+		OBFUSCATED(EnumChatFormatting.OBFUSCATED),
+		BOLD(EnumChatFormatting.BOLD),
+		STRIKETHROUGH(EnumChatFormatting.STRIKETHROUGH),
+		UNDERLINE(EnumChatFormatting.UNDERLINE),
+		ITALIC(EnumChatFormatting.ITALIC),
+		RESET(EnumChatFormatting.RESET),
+		;
 
-		public final TextFormatting format;
+		public final EnumChatFormatting format;
 
-		private CompatTextFormatting(final TextFormatting format) {
+		private CompatTextFormatting(final EnumChatFormatting format) {
 			this.format = format;
 		}
 
@@ -596,7 +596,7 @@ public class Compat {
 		}
 
 		public void sendPacket(final CompatPacket packet) {
-			this.connection.sendPacket(packet.packet);
+			this.connection.addToSendQueue(packet.packet);
 		}
 	}
 
@@ -609,25 +609,25 @@ public class Compat {
 	}
 
 	public static class CompatC12PacketUpdateSign extends CompatPacket {
-		public CompatC12PacketUpdateSign(final CPacketUpdateSign packet) {
+		public CompatC12PacketUpdateSign(final C12PacketUpdateSign packet) {
 			super(packet);
 		}
 
 		public static CompatC12PacketUpdateSign create(final CompatBlockPos pos, final List<CompatTextComponent> clines) {
-			final List<ITextComponent> lines = Lists.transform(clines, input -> {
+			final List<IChatComponent> lines = Lists.transform(clines, input -> {
 				return input==null ? null : input.component;
 			});
-			return new CompatC12PacketUpdateSign(new CPacketUpdateSign(pos.pos, lines.toArray(new ITextComponent[lines.size()])));
+			return new CompatC12PacketUpdateSign(new C12PacketUpdateSign(pos.pos, lines.toArray(new IChatComponent[lines.size()])));
 		}
 	}
 
 	public static class CompatC17PacketCustomPayload extends CompatPacket {
-		public CompatC17PacketCustomPayload(final CPacketCustomPayload packet) {
+		public CompatC17PacketCustomPayload(final C17PacketCustomPayload packet) {
 			super(packet);
 		}
 
 		public static CompatC17PacketCustomPayload create(final String channel, final String data) {
-			return new CompatC17PacketCustomPayload(new CPacketCustomPayload(channel, new PacketBuffer(Unpooled.buffer()).writeString(data)));
+			return new CompatC17PacketCustomPayload(new C17PacketCustomPayload(channel, new PacketBuffer(Unpooled.buffer()).writeString(data)));
 		}
 	}
 
@@ -637,8 +637,8 @@ public class Compat {
 		}
 
 		public static void setSignText(final TileEntitySign tile, final List<CompatTextComponent> clines) {
-			final List<ITextComponent> lines = Lists.transform(clines, t -> t==null ? null : t.component);
-			final Iterator<ITextComponent> itr = lines.iterator();
+			final List<IChatComponent> lines = Lists.transform(clines, t -> t==null ? null : t.component);
+			final Iterator<IChatComponent> itr = lines.iterator();
 			for (int i = 0; i<tile.signText.length; i++)
 				tile.signText[i] = itr.hasNext() ? itr.next() : CompatTextComponent.blank.component;
 		}
@@ -684,7 +684,7 @@ public class Compat {
 	}
 
 	public static class CompatTextureUtil {
-		public static final DynamicTexture missingTexture = TextureUtil.MISSING_TEXTURE;
+		public static final DynamicTexture missingTexture = TextureUtil.missingTexture;
 
 		public static void processPixelValues(final int[] pixel, final int displayWidth, final int displayHeight) {
 			TextureUtil.processPixelValues(pixel, displayWidth, displayHeight);
@@ -779,7 +779,6 @@ public class Compat {
 			return null;
 		}
 
-		@SuppressWarnings("deprecation")
 		@Override
 		public RuntimeOptionGuiHandler getHandlerFor(final RuntimeOptionCategoryElement element) {
 			return null;
@@ -818,7 +817,7 @@ public class Compat {
 
 	public static abstract class CompatRootCommand extends CommandBase implements ICommand {
 		@Override
-		public @Nullable List<String> getTabCompletionOptions(final MinecraftServer server, final @Nullable ICommandSender sender, final @Nullable String[] args, final @Nullable BlockPos pos) {
+		public @Nullable List<String> addTabCompletionOptions(final @Nullable ICommandSender sender, final @Nullable String[] args, final @Nullable BlockPos pos) {
 			return addTabCompletionOptionCompat(sender, args);
 		}
 
@@ -846,7 +845,7 @@ public class Compat {
 		public abstract @Nonnull String getCommandUsageCompat(final @Nullable ICommandSender sender);
 
 		@Override
-		public void execute(final MinecraftServer server, final ICommandSender sender, final String[] args) throws CommandException {
+		public void processCommand(final ICommandSender sender, final String[] args) throws CommandException {
 			processCommandCompat(sender, args);
 		}
 
@@ -855,7 +854,7 @@ public class Compat {
 
 	public static abstract class CompatSubCommand implements ICommand {
 		@Override
-		public @Nullable List<String> getTabCompletionOptions(final MinecraftServer server, final @Nullable ICommandSender sender, final @Nullable String[] args, final @Nullable BlockPos pos) {
+		public @Nullable List<String> addTabCompletionOptions(final @Nullable ICommandSender sender, final @Nullable String[] args, final @Nullable BlockPos pos) {
 			return addTabCompletionOptionCompat(sender, args);
 		}
 
@@ -883,14 +882,14 @@ public class Compat {
 		public abstract @Nonnull String getCommandUsageCompat(final @Nullable ICommandSender sender);
 
 		@Override
-		public void execute(final MinecraftServer server, final ICommandSender sender, final String[] args) throws CommandException {
+		public void processCommand(final ICommandSender sender, final String[] args) throws CommandException {
 			processCommandCompat(sender, args);
 		}
 
 		public abstract void processCommandCompat(final @Nullable ICommandSender sender, final @Nullable String[] args) throws CommandException;
 
 		@Override
-		public boolean checkPermission(final MinecraftServer server, final ICommandSender sender) {
+		public boolean canCommandSenderUseCommand(final ICommandSender sender) {
 			return canCommandSenderUseCommandCompat(sender);
 		}
 
@@ -928,7 +927,8 @@ public class Compat {
 				super(updateCounterCreated, dummytext.component, lineId);
 			}
 
-			public @Nullable ITextComponent onClicked(final @Nonnull GuiNewChat chat, final int x) {
+			@CoreInvoke
+			public @Nullable IChatComponent onClicked(final @Nonnull GuiNewChat chat, final int x) {
 				final CompatTextComponent component = onClickedCompat(chat, x);
 				if (component!=null)
 					return component.component;
@@ -945,16 +945,11 @@ public class Compat {
 		}
 
 		public static String translateToLocal(final String text) {
-			return net.minecraft.util.text.translation.I18n.translateToLocal(text);
+			return StatCollector.translateToLocal(text);
 		}
 	}
 
 	public static class CompatModel {
-		public final IModel model;
-
-		public CompatModel(@Nonnull final IModel model) {
-			this.model = model;
-		}
 	}
 
 	public static class CompatBakedModel {
@@ -968,7 +963,7 @@ public class Compat {
 	public static class CompatVertex {
 		private static class CompatBaseVertexImpl implements CompatBaseVertex {
 			public static final @Nonnull Tessellator t = Tessellator.getInstance();
-			public static final @Nonnull VertexBuffer w = t.getBuffer();
+			public static final @Nonnull WorldRenderer w = t.getWorldRenderer();
 
 			public CompatBaseVertexImpl() {
 			}

@@ -142,16 +142,16 @@ public class CompatEvents {
 			}
 
 			public List<String> getLeft() {
-				return this.event.getLeft();
+				return this.event.left;
 			}
 		}
 
 		public CompatElementType getType() {
-			return CompatElementType.getType(this.event.getType());
+			return CompatElementType.getType(this.event.type);
 		}
 
 		public float getPartialTicks() {
-			return this.event.getPartialTicks();
+			return this.event.partialTicks;
 		}
 
 		public static enum CompatElementType {
@@ -186,19 +186,19 @@ public class CompatEvents {
 			}
 
 			public CompatScreen getGui() {
-				return new CompatScreen(this.event.getGui());
+				return new CompatScreen(this.event.gui);
 			}
 
 			public int getMouseX() {
-				return this.event.getMouseX();
+				return this.event.mouseX;
 			}
 
 			public int getMouseY() {
-				return this.event.getMouseY();
+				return this.event.mouseY;
 			}
 
 			public float getRenderPartialTicks() {
-				return this.event.getRenderPartialTicks();
+				return this.event.renderPartialTicks;
 			}
 
 			public static class CompatPost extends CompatDrawScreenEvent {
@@ -215,7 +215,7 @@ public class CompatEvents {
 		}
 
 		public String getModId() {
-			return this.event.getModID();
+			return this.event.modID;
 		}
 
 		public static class CompatOnConfigChangedEvent extends CompatConfigChangedEvent {

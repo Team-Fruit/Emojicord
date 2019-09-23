@@ -25,75 +25,75 @@ import net.minecraft.client.renderer.GlStateManager;
 public class OpenGL {
 	public static void glEnable(final int attrib) {
 		switch (attrib) {
-		case GL11.GL_ALPHA_TEST:
-			GlStateManager.enableAlpha();
-			break;
-		case GL11.GL_BLEND:
-			GlStateManager.enableBlend();
-			break;
-		case GL11.GL_CULL_FACE:
-			GlStateManager.enableCull();
-			break;
-		case GL11.GL_DEPTH_TEST:
-			GlStateManager.enableDepth();
-			break;
-		case GL11.GL_FOG:
-			GlStateManager.enableFog();
-			break;
-		case GL11.GL_LIGHTING:
-			GlStateManager.enableLighting();
-			break;
-		case GL11.GL_NORMALIZE:
-			GlStateManager.enableNormalize();
-			break;
-		case GL11.GL_POLYGON_OFFSET_FILL:
-			GlStateManager.enablePolygonOffset();
-			break;
-		case GL12.GL_RESCALE_NORMAL:
-			GlStateManager.enableRescaleNormal();
-			break;
-		case GL11.GL_TEXTURE_2D:
-			GlStateManager.enableTexture2D();
-			break;
-		default:
-			GL11.glEnable(attrib);
+			case GL11.GL_ALPHA_TEST:
+				GlStateManager.enableAlpha();
+				break;
+			case GL11.GL_BLEND:
+				GlStateManager.enableBlend();
+				break;
+			case GL11.GL_CULL_FACE:
+				GlStateManager.enableCull();
+				break;
+			case GL11.GL_DEPTH_TEST:
+				GlStateManager.enableDepth();
+				break;
+			case GL11.GL_FOG:
+				GlStateManager.enableFog();
+				break;
+			case GL11.GL_LIGHTING:
+				GlStateManager.enableLighting();
+				break;
+			case GL11.GL_NORMALIZE:
+				GlStateManager.enableNormalize();
+				break;
+			case GL11.GL_POLYGON_OFFSET_FILL:
+				GlStateManager.enablePolygonOffset();
+				break;
+			case GL12.GL_RESCALE_NORMAL:
+				GlStateManager.enableRescaleNormal();
+				break;
+			case GL11.GL_TEXTURE_2D:
+				GlStateManager.enableTexture2D();
+				break;
+			default:
+				GL11.glEnable(attrib);
 		}
 	}
 
 	public static void glDisable(final int attrib) {
 		switch (attrib) {
-		case GL11.GL_ALPHA_TEST:
-			GlStateManager.disableAlpha();
-			break;
-		case GL11.GL_BLEND:
-			GlStateManager.disableBlend();
-			break;
-		case GL11.GL_CULL_FACE:
-			GlStateManager.disableCull();
-			break;
-		case GL11.GL_DEPTH_TEST:
-			GlStateManager.disableDepth();
-			break;
-		case GL11.GL_FOG:
-			GlStateManager.disableFog();
-			break;
-		case GL11.GL_LIGHTING:
-			GlStateManager.disableLighting();
-			break;
-		case GL11.GL_NORMALIZE:
-			GlStateManager.disableNormalize();
-			break;
-		case GL11.GL_POLYGON_OFFSET_FILL:
-			GlStateManager.disablePolygonOffset();
-			break;
-		case GL12.GL_RESCALE_NORMAL:
-			GlStateManager.disableRescaleNormal();
-			break;
-		case GL11.GL_TEXTURE_2D:
-			GlStateManager.disableTexture2D();
-			break;
-		default:
-			GL11.glDisable(attrib);
+			case GL11.GL_ALPHA_TEST:
+				GlStateManager.disableAlpha();
+				break;
+			case GL11.GL_BLEND:
+				GlStateManager.disableBlend();
+				break;
+			case GL11.GL_CULL_FACE:
+				GlStateManager.disableCull();
+				break;
+			case GL11.GL_DEPTH_TEST:
+				GlStateManager.disableDepth();
+				break;
+			case GL11.GL_FOG:
+				GlStateManager.disableFog();
+				break;
+			case GL11.GL_LIGHTING:
+				GlStateManager.disableLighting();
+				break;
+			case GL11.GL_NORMALIZE:
+				GlStateManager.disableNormalize();
+				break;
+			case GL11.GL_POLYGON_OFFSET_FILL:
+				GlStateManager.disablePolygonOffset();
+				break;
+			case GL12.GL_RESCALE_NORMAL:
+				GlStateManager.disableRescaleNormal();
+				break;
+			case GL11.GL_TEXTURE_2D:
+				GlStateManager.disableTexture2D();
+				break;
+			default:
+				GL11.glDisable(attrib);
 		}
 	}
 
@@ -131,8 +131,10 @@ public class OpenGL {
 		// GL11.glBlendFunc(sfactor, dfactor);
 	}
 
-	public static void glBlendFuncSeparate(final int srcFactor, final int dstFactor, final int srcFactorAlpha,
-			final int dstFactorAlpha) {
+	public static void glBlendFuncSeparate(
+			final int srcFactor, final int dstFactor, final int srcFactorAlpha,
+			final int dstFactorAlpha
+	) {
 		GlStateManager.tryBlendFuncSeparate(srcFactor, dstFactor, srcFactorAlpha, dstFactorAlpha);
 		// OpenGlHelper.glBlendFunc(srcFactor, dstFactor, srcFactorAlpha, dstFactorAlpha);
 	}
@@ -149,7 +151,8 @@ public class OpenGL {
 
 	public static void glClearColor(
 			final float red, final float green, final float blue,
-			final float alpha) {
+			final float alpha
+	) {
 		GlStateManager.clearColor(red, green, blue, alpha);
 		// GL11.glClearColor(red, green, blue, alpha);
 	}
@@ -170,21 +173,21 @@ public class OpenGL {
 	}
 
 	public static void glColor4i(final int red, final int green, final int blue, final int alpha) {
-		glColor4f(red / 255f, green / 255f, blue / 255f, alpha / 255f);
+		glColor4f(red/255f, green/255f, blue/255f, alpha/255f);
 	}
 
 	public static void glColor4ub(final byte red, final byte green, final byte blue, final byte alpha) {
-		glColor4i(red & 0xff, green & 0xff, blue & 0xff, alpha & 0xff);
+		glColor4i(red&0xff, green&0xff, blue&0xff, alpha&0xff);
 		// GL11.glColor4ub(red, green, blue, alpha);
 	}
 
 	public static void glColorRGB(final int rgb) {
-		final int value = 0xff000000 | rgb;
-		glColor4i(value >> 16 & 0xff, value >> 8 & 0xff, value >> 0 & 0xff, value >> 24 & 0xff);
+		final int value = 0xff000000|rgb;
+		glColor4i(value>>16&0xff, value>>8&0xff, value>>0&0xff, value>>24&0xff);
 	}
 
 	public static void glColorRGBA(final int rgba) {
-		glColor4i(rgba >> 16 & 0xff, rgba >> 8 & 0xff, rgba >> 0 & 0xff, rgba >> 24 & 0xff);
+		glColor4i(rgba>>16&0xff, rgba>>8&0xff, rgba>>0&0xff, rgba>>24&0xff);
 	}
 
 	public static void glColor(final Color color) {
@@ -198,11 +201,11 @@ public class OpenGL {
 	private static FloatBuffer buf = GLAllocation.createDirectFloatBuffer(16);
 
 	private static int toColorCode(final int r, final int g, final int b, final int a) {
-		return (a & 0xff) << 24 | (r & 0xff) << 16 | (g & 0xff) << 8 | (b & 0xff) << 0;
+		return (a&0xff)<<24|(r&0xff)<<16|(g&0xff)<<8|(b&0xff)<<0;
 	}
 
 	private static int toColorCode(final float r, final float g, final float b, final float a) {
-		return toColorCode((int) (r * 255 + .5f), (int) (g * 255 + .5f), (int) (b * 255 + .5f), (int) (a * 255 + .5f));
+		return toColorCode((int) (r*255+.5f), (int) (g*255+.5f), (int) (b*255+.5f), (int) (a*255+.5f));
 	}
 
 	public static int glGetColorRGBA() {
@@ -232,8 +235,8 @@ public class OpenGL {
 		final float g = buf.get(1);
 		final float b = buf.get(2);
 		final float a = buf.get(3);
-		return new org.lwjgl.util.Color((int) (r * 255 + 0.5) & 0xff, (int) (g * 255 + 0.5) & 0xff,
-				(int) (b * 255 + 0.5) & 0xff, (int) (a * 255 + 0.5) & 0xff);
+		return new org.lwjgl.util.Color((int) (r*255+0.5)&0xff, (int) (g*255+0.5)&0xff,
+				(int) (b*255+0.5)&0xff, (int) (a*255+0.5)&0xff);
 	}
 
 	public static void glColorMask(final boolean red, final boolean green, final boolean blue, final boolean alpha) {
@@ -247,13 +250,7 @@ public class OpenGL {
 	}
 
 	public static void glCullFace(final int mode) {
-		// GlStateManager.cullFace(mode);
-		if (mode == GlStateManager.CullFace.BACK.mode)
-			GlStateManager.cullFace(GlStateManager.CullFace.BACK);
-		else if (mode == GlStateManager.CullFace.FRONT.mode)
-			GlStateManager.cullFace(GlStateManager.CullFace.FRONT);
-		else if (mode == GlStateManager.CullFace.FRONT_AND_BACK.mode)
-			GlStateManager.cullFace(GlStateManager.CullFace.FRONT_AND_BACK);
+		GlStateManager.cullFace(mode);
 		// GL11.glCullFace(mode);
 	}
 
@@ -292,8 +289,10 @@ public class OpenGL {
 		// GL11.glMultMatrix(m);
 	}
 
-	public static void glOrtho(final double left, final double right, final double bottom, final double top,
-			final double zNear, final double zFar) {
+	public static void glOrtho(
+			final double left, final double right, final double bottom, final double top,
+			final double zNear, final double zFar
+	) {
 		GlStateManager.ortho(left, right, bottom, top, zNear, zFar);
 		// GL11.glOrtho(left, right, bottom, top, zNear, zFar);
 	}
@@ -392,8 +391,10 @@ public class OpenGL {
 		GL11.glPushAttrib(mask);
 	}
 
-	public static void glTexImage2D(final int target, final int level, final int internalFormat, final int width,
-			final int height, final int border, final int format, final int type, final IntBuffer pixels) {
+	public static void glTexImage2D(
+			final int target, final int level, final int internalFormat, final int width,
+			final int height, final int border, final int format, final int type, final IntBuffer pixels
+	) {
 		GL11.glTexImage2D(target, level, internalFormat, width, height, border, format, type, pixels);
 	}
 
@@ -402,7 +403,7 @@ public class OpenGL {
 	}
 
 	public static void glTexCoord2f(final float sCoord, final float tCoord) {
-		GlStateManager.glTexCoord2f(sCoord, tCoord);
+		GL11.glTexCoord2f(sCoord, tCoord);
 	}
 
 	public static void glVertex2f(final float x, final float y) {
@@ -432,10 +433,10 @@ public class OpenGL {
 	private static @Nullable ContextCapabilities capabilities;
 
 	public static boolean openGl30() {
-		if (capabilities == null)
+		if (capabilities==null)
 			capabilities = GLContext.getCapabilities();
 		final ContextCapabilities cap = capabilities;
-		return cap != null && cap.OpenGL30;
+		return cap!=null&&cap.OpenGL30;
 	}
 
 	public static void glGenerateMipmap(final int target) {
@@ -443,7 +444,7 @@ public class OpenGL {
 	}
 
 	public static void glBindTexture(final int target, final int texture) {
-		if (target == GL11.GL_TEXTURE_2D)
+		if (target==GL11.GL_TEXTURE_2D)
 			GlStateManager.bindTexture(texture);
 		else
 			GL11.glBindTexture(target, texture);

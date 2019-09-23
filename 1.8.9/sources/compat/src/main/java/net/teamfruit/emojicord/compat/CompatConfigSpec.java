@@ -229,7 +229,7 @@ public class CompatConfigSpec {
 
 		public void apply(final Property builder) {
 			if (this.comment!=null)
-				builder.setComment(DOT_JOINER.join(this.comment));
+				builder.comment = DOT_JOINER.join(this.comment);
 			if (this.langKey!=null)
 				builder.setLanguageKey(this.langKey);
 			if (this.worldRestart)
