@@ -18,15 +18,17 @@ import net.teamfruit.emojicord.compat.CompatFMLDeobfuscatingRemapper;
 
 public class ClassMatcher implements Predicate<ClassNode> {
 	private final @Nonnull ClassName clsName;
+	private final @Nonnull String mappedClassName;
 	private final @Nonnull String unmappedClassName;
 
 	public ClassMatcher(final @Nonnull ClassName clsName) {
 		this.clsName = clsName;
-		this.unmappedClassName = CompatFMLDeobfuscatingRemapper.unmap(this.clsName.getBytecodeName());
+		this.mappedClassName = this.clsName.getBytecodeName();
+		this.unmappedClassName = CompatFMLDeobfuscatingRemapper.unmap(this.mappedClassName);
 	}
 
 	public boolean match(final @Nonnull String className) {
-		return this.unmappedClassName.equals(className);
+		return this.unmappedClassName.equals(className)||this.mappedClassName.equals(className);
 	}
 
 	@Override
@@ -36,6 +38,6 @@ public class ClassMatcher implements Predicate<ClassNode> {
 
 	@Override
 	public @Nonnull String toString() {
-		return String.format("Class Matcher: %s", this.clsName.getBytecodeName());
+		return String.format("Class Matcher: %s", this.mappedClassName);
 	}
 }
