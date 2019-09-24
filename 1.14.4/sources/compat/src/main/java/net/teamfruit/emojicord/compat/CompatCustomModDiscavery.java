@@ -1,4 +1,4 @@
-package net.teamfruit.emojicord.asm;
+package net.teamfruit.emojicord.compat;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -12,8 +12,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.Validate;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import com.google.common.collect.Lists;
 
@@ -29,18 +27,18 @@ import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import net.minecraftforge.forgespi.locating.IModFile;
 import net.minecraftforge.forgespi.locating.IModFile.Type;
+import net.teamfruit.emojicord.Log;
 
 // Since FML does not load this mod that implements ITransformerService, load it manually.
-public class EmojicordFMLPlugin extends AbstractJarFileLocator {
-	private static final Logger LOGGER = LogManager.getLogger();
+public class CompatCustomModDiscavery extends AbstractJarFileLocator {
 	private static final String SUFFIX = ".jar";
 	private final Path modFolder;
 
-	public EmojicordFMLPlugin() {
+	public CompatCustomModDiscavery() {
 		this(FMLPaths.MODSDIR.get());
 	}
 
-	EmojicordFMLPlugin(final Path modFolder) {
+	CompatCustomModDiscavery(final Path modFolder) {
 		this.modFolder = modFolder;
 	}
 
@@ -75,9 +73,9 @@ public class EmojicordFMLPlugin extends AbstractJarFileLocator {
 	}
 
 	public LoadingModList discoverMods() {
-		LOGGER.debug(LogMarkers.SCAN, "Trying locator {}", this);
+		Log.log.debug(LogMarkers.SCAN, "Trying locator {}", this);
 		final Map<Type, List<ModFile>> modFiles = scanMods().stream().map(ModFile.class::cast).peek((mf) -> {
-			LOGGER.debug(LogMarkers.SCAN, "Found mod file {} of type {} with locator {}", mf.getFileName(), mf.getType(), mf.getLocator());
+			Log.log.debug(LogMarkers.SCAN, "Found mod file {} of type {} with locator {}", mf.getFileName(), mf.getType(), mf.getLocator());
 		}).collect(Collectors.groupingBy(IModFile::getType));
 
 		FMLLoader.getLanguageLoadingProvider().addAdditionalLanguages(modFiles.get(Type.LANGPROVIDER));
@@ -86,12 +84,12 @@ public class EmojicordFMLPlugin extends AbstractJarFileLocator {
 		for (final Iterator<ModFile> loadingModList = mods.iterator(); loadingModList.hasNext();) {
 			final ModFile mod = loadingModList.next();
 			if (!(mod.getLocator().isValid(mod)&&mod.identifyMods())) {
-				LOGGER.warn(LogMarkers.SCAN, "File {} has been ignored - it is invalid", mod.getFilePath());
+				Log.log.warn(LogMarkers.SCAN, "File {} has been ignored - it is invalid", mod.getFilePath());
 				loadingModList.remove();
 			}
 		}
 
-		LOGGER.debug(LogMarkers.SCAN, "Found {} mod files with {} mods", (Object[]) new Supplier[] { mods::size, () -> {
+		Log.log.debug(LogMarkers.SCAN, "Found {} mod files with {} mods", (Object[]) new Supplier[] { mods::size, () -> {
 			return Integer.valueOf(mods.stream().mapToInt((mf) -> {
 				return mf.getModInfos().size();
 			}).sum());

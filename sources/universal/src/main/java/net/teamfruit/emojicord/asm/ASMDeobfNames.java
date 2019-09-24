@@ -21,7 +21,12 @@ public class ASMDeobfNames {
 	}).get();
 	public static final @Nonnull RefName FontRendererRenderChar = RefName.deobName("renderChar", "func_181559_a");
 	public static final @Nonnull RefName FontRendererRenderCharAtPos = RefName.deobName("renderCharAtPos", "func_78278_a");
-	public static final @Nonnull RefName FontRendererRenderGlyph = RefName.deobName("func_212452_a", "func_212452_a");
+	public static final @Nonnull RefName FontRendererRenderGlyph = ((Supplier<RefName>) () -> {
+		if (CompatVersion.version().older(CompatBaseVersion.V13))
+			return RefName.deobName("func_212452_a", "func_212452_a");
+		else
+			return RefName.deobName("renderGlyph", "func_212452_a");
+	}).get();
 	public static final @Nonnull RefName FontRendererGetStringWidth = RefName.deobName("getStringWidth", "func_78256_a");
 	public static final @Nonnull RefName FontRendererGetCharWidth = ((Supplier<RefName>) () -> {
 		if (CompatVersion.version().older(CompatBaseVersion.V11))

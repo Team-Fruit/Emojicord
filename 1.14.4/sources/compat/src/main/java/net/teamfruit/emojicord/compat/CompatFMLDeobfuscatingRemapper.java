@@ -2,7 +2,7 @@ package net.teamfruit.emojicord.compat;
 
 import javax.annotation.Nonnull;
 
-import net.teamfruit.emojicord.asm.EmojicordCorePlugin;
+import net.teamfruit.emojicord.asm.EmojicordCoreService;
 
 public class CompatFMLDeobfuscatingRemapper {
 	public static @Nonnull String mapMethodDesc(@Nonnull final String desc) {
@@ -22,6 +22,6 @@ public class CompatFMLDeobfuscatingRemapper {
 	}
 
 	public static boolean useMcpNames() {
-		return EmojicordCorePlugin.Srg2Mcp!=null;
+		return EmojicordCoreService.Srg2Mcp!=null;
 	}
 }
