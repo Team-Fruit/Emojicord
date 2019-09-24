@@ -8,6 +8,7 @@ import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 
+import net.teamfruit.emojicord.asm.lib.ASMValidate;
 import net.teamfruit.emojicord.asm.lib.ClassName;
 import net.teamfruit.emojicord.asm.lib.DescHelper;
 import net.teamfruit.emojicord.asm.lib.INodeTreeTransformer;
@@ -27,6 +28,10 @@ public class GuiTextFieldTransform implements INodeTreeTransformer {
 
 	@Override
 	public ClassNode apply(final ClassNode node) {
+		final ASMValidate validator = ASMValidate.create(getSimpleName());
+		validator.test("drawTextBox.begin");
+		validator.tests("drawTextBox.return", 2);
+
 		{
 			final MethodMatcher matcher = ((Supplier<MethodMatcher>) () -> {
 				if (CompatVersion.version().older(CompatBaseVersion.V13))
@@ -44,6 +49,7 @@ public class GuiTextFieldTransform implements INodeTreeTransformer {
 					insertion.add(new InsnNode(Opcodes.ICONST_1));
 					insertion.add(new FieldInsnNode(Opcodes.PUTSTATIC, ClassName.of("net.teamfruit.emojicord.emoji.EmojiFontRenderer").getBytecodeName(), "isTextFieldRendering", DescHelper.toDesc(boolean.class)));
 					method.instructions.insert(insertion);
+					validator.check("drawTextBox.begin");
 				}
 				VisitorHelper.stream(method.instructions).filter(e -> {
 					return e instanceof InsnNode&&e.getOpcode()==Opcodes.RETURN;
@@ -57,10 +63,13 @@ public class GuiTextFieldTransform implements INodeTreeTransformer {
 						insertion.add(new InsnNode(Opcodes.ICONST_0));
 						insertion.add(new FieldInsnNode(Opcodes.PUTSTATIC, ClassName.of("net.teamfruit.emojicord.emoji.EmojiFontRenderer").getBytecodeName(), "isTextFieldRendering", DescHelper.toDesc(boolean.class)));
 						method.instructions.insertBefore(marker, insertion);
+						validator.check("drawTextBox.return");
 					}
 				});
 			});
 		}
+
+		validator.validate();
 		return node;
 	}
 }

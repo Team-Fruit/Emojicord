@@ -16,10 +16,11 @@ import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
+import net.teamfruit.emojicord.asm.lib.ASMValidate;
 import net.teamfruit.emojicord.asm.lib.ClassName;
 import net.teamfruit.emojicord.asm.lib.DescHelper;
-import net.teamfruit.emojicord.asm.lib.MethodMatcher;
 import net.teamfruit.emojicord.asm.lib.INodeTreeTransformer;
+import net.teamfruit.emojicord.asm.lib.MethodMatcher;
 import net.teamfruit.emojicord.asm.lib.VisitorHelper;
 import net.teamfruit.emojicord.compat.CompatBaseVersion;
 import net.teamfruit.emojicord.compat.CompatVersion;
@@ -32,6 +33,15 @@ public class FontRendererTransform implements INodeTreeTransformer {
 
 	@Override
 	public ClassNode apply(final ClassNode node) {
+		final ASMValidate validator = ASMValidate.create(getSimpleName());
+		validator.test("renderStringAtPos.updateEmojiContext");
+		validator.test("renderStringAtPos.emoji");
+		validator.test("renderGlyph.render", CompatVersion.version().newer(CompatBaseVersion.V13));
+		validator.test("getStringWidth.updateEmojiContext");
+		validator.test("getStringWidth.findGlyph", CompatVersion.version().newer(CompatBaseVersion.V13));
+		validator.test("getCharWidth.width");
+		validator.test("renderChar", CompatVersion.version().older(CompatBaseVersion.V11));
+
 		{
 			final MethodMatcher matcher = ((Supplier<MethodMatcher>) () -> {
 				if (CompatVersion.version().older(CompatBaseVersion.V11))
@@ -51,10 +61,16 @@ public class FontRendererTransform implements INodeTreeTransformer {
 					insertion.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ClassName.of("net.teamfruit.emojicord.emoji.EmojiFontRenderer").getBytecodeName(), "updateEmojiContext", DescHelper.toDescMethod(ClassName.of("java.lang.String"), ClassName.of("java.lang.String")), false));
 					insertion.add(new VarInsnNode(Opcodes.ASTORE, 1));
 					method.instructions.insert(insertion);
+					validator.check("renderStringAtPos.updateEmojiContext");
 				}
 
 				if (CompatVersion.version().older(CompatBaseVersion.V11)) {
-					final MethodMatcher matcher0 = new MethodMatcher(getClassName(), DescHelper.toDescMethod(float.class, char.class, boolean.class), ASMDeobfNames.FontRendererRenderChar);
+					final MethodMatcher matcher0 = ((Supplier<MethodMatcher>) () -> {
+						if (CompatVersion.version().older(CompatBaseVersion.V7))
+							return new MethodMatcher(getClassName(), DescHelper.toDescMethod(float.class, int.class, char.class, boolean.class), ASMDeobfNames.FontRendererRenderCharAtPos);
+						else
+							return new MethodMatcher(getClassName(), DescHelper.toDescMethod(float.class, char.class, boolean.class), ASMDeobfNames.FontRendererRenderChar);
+					}).get();
 					VisitorHelper.stream(method.instructions).filter(matcher0.insnMatcher()).findFirst().ifPresent(marker -> {
 						{
 							/*
@@ -62,7 +78,7 @@ public class FontRendererTransform implements INodeTreeTransformer {
 							 447  putstatic net.teamfruit.emojicord.emoji.EmojiFontRenderer.index : int [181]
 							 450  iload_2 [shadow]
 							 451  putstatic net.teamfruit.emojicord.emoji.EmojiFontRenderer.shadow : boolean [183]
-							
+
 							 466  iconst_0
 							 467  putstatic net.teamfruit.emojicord.emoji.EmojiFontRenderer.shadow : boolean [183]
 							*/
@@ -84,6 +100,7 @@ public class FontRendererTransform implements INodeTreeTransformer {
 
 								method.instructions.insert(marker, insertion);
 							}
+							validator.check("renderStringAtPos.emoji");
 						}
 					});
 				} else {
@@ -98,7 +115,7 @@ public class FontRendererTransform implements INodeTreeTransformer {
 						 369  iload 23 [index]
 						 371  invokestatic net.teamfruit.emojicord.emoji.EmojiFontRenderer.getEmojiGlyph(char, int) : net.teamfruit.emojicord.emoji.EmojiFontRenderer$EmojiGlyph [208]
 						 374  astore 27 [emojiGlyph]
-						
+
 						 376  aload 27 [emojiGlyph]
 						 378  ifnull 392
 						 381  aload 27 [emojiGlyph]
@@ -106,7 +123,7 @@ public class FontRendererTransform implements INodeTreeTransformer {
 						 385  aload 27 [emojiGlyph]
 						 387  astore 26 [texturedglyph]
 						 389  goto 438
-						
+
 						 392  aload_0 [this]
 						 393  getfield net.minecraft.client.gui.FontRenderer.font : net.minecraft.client.gui.fonts.Font [45]
 						 396  iload 24 [character]
@@ -127,7 +144,7 @@ public class FontRendererTransform implements INodeTreeTransformer {
 						 431  iload 24 [character]
 						 433  invokevirtual net.minecraft.client.gui.fonts.Font.getGlyph(char) : net.minecraft.client.gui.fonts.TexturedGlyph [222]
 						 436  astore 26 [texturedglyph]
-						
+
 						 438 -
 						*/
 						final LabelNode label0 = new LabelNode();
@@ -165,6 +182,7 @@ public class FontRendererTransform implements INodeTreeTransformer {
 
 							method.instructions.insert(marker3, insertion);
 						}
+						validator.check("renderStringAtPos.emoji");
 					}
 				}
 			});
@@ -178,7 +196,7 @@ public class FontRendererTransform implements INodeTreeTransformer {
 						/*
 						 27  iconst_1
 						 28  putstatic net.teamfruit.emojicord.emoji.EmojiFontRenderer.shadow : boolean [351]
-						
+
 						 57  iconst_0
 						 58  putstatic net.teamfruit.emojicord.emoji.EmojiFontRenderer.shadow : boolean [351]
 						*/
@@ -198,6 +216,7 @@ public class FontRendererTransform implements INodeTreeTransformer {
 
 							method.instructions.insert(marker, insertion);
 						}
+						validator.check("renderGlyph.render");
 					});
 				}
 			});
@@ -216,6 +235,7 @@ public class FontRendererTransform implements INodeTreeTransformer {
 					insertion.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ClassName.of("net.teamfruit.emojicord.emoji.EmojiFontRenderer").getBytecodeName(), "updateEmojiContext", DescHelper.toDescMethod(ClassName.of("java.lang.String"), ClassName.of("java.lang.String")), false));
 					insertion.add(new VarInsnNode(Opcodes.ASTORE, 1));
 					method.instructions.insert(insertion);
+					validator.check("getStringWidth.updateEmojiContext");
 				}
 
 				if (CompatVersion.version().newer(CompatBaseVersion.V13)) {
@@ -224,7 +244,7 @@ public class FontRendererTransform implements INodeTreeTransformer {
 						{
 							/*
 							 *88  fload_2 [width]
-							
+
 							  89  aload_0 [this]
 							  90  getfield net.minecraft.client.gui.FontRenderer.font : net.minecraft.client.gui.fonts.Font [45]
 							  93  iload 5 [character]
@@ -233,9 +253,9 @@ public class FontRendererTransform implements INodeTreeTransformer {
 							  99  invokeinterface net.minecraft.client.gui.fonts.IGlyph.getAdvance(boolean) : float [254] [nargs: 2]
 							 104  fadd
 							 105  fstore_2 [width]
-							
+
 							  ↓
-							
+
 							  88  iload 5 [character]
 							  90  iload 4 [index]
 							  92  invokestatic net.teamfruit.emojicord.emoji.EmojiFontRenderer.getEmojiGlyph(char, int) : net.teamfruit.emojicord.emoji.EmojiFontRenderer$EmojiGlyph [208]
@@ -245,7 +265,7 @@ public class FontRendererTransform implements INodeTreeTransformer {
 							 100  ifnull 108
 							 103  aload 6 [emojiGlyph]
 							 105  goto 117
-							
+
 							 108  aload_0 [this]
 							 109  getfield net.minecraft.client.gui.FontRenderer.font : net.minecraft.client.gui.fonts.Font [45]
 							 112  iload 5 [character]
@@ -286,6 +306,7 @@ public class FontRendererTransform implements INodeTreeTransformer {
 
 								method.instructions.insert(marker0, insertion);
 							}
+							validator.check("getStringWidth.findGlyph");
 						}
 					});
 				}
@@ -322,11 +343,17 @@ public class FontRendererTransform implements INodeTreeTransformer {
 					}
 					insertion.add(label);
 					method.instructions.insert(insertion);
+					validator.check("getCharWidth.width");
 				}
 			});
 		}
 		if (CompatVersion.version().older(CompatBaseVersion.V11)) {
-			final MethodMatcher matcher = new MethodMatcher(getClassName(), DescHelper.toDescMethod(float.class, char.class, boolean.class), ASMDeobfNames.FontRendererRenderChar);
+			final MethodMatcher matcher = ((Supplier<MethodMatcher>) () -> {
+				if (CompatVersion.version().older(CompatBaseVersion.V7))
+					return new MethodMatcher(getClassName(), DescHelper.toDescMethod(float.class, int.class, char.class, boolean.class), ASMDeobfNames.FontRendererRenderCharAtPos);
+				else
+					return new MethodMatcher(getClassName(), DescHelper.toDescMethod(float.class, char.class, boolean.class), ASMDeobfNames.FontRendererRenderChar);
+			}).get();
 			node.methods.stream().filter(matcher).forEach(method -> {
 				{
 					/*
@@ -351,8 +378,13 @@ public class FontRendererTransform implements INodeTreeTransformer {
 					12  -
 					*/
 					final InsnList insertion = new InsnList();
-					insertion.add(new VarInsnNode(Opcodes.ILOAD, 1));
-					insertion.add(new VarInsnNode(Opcodes.ILOAD, 2));
+					if (CompatVersion.version().older(CompatBaseVersion.V7)) {
+						insertion.add(new VarInsnNode(Opcodes.ILOAD, 2));
+						insertion.add(new VarInsnNode(Opcodes.ILOAD, 3));
+					} else {
+						insertion.add(new VarInsnNode(Opcodes.ILOAD, 1));
+						insertion.add(new VarInsnNode(Opcodes.ILOAD, 2));
+					}
 					insertion.add(new VarInsnNode(Opcodes.ALOAD, 0));
 					insertion.add(new FieldInsnNode(Opcodes.GETFIELD, getClassName().getBytecodeName(), ASMDeobfNames.FontRendererPosX.name(), DescHelper.toDesc(float.class)));
 					insertion.add(new VarInsnNode(Opcodes.ALOAD, 0));
@@ -372,9 +404,12 @@ public class FontRendererTransform implements INodeTreeTransformer {
 					insertion.add(new InsnNode(Opcodes.FRETURN));
 					insertion.add(label);
 					method.instructions.insert(insertion);
+					validator.check("renderChar");
 				}
 			});
 		}
+
+		validator.validate();
 		return node;
 	}
 }

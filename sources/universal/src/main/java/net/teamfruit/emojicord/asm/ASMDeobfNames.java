@@ -9,7 +9,8 @@ import net.teamfruit.emojicord.compat.CompatBaseVersion;
 import net.teamfruit.emojicord.compat.CompatVersion;
 
 public class ASMDeobfNames {
-	public static final @Nonnull RefName GuiScreenSendMessage = RefName.deobName("sendChatMessage", "func_175281_b");
+	public static final @Nonnull RefName GuiScreenSendChatMessage = RefName.deobName("sendChatMessage", "func_175281_b");
+	public static final @Nonnull RefName GuiChatSendChatMessage = RefName.deobName("func_146403_a", "func_146403_a");
 	public static final @Nonnull RefName GuiTextFieldDrawTextBox = RefName.deobName("drawTextBox", "func_146194_f");
 	public static final @Nonnull RefName TextFieldWidgetRenderButton = RefName.deobName("renderButton", "renderButton");
 	public static final @Nonnull RefName FontRendererRenderStringAtPos = ((Supplier<RefName>) () -> {
@@ -19,6 +20,7 @@ public class ASMDeobfNames {
 			return RefName.deobName("renderStringAtPos", "func_211843_b");
 	}).get();
 	public static final @Nonnull RefName FontRendererRenderChar = RefName.deobName("renderChar", "func_181559_a");
+	public static final @Nonnull RefName FontRendererRenderCharAtPos = RefName.deobName("renderCharAtPos", "func_78278_a");
 	public static final @Nonnull RefName FontRendererRenderGlyph = RefName.deobName("func_212452_a", "func_212452_a");
 	public static final @Nonnull RefName FontRendererGetStringWidth = RefName.deobName("getStringWidth", "func_78256_a");
 	public static final @Nonnull RefName FontRendererGetCharWidth = ((Supplier<RefName>) () -> {
