@@ -90,7 +90,7 @@ public class ASMValidate {
 			if (this.cases.size()>0)
 				throw new IllegalStateException(String.format("ASM Assertion Error in %s: Not enough checkpoints: %s", this.testName,
 						this.cases.stream().collect(Collectors.groupingBy(e -> e, Collectors.counting())).entrySet()
-								.stream().map(e -> (e.getValue()==1 ? e.getKey() : String.format("%s(%ld)", e.getKey(), e.getValue())))
+								.stream().map(e -> (e.getValue()==1 ? e.getKey() : String.format("%s(%d)", e.getKey(), e.getValue())))
 								.collect(Collectors.joining(", "))));
 			Log.log.info("ASM Validator Passed: "+this.testName);
 		}

@@ -12,7 +12,12 @@ public class ASMDeobfNames {
 	public static final @Nonnull RefName GuiScreenSendChatMessage = RefName.deobName("sendChatMessage", "func_175281_b");
 	public static final @Nonnull RefName GuiChatSendChatMessage = RefName.deobName("func_146403_a", "func_146403_a");
 	public static final @Nonnull RefName GuiTextFieldDrawTextBox = RefName.deobName("drawTextBox", "func_146194_f");
-	public static final @Nonnull RefName TextFieldWidgetRenderButton = RefName.deobName("renderButton", "renderButton");
+	public static final @Nonnull RefName GuiTextFieldDrawTextField = ((Supplier<RefName>) () -> {
+		if (CompatVersion.version().older(CompatBaseVersion.V13))
+			return RefName.deobName("drawTextField", "func_195608_a");
+		else
+			return RefName.deobName("renderButton", "renderButton");
+	}).get();
 	public static final @Nonnull RefName FontRendererRenderStringAtPos = ((Supplier<RefName>) () -> {
 		if (CompatVersion.version().older(CompatBaseVersion.V11))
 			return RefName.deobName("renderStringAtPos", "func_78255_a");

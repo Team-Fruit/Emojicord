@@ -30,14 +30,15 @@ public class GuiTextFieldTransform implements INodeTreeTransformer {
 	public ClassNode apply(final ClassNode node) {
 		final ASMValidate validator = ASMValidate.create(getSimpleName());
 		validator.test("drawTextBox.begin");
-		validator.tests("drawTextBox.return", 2);
+		validator.test("drawTextBox.return", CompatVersion.version().older(CompatBaseVersion.V11));
+		validator.test("drawTextBox.return");
 
 		{
 			final MethodMatcher matcher = ((Supplier<MethodMatcher>) () -> {
-				if (CompatVersion.version().older(CompatBaseVersion.V13))
+				if (CompatVersion.version().older(CompatBaseVersion.V11))
 					return new MethodMatcher(getClassName(), DescHelper.toDescMethod(void.class, int.class), ASMDeobfNames.GuiTextFieldDrawTextBox);
 				else
-					return new MethodMatcher(getClassName(), DescHelper.toDescMethod(void.class, int.class, int.class, float.class), ASMDeobfNames.TextFieldWidgetRenderButton);
+					return new MethodMatcher(getClassName(), DescHelper.toDescMethod(void.class, int.class, int.class, float.class), ASMDeobfNames.GuiTextFieldDrawTextField);
 			}).get();
 			node.methods.stream().filter(matcher).forEach(method -> {
 				{
