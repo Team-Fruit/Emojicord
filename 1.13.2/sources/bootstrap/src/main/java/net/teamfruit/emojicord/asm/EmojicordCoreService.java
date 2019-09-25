@@ -13,10 +13,12 @@ import cpw.mods.modlauncher.api.ITransformationService;
 import cpw.mods.modlauncher.api.ITransformer;
 import cpw.mods.modlauncher.api.IncompatibleEnvironmentException;
 import net.teamfruit.emojicord.Reference;
+import net.teamfruit.emojicord.compat.CompatBaseCustomModDiscovery;
 
 public class EmojicordCoreService implements ITransformationService {
 	public static @Nullable BiFunction<Domain, String, String> Srg2Mcp;
 	public static Set<String> TransformerServices;
+	private CompatBaseCustomModDiscovery discovery;
 
 	@Override
 	public void onLoad(final IEnvironment env, final Set<String> otherServices) throws IncompatibleEnvironmentException {
@@ -25,20 +27,22 @@ public class EmojicordCoreService implements ITransformationService {
 
 	@Override
 	public void initialize(final IEnvironment environment) {
+		try {
+			final Class<?> discoveryClass = Class.forName(Reference.CUSTOM_MOD_DISCOVERY);
+			this.discovery = (CompatBaseCustomModDiscovery) discoveryClass.newInstance();
+		} catch (final ReflectiveOperationException e) {
+			throw new RuntimeException("Failed to load transformer", e);
+		}
+		final String file = getClass().getProtectionDomain().getCodeSource().getLocation().getFile();
+		if (file.endsWith(".jar"))
+			this.discovery.registerModNameList(Arrays.asList(file));
 	}
 
 	@Override
 	public void beginScanning(final IEnvironment environment) {
 		Srg2Mcp = environment.findNameMapping("srg").orElse(null);
 		// Load mod manually when product environment.
-		if (Srg2Mcp==null)
-			try {
-				final Class<?> discoveryClass = Class.forName(Reference.CUSTOM_MOD_DISCOVERY);
-				final Object discovery = discoveryClass.newInstance();
-				discoveryClass.getMethod("discoverMods").invoke(discovery);
-			} catch (final ReflectiveOperationException e) {
-				throw new RuntimeException("Failed to load transformer", e);
-			}
+		this.discovery.discoverMods();
 	}
 
 	@Override

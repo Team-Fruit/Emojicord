@@ -23,6 +23,7 @@ public class EmojicordCorePlugin implements net.minecraftforge.fml.relauncher.IF
 
 	@Override
 	public @Nullable String[] getASMTransformerClass() {
+		UniversalVersionerInjector.inject();
 		return new String[] {
 				Reference.TRANSFORMER
 		};

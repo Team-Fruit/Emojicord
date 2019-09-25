@@ -2,16 +2,14 @@ package net.teamfruit.emojicord.compat;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.Validate;
 
 import com.google.common.collect.Lists;
 
@@ -29,9 +27,9 @@ import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import net.teamfruit.emojicord.Log;
 
 // Since FML does not load this mod that implements ITransformerService, load it manually.
-public class CompatCustomModDiscovery extends AbstractJarFileLocator {
-	private static final String SUFFIX = ".jar";
+public class CompatCustomModDiscovery extends AbstractJarFileLocator implements CompatBaseCustomModDiscovery {
 	private final Path modFolder;
+	private List<Path> modList = Lists.newArrayList();
 
 	public CompatCustomModDiscovery() {
 		this(FMLPaths.MODSDIR.get());
@@ -42,16 +40,28 @@ public class CompatCustomModDiscovery extends AbstractJarFileLocator {
 	}
 
 	@Override
+	public void registerModNameList(final List<String> modList) {
+		this.modList.addAll(modList.stream().map(e -> this.modFolder.resolve(Paths.get(e))).collect(Collectors.toList()));
+	}
+
+	@Override
+	public void registerModList(final List<File> modList) {
+		this.modList.addAll(modList.stream().map(File::toPath).collect(Collectors.toList()));
+	}
+
+	@Override
+	public List<Path> getModFiles() {
+		return this.modList;
+	}
+
+	@Override
 	public List<ModFile> scanMods() {
 		try {
-			final Path path = Paths.get(Validate.notNull(getClass().getProtectionDomain().getCodeSource()).getLocation().toURI());
-			final File file = path.toFile();
-			Validate.isTrue(file.isFile()&&path.toString().endsWith(SUFFIX));
-			final ModFile modFile = new ModFile(path, this);
-			this.modJars.compute(modFile, (mf, fs) -> {
-				return createFileSystem(mf);
-			});
-			return Lists.newArrayList(modFile);
+			return getModFiles().stream().filter(Files::isRegularFile).map(e -> new ModFile(e, this)).peek(modFile -> {
+				this.modJars.compute(modFile, (mf, fs) -> {
+					return createFileSystem(mf);
+				});
+			}).collect(Collectors.toList());
 		} catch (final Exception e) {
 			throw new RuntimeException("Error during Emojicord discovery", e);
 		}
@@ -71,9 +81,10 @@ public class CompatCustomModDiscovery extends AbstractJarFileLocator {
 	public void initArguments(final Map<String, ?> arguments) {
 	}
 
-	public LoadingModList discoverMods() {
-		Log.log.debug(LogMarkers.SCAN, "Trying locator {}", this);
-		final Map<Type, List<ModFile>> modFiles = scanMods().stream().peek((mf) -> {
+	@Override
+	public void discoverMods() {
+		//Log.log.debug(LogMarkers.SCAN, "Trying locator {}", this);
+		final Map<Type, List<ModFile>> modFiles = scanMods().stream().map(ModFile.class::cast).peek((mf) -> {
 			Log.log.debug(LogMarkers.SCAN, "Found mod file {} of type {} with locator {}", mf.getFileName(), mf.getType(), mf.getLocator());
 		}).collect(Collectors.groupingBy(ModFile::getType));
 
@@ -88,11 +99,11 @@ public class CompatCustomModDiscovery extends AbstractJarFileLocator {
 			}
 		}
 
-		Log.log.debug(LogMarkers.SCAN, "Found {} mod files with {} mods", (Object[]) new Supplier[] { mods::size, () -> {
-			return Integer.valueOf(mods.stream().mapToInt((mf) -> {
-				return mf.getModInfos().size();
-			}).sum());
-		} });
+		//Log.log.debug(LogMarkers.SCAN, "Found {} mod files with {} mods", (Object[]) new Supplier[] { mods::size, () -> {
+		//	return Integer.valueOf(mods.stream().mapToInt((mf) -> {
+		//		return mf.getModInfos().size();
+		//	}).sum());
+		//} });
 
 		final LoadingModList to = FMLLoader.getLoadingModList();
 		final BackgroundScanHandler backgroundScanHandler = new BackgroundScanHandler();
@@ -119,7 +130,5 @@ public class CompatCustomModDiscovery extends AbstractJarFileLocator {
 				fileById.put(modinfo.getModId(), modinfo.getOwningFile());
 			});
 		}
-
-		return to;
 	}
 }

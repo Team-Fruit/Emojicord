@@ -14,5 +14,5 @@ public class Reference {
 	public static final @Nonnull String TRANSFORMER = "net.teamfruit.emojicord.asm.EmojicordTransformer";
 	public static final @Nonnull String TRANSFORMER_DECORATOR = "net.teamfruit.emojicord.compat.CompatTransformerDecorator";
 	public static final @Nonnull String TRANSFORMER_DECORATEE = "net.teamfruit.emojicord.compat.CompatTransformer";
-	public static final @Nonnull String CUSTOM_MOD_DISCOVERY = "net.teamfruit.emojicord.compat.CompatCustomModDiscavery";
+	public static final @Nonnull String CUSTOM_MOD_DISCOVERY = "net.teamfruit.emojicord.compat.CompatCustomModDiscovery";
 }
