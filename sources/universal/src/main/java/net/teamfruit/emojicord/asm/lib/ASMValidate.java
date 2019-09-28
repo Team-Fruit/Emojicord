@@ -29,6 +29,9 @@ public class ASMValidate {
 	public void check(final String name) {
 	}
 
+	public void checks(final String name) {
+	}
+
 	public void validate() {
 	}
 
@@ -82,6 +85,11 @@ public class ASMValidate {
 		@Override
 		public void check(final String name) {
 			Validate.validState(this.cases.remove(name), "ASM Assertion Error in %s: Too many checkpoints: %s", this.testName, name);
+		}
+
+		@Override
+		public void checks(final String name) {
+			this.cases.remove(name);
 		}
 
 		// It often happens due to mistakes in arguments or Mcp or Srg names, so it should be displayed collectively.

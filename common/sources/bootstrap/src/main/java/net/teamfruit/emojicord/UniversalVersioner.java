@@ -12,6 +12,7 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -104,7 +105,7 @@ public class UniversalVersioner {
 		}
 	}
 
-	private static void loadVersionImpl(final File modFile) {
+	public static Path prepareVersionFileV7(final Path modFile) {
 		if (modFile==null)
 			throw new RuntimeException("Could not specify mod file.");
 
@@ -128,7 +129,7 @@ public class UniversalVersioner {
 			final String jarname = String.format("%s.jar", mccversion);
 			final File destMod = new File(modVersionSpecific, jarname);
 
-			file = new ZipFile(modFile);
+			file = new ZipFile(modFile.toFile());
 			final ZipEntry entry = file.getEntry(jarname);
 			if (entry==null)
 				throw new RuntimeException("Could not find version-specific file: "+jarname);
@@ -137,10 +138,11 @@ public class UniversalVersioner {
 			if (!modVersionSpecific.mkdirs()&&!modVersionSpecific.isDirectory())
 				throw new IOException("Directory '"+modVersionSpecific+"' could not be created");
 
-			Files.copy(stream, destMod.toPath());
+			Files.createDirectories(modVersionSpecific.toPath());
+			if (Files.isWritable(modFile))
+				Files.copy(stream, destMod.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
-			final Object classLoader = getFMLField(getClass("net.minecraft.launchwrapper.Launch"), "classLoader", null, false);
-			invokeFMLMethod(getClass("net.minecraft.launchwrapper.LaunchClassLoader"), "addURL", new Class<?>[] { String.class }, classLoader, new Object[] { destMod.toURI().toURL() }, false);
+			return destMod.toPath();
 		} catch (final IOException e) {
 			throw new RuntimeException("Could not load version-specific file.", e);
 		} finally {
@@ -149,11 +151,7 @@ public class UniversalVersioner {
 		}
 	}
 
-	private static void loadVersionImplN(final File modFile) {
-		/// TODO
-		// IEnvironmentからModの場所が取れるからCompatCustomModDiscoveryの実装を変える
-		// IEnvironmentからの場所でloadVersionImplNをじっそう
-
+	public static Path prepareVersionFileV13(final Path modFile) {
 		if (modFile==null)
 			throw new RuntimeException("Could not specify mod file.");
 
@@ -169,7 +167,7 @@ public class UniversalVersioner {
 
 			final Class<?> pathClass = getFMLClass("loading.FMLPaths");
 			final Object modsDirPath = getFMLField(pathClass, "MODSDIR", null, false);
-			final Path modsDir = getFMLField(pathClass, "get", modsDirPath, false);
+			final Path modsDir = invokeFMLMethod(pathClass, "get", new Class[] {}, modsDirPath, new Object[] {}, false);
 
 			final Path versionSpecificModsDir = modsDir.resolve(Paths.get(mccversion));
 			final Path modVersionSpecific = versionSpecificModsDir.resolve(Paths.get(Reference.MODID));
@@ -177,23 +175,40 @@ public class UniversalVersioner {
 			final String jarname = String.format("%s.jar", mccversion);
 			final Path destMod = modVersionSpecific.resolve(Paths.get(jarname));
 
-			file = new ZipFile(modFile);
+			file = new ZipFile(modFile.toFile());
 			final ZipEntry entry = file.getEntry(jarname);
 			if (entry==null)
 				throw new RuntimeException("Could not find version-specific file: "+jarname);
 			stream = file.getInputStream(entry);
 
 			Files.createDirectories(modVersionSpecific);
-			Files.copy(stream, destMod);
+			if (Files.isWritable(modFile))
+				Files.copy(stream, destMod, StandardCopyOption.REPLACE_EXISTING);
 
-			final Object classLoader = invokeFMLMethod(fmlLoaderClass, "getLaunchClassLoader", new Class[] {}, null, new Object[] {}, false);
-			final Object delegateClassLoader = getFMLField(getClass("cpw.mods.modlauncher.TransformingClassLoader"), "delegatedClassLoader", classLoader, true);
-			invokeFMLMethod(URLClassLoader.class, "addURL", new Class[] { URL.class }, delegateClassLoader, new Object[] { destMod.toUri().toURL() }, true);
+			return destMod;
 		} catch (final IOException e) {
 			throw new RuntimeException("Could not load version-specific file.", e);
 		} finally {
 			closeQuietly(file);
 			closeQuietly(stream);
+		}
+	}
+
+	public static URLClassLoader getLaunchClassLoaderV7() {
+		return getFMLField(getClass("net.minecraft.launchwrapper.Launch"), "classLoader", null, false);
+	}
+
+	public static URLClassLoader getTransformingClassLoaderV13() {
+		final Class<?> fmlLoaderClass = getFMLClass("loading.FMLLoader");
+		final Object classLoader = invokeFMLMethod(fmlLoaderClass, "getLaunchClassLoader", new Class[] {}, null, new Object[] {}, false);
+		return getFMLField(getClass("cpw.mods.modlauncher.TransformingClassLoader"), "delegatedClassLoader", classLoader, true);
+	}
+
+	public static void loadPath(final Path file, final ClassLoader classLoader) {
+		try {
+			invokeFMLMethod(URLClassLoader.class, "addURL", new Class[] { URL.class }, classLoader, new Object[] { file.toUri().toURL() }, true);
+		} catch (final IOException e) {
+			throw new RuntimeException("Could not load version-specific file.", e);
 		}
 	}
 
@@ -206,14 +221,16 @@ public class UniversalVersioner {
 		}
 	}
 
-	public static void loadVersionFromFMLMod() {
+	public static Path getModFileV7() {
 		final Object loader = invokeFMLMethod(getFMLClass("common.Loader"), "instance", new Class[0], null, new Object[0], false);
 		final Object container = invokeFMLMethod(getFMLClass("common.Loader"), "activeModContainer", new Class[0], loader, new Object[0], false);
 		final File modFile = invokeFMLMethod(getFMLClass("common.ModContainer"), "getSource", new Class[0], container, new Object[0], false);
-		loadVersionImpl(modFile);
+		if (modFile==null)
+			return null;
+		return modFile.toPath();
 	}
 
-	public static File loadVersionFromCoreMod(final Class<?> coreModClass) {
+	public static Path getCoreModFileV7(final Class<?> coreModClass) {
 		File modFile = null;
 		final Map<String, Object> blackboard = getFMLField(getClass("net.minecraft.launchwrapper.Launch"), "blackboard", null, false);
 		final List<?> tweakers = (List<?>) blackboard.get("Tweaks");
@@ -226,27 +243,21 @@ public class UniversalVersioner {
 						modFile = getFMLField(fmlPlugin, "location", tweaker, true);
 				}
 		}
-		loadVersionImpl(modFile);
-		return modFile;
+		if (modFile==null)
+			return null;
+		return modFile.toPath();
 	}
 
-	public static File loadVersionFromCoreService(final Class<?> coreModClass) {
-		File modFile = null;
+	public static Path getCoreServiceFileV13(final Class<?> coreModClass) {
+		Path modFile = null;
 		try {
-			final String file = coreModClass.getClass().getProtectionDomain().getCodeSource().getLocation().getFile();
-			if (file.endsWith(".jar")) {
-				final Class<?> pathClass = getFMLClass("loading.FMLPaths");
-				final Object modsDirPath = getFMLField(pathClass, "MODSDIR", null, false);
-				final Path modsDir = getFMLField(pathClass, "MODSDIR", modsDirPath, false);
-				final Path relpath = Paths.get(file);
-				final Path path = modsDir.resolve(relpath);
-				if (Files.isRegularFile(path))
-					modFile = path.toFile();
-			}
+			final Path file = Paths.get(coreModClass.getProtectionDomain().getCodeSource().getLocation().toURI());
+			if (file.toString().endsWith(".jar"))
+				if (Files.isRegularFile(file))
+					modFile = file;
 		} catch (final Exception e) {
 			throw new RuntimeException("Error during loading version-specific file", e);
 		}
-		loadVersionImplN(modFile);
 		return modFile;
 	}
 }

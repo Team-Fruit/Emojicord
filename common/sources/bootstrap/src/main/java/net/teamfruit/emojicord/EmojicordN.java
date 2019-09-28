@@ -1,6 +1,5 @@
 package net.teamfruit.emojicord;
 
-
 import java.io.File;
 
 import javax.annotation.Nonnull;
@@ -8,7 +7,6 @@ import javax.annotation.Nullable;
 
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -17,7 +15,6 @@ import net.teamfruit.emojicord.compat.CompatBaseProxy.CompatFMLInitializationEve
 import net.teamfruit.emojicord.compat.CompatBaseProxy.CompatFMLPostInitializationEvent;
 import net.teamfruit.emojicord.compat.CompatBaseProxy.CompatFMLPreInitializationEvent;
 
-@Mod(value = Reference.MODID)
 public class EmojicordN {
 	public static @Nullable EmojicordN instance;
 

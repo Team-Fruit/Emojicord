@@ -30,7 +30,7 @@ public class GuiTextFieldTransform implements INodeTreeTransformer {
 	public ClassNode apply(final ClassNode node) {
 		final ASMValidate validator = ASMValidate.create(getSimpleName());
 		validator.test("drawTextBox.begin");
-		validator.test("drawTextBox.return", CompatVersion.version().older(CompatBaseVersion.V11));
+		//validator.test("drawTextBox.return", CompatVersion.version().older(CompatBaseVersion.V11));
 		validator.test("drawTextBox.return");
 
 		{
@@ -64,7 +64,7 @@ public class GuiTextFieldTransform implements INodeTreeTransformer {
 						insertion.add(new InsnNode(Opcodes.ICONST_0));
 						insertion.add(new FieldInsnNode(Opcodes.PUTSTATIC, ClassName.of("net.teamfruit.emojicord.emoji.EmojiFontRenderer").getBytecodeName(), "isTextFieldRendering", DescHelper.toDesc(boolean.class)));
 						method.instructions.insertBefore(marker, insertion);
-						validator.check("drawTextBox.return");
+						validator.checks("drawTextBox.return");
 					}
 				});
 			});

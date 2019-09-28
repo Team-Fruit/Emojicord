@@ -1,10 +1,8 @@
 package net.teamfruit.emojicord.compat;
 
-import java.io.File;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -15,7 +13,6 @@ import com.google.common.collect.Lists;
 
 import cpw.mods.modlauncher.api.LamdbaExceptionUtils;
 import net.minecraftforge.fml.loading.FMLLoader;
-import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.loading.LoadingModList;
 import net.minecraftforge.fml.loading.LogMarkers;
 import net.minecraftforge.fml.loading.moddiscovery.AbstractJarFileLocator;
@@ -28,25 +25,11 @@ import net.teamfruit.emojicord.Log;
 
 // Since FML does not load this mod that implements ITransformerService, load it manually.
 public class CompatCustomModDiscovery extends AbstractJarFileLocator implements CompatBaseCustomModDiscovery {
-	private final Path modFolder;
 	private List<Path> modList = Lists.newArrayList();
 
-	public CompatCustomModDiscovery() {
-		this(FMLPaths.MODSDIR.get());
-	}
-
-	CompatCustomModDiscovery(final Path modFolder) {
-		this.modFolder = modFolder;
-	}
-
 	@Override
-	public void registerModNameList(final List<String> modList) {
-		this.modList.addAll(modList.stream().map(e -> this.modFolder.resolve(Paths.get(e))).collect(Collectors.toList()));
-	}
-
-	@Override
-	public void registerModList(final List<File> modList) {
-		this.modList.addAll(modList.stream().map(File::toPath).collect(Collectors.toList()));
+	public void registerModList(final List<Path> modList) {
+		this.modList.addAll(modList);
 	}
 
 	@Override
@@ -68,13 +51,20 @@ public class CompatCustomModDiscovery extends AbstractJarFileLocator implements 
 	}
 
 	@Override
+	public Path findPath(final ModFile modFile, final String... path) {
+		if (path.length==1&&"pack.mcmeta".equals(path[0]))
+			return super.findPath(modFile, "pack_4.mcmeta");
+		return super.findPath(modFile, path);
+	}
+
+	@Override
 	public String name() {
 		return "Emojicord Locator";
 	}
 
 	@Override
 	public String toString() {
-		return "{EmojicordFMLPlugin locator at "+this.modFolder+"}";
+		return "{EmojicordFMLPlugin locator}";
 	}
 
 	@Override
@@ -130,5 +120,7 @@ public class CompatCustomModDiscovery extends AbstractJarFileLocator implements 
 				fileById.put(modinfo.getModId(), modinfo.getOwningFile());
 			});
 		}
+
+		backgroundScanHandler.getScannedFiles().stream().forEach(e -> e.getScanResult().getTargets().remove(null));
 	}
 }

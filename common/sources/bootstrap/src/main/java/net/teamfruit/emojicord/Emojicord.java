@@ -20,10 +20,21 @@ import net.teamfruit.emojicord.compat.CompatBaseProxy.CompatFMLInitializationEve
 import net.teamfruit.emojicord.compat.CompatBaseProxy.CompatFMLPostInitializationEvent;
 import net.teamfruit.emojicord.compat.CompatBaseProxy.CompatFMLPreInitializationEvent;
 
-@Mod(modid = Reference.MODID, name = Reference.NAME, version = Reference.VERSION, guiFactory = Reference.GUI_FACTORY)
+@Mod(value = Reference.MODID, modid = Reference.MODID, name = Reference.NAME, version = Reference.VERSION, guiFactory = Reference.GUI_FACTORY)
 public class Emojicord {
 	@Instance(Reference.MODID)
 	public static @Nullable Emojicord instance;
+
+	public Emojicord() {
+		boolean checkV13Newer = false;
+		try {
+			Class.forName("net.minecraft.launchwrapper.Launch", false, getClass().getClassLoader());
+		} catch (final ClassNotFoundException e) {
+			checkV13Newer = true;
+		}
+		if (checkV13Newer)
+			new EmojicordN();
+	}
 
 	@SidedProxy(serverSide = Reference.PROXY_SERVER, clientSide = Reference.PROXY_CLIENT)
 	public static @Nullable CompatBaseProxy proxy;
