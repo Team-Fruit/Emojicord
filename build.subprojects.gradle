@@ -185,6 +185,8 @@ minecraft {
 		mappings = project.version_mappings
 
 	if (project.forgegradle.contains('3.+')) {
+		accessTransformer = file('../sources/default/src/main/resources/META-INF/accesstransformer.cfg')
+
 		runs {
 			client {
 				taskName = "${project.name}_Client"
