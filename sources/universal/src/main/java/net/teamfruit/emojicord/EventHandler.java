@@ -6,11 +6,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.lwjgl.opengl.GL11;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
@@ -30,29 +30,28 @@ import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
 
-import cpw.mods.modlauncher.api.LamdbaExceptionUtils;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.renderer.Rectangle2d;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec2f;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.teamfruit.emojicord.compat.Compat.CompatMinecraft;
+import net.teamfruit.emojicord.compat.Compat.CompatTextFormatting;
+import net.teamfruit.emojicord.compat.Compat.CompatVertex;
+import net.teamfruit.emojicord.compat.CompatBaseVertex;
 import net.teamfruit.emojicord.compat.CompatEvents.CompatClientChatEvent;
 import net.teamfruit.emojicord.compat.CompatEvents.CompatConfigChangedEvent.CompatOnConfigChangedEvent;
 import net.teamfruit.emojicord.compat.CompatEvents.CompatGuiScreenEvent;
 import net.teamfruit.emojicord.compat.CompatEvents.CompatHandler;
 import net.teamfruit.emojicord.compat.CompatEvents.CompatRenderGameOverlayEvent;
+import net.teamfruit.emojicord.compat.OpenGL;
 import net.teamfruit.emojicord.emoji.DiscordEmojiIdDictionary;
 import net.teamfruit.emojicord.emoji.EmojiId;
 import net.teamfruit.emojicord.emoji.EmojiText;
 import net.teamfruit.emojicord.emoji.StandardEmojiIdDictionary;
+import net.teamfruit.emojicord.gui.MathHelper;
+import net.teamfruit.emojicord.gui.Rectangle2d;
 
 public class EventHandler extends CompatHandler {
 	@Override
@@ -198,9 +197,7 @@ public class EventHandler extends CompatHandler {
 		public ChatScreen chatScreen;
 		public TextFieldWidget inputField;
 		public FontRenderer font;
-		public Minecraft minecraft;
 		public int mouseX, mouseY;
-		public Supplier<Boolean> hasEdits;
 		private SuggestionsList suggestions;
 		private CompletableFuture<Suggestions> pendingSuggestions;
 		private ParseResults<IEmojiSuggestionProvider> currentParse;
@@ -211,17 +208,12 @@ public class EventHandler extends CompatHandler {
 		private IEmojiSuggestionProvider emojiSuggestionProvider = new EmojiSuggestionProvider(null);
 
 		public SuggestionChat(final ChatScreen screen) {
-			this.minecraft = CompatMinecraft.getMinecraft().getMinecraftObj();
 			this.chatScreen = screen;
 			this.font = CompatMinecraft.getMinecraft().getFontRenderer().getFontRendererObj();
 			try {
 				final Field inputfield = screen.getClass().getDeclaredField("inputField");
 				inputfield.setAccessible(true);
 				this.inputField = (TextFieldWidget) inputfield.get(screen);
-
-				final Field hasEditsField = screen.getClass().getDeclaredField("hasEdits");
-				hasEditsField.setAccessible(true);
-				this.hasEdits = LamdbaExceptionUtils.rethrowSupplier(() -> (Boolean) hasEditsField.get(screen));
 			} catch (final ReflectiveOperationException e) {
 				throw new RuntimeException(e);
 			}
@@ -334,15 +326,15 @@ public class EventHandler extends CompatHandler {
 			}
 
 			if (this.commandUsage.isEmpty())
-				fillNodeUsage(TextFormatting.GRAY);
+				fillNodeUsage(CompatTextFormatting.GRAY);
 
 			this.suggestions = null;
-			if (this.hasEdits.get()&&this.minecraft.gameSettings.autoSuggestCommands)
+			if (EmojicordConfig.SUGGEST.autoSuggest.get())
 				showSuggestions();
 
 		}
 
-		private void fillNodeUsage(final TextFormatting p_195132_1_) {
+		private void fillNodeUsage(final CompatTextFormatting textColor) {
 			final CommandContextBuilder<IEmojiSuggestionProvider> commandcontextbuilder = this.currentParse.getContext();
 			final SuggestionContext<IEmojiSuggestionProvider> suggestioncontext = commandcontextbuilder.findSuggestionContext(this.inputField.getCursorPosition());
 			final Map<CommandNode<IEmojiSuggestionProvider>, String> map = this.emojiSuggestionDispatcher.getSmartUsage(suggestioncontext.parent, this.emojiSuggestionProvider);
@@ -351,7 +343,7 @@ public class EventHandler extends CompatHandler {
 
 			for (final Entry<CommandNode<IEmojiSuggestionProvider>, String> entry : map.entrySet())
 				if (!(entry.getKey() instanceof LiteralCommandNode)) {
-					list.add(p_195132_1_+entry.getValue());
+					list.add(textColor+entry.getValue());
 					i = Math.max(i, this.font.getStringWidth(entry.getValue()));
 				}
 		}
@@ -360,13 +352,46 @@ public class EventHandler extends CompatHandler {
 			return p_208602_1_.startsWith(p_208602_0_) ? p_208602_1_.substring(p_208602_0_.length()) : null;
 		}
 
+		public static void fill(int p_fill_0_, int p_fill_1_, int p_fill_2_, int p_fill_3_, final int p_fill_4_) {
+			if (p_fill_0_<p_fill_2_) {
+				final int i = p_fill_0_;
+				p_fill_0_ = p_fill_2_;
+				p_fill_2_ = i;
+			}
+
+			if (p_fill_1_<p_fill_3_) {
+				final int j = p_fill_1_;
+				p_fill_1_ = p_fill_3_;
+				p_fill_3_ = j;
+			}
+
+			final float f3 = (p_fill_4_>>24&255)/255.0F;
+			final float f = (p_fill_4_>>16&255)/255.0F;
+			final float f1 = (p_fill_4_>>8&255)/255.0F;
+			final float f2 = (p_fill_4_&255)/255.0F;
+			final CompatBaseVertex t = CompatVertex.getTessellator();
+			OpenGL.glEnable(GL11.GL_BLEND);
+			OpenGL.glDisable(GL11.GL_TEXTURE_2D);
+			OpenGL.glBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO);
+			OpenGL.glColor4f(f, f1, f2, f3);
+			t.begin(GL11.GL_QUADS);
+			t.pos(p_fill_0_, p_fill_3_, 0.0D);
+			t.pos(p_fill_2_, p_fill_3_, 0.0D);
+			t.pos(p_fill_2_, p_fill_1_, 0.0D);
+			t.pos(p_fill_0_, p_fill_1_, 0.0D);
+			t.draw();
+			OpenGL.glEnable(GL11.GL_TEXTURE_2D);
+			OpenGL.glDisable(GL11.GL_BLEND);
+		}
+
 		private class SuggestionsList {
 			private final Rectangle2d rectangle;
 			private final Suggestions suggestions;
 			private final String text;
 			private int scrollY;
 			private int selectedIndex;
-			private Vec2f lastMouse = Vec2f.ZERO;
+			private int lastMouseX;;
+			private int lastMouseY;;
 			private boolean arrowKeyUsed;
 
 			private SuggestionsList(final int posX, final int posY, final int width, final Suggestions suggestions) {
@@ -379,34 +404,36 @@ public class EventHandler extends CompatHandler {
 			public void render(final int mouseX, final int mouseY) {
 				final int i = Math.min(this.suggestions.getList().size(), 10);
 				final int j = -5592406;
-				final boolean flag = this.scrollY>0;
-				final boolean flag1 = this.suggestions.getList().size()>this.scrollY+i;
-				final boolean flag2 = flag||flag1;
-				final boolean flag3 = this.lastMouse.x!=mouseX||this.lastMouse.y!=mouseY;
-				if (flag3)
-					this.lastMouse = new Vec2f(mouseX, mouseY);
+				final boolean isScrollTop = this.scrollY>0;
+				final boolean isScrollBottom = this.suggestions.getList().size()>this.scrollY+i;
+				final boolean isScroll = isScrollTop||isScrollBottom;
+				final boolean isMouseMoved = this.lastMouseX!=mouseX||this.lastMouseY!=mouseY;
+				if (isMouseMoved) {
+					this.lastMouseX = mouseX;
+					this.lastMouseY = mouseY;
+				}
 
-				if (flag2) {
-					AbstractGui.fill(this.rectangle.getX(), this.rectangle.getY()-1, this.rectangle.getX()+this.rectangle.getWidth(), this.rectangle.getY(), 0xD0000000);
-					AbstractGui.fill(this.rectangle.getX(), this.rectangle.getY()+this.rectangle.getHeight(), this.rectangle.getX()+this.rectangle.getWidth(), this.rectangle.getY()+this.rectangle.getHeight()+1, 0xD0000000);
-					if (flag)
+				if (isScroll) {
+					fill(this.rectangle.getX(), this.rectangle.getY()-1, this.rectangle.getX()+this.rectangle.getWidth(), this.rectangle.getY(), 0xD0000000);
+					fill(this.rectangle.getX(), this.rectangle.getY()+this.rectangle.getHeight(), this.rectangle.getX()+this.rectangle.getWidth(), this.rectangle.getY()+this.rectangle.getHeight()+1, 0xD0000000);
+					if (isScrollTop)
 						for (int k = 0; k<this.rectangle.getWidth(); ++k)
 							if (k%2==0)
-								AbstractGui.fill(this.rectangle.getX()+k, this.rectangle.getY()-1, this.rectangle.getX()+k+1, this.rectangle.getY(), -1);
+								fill(this.rectangle.getX()+k, this.rectangle.getY()-1, this.rectangle.getX()+k+1, this.rectangle.getY(), -1);
 
-					if (flag1)
+					if (isScrollBottom)
 						for (int i1 = 0; i1<this.rectangle.getWidth(); ++i1)
 							if (i1%2==0)
-								AbstractGui.fill(this.rectangle.getX()+i1, this.rectangle.getY()+this.rectangle.getHeight(), this.rectangle.getX()+i1+1, this.rectangle.getY()+this.rectangle.getHeight()+1, -1);
+								fill(this.rectangle.getX()+i1, this.rectangle.getY()+this.rectangle.getHeight(), this.rectangle.getX()+i1+1, this.rectangle.getY()+this.rectangle.getHeight()+1, -1);
 				}
 
 				boolean flag4 = false;
 
 				for (int l = 0; l<i; ++l) {
 					final Suggestion suggestion = this.suggestions.getList().get(l+this.scrollY);
-					AbstractGui.fill(this.rectangle.getX(), this.rectangle.getY()+12*l, this.rectangle.getX()+this.rectangle.getWidth(), this.rectangle.getY()+12*l+12, 0xD0000000);
+					fill(this.rectangle.getX(), this.rectangle.getY()+12*l, this.rectangle.getX()+this.rectangle.getWidth(), this.rectangle.getY()+12*l+12, 0xD0000000);
 					if (mouseX>this.rectangle.getX()&&mouseX<this.rectangle.getX()+this.rectangle.getWidth()&&mouseY>this.rectangle.getY()+12*l&&mouseY<this.rectangle.getY()+12*l+12) {
-						if (flag3)
+						if (isMouseMoved)
 							select(l+this.scrollY);
 
 						flag4 = true;
@@ -420,7 +447,6 @@ public class EventHandler extends CompatHandler {
 					if (message!=null)
 						;//renderTooltip(TextComponentUtils.toTextComponent(message).getFormattedText(), p_198500_1_, p_198500_2_);
 				}
-
 			}
 
 			public boolean mouseClicked(final int mouseX, final int mouseY, final int clickButton) {
