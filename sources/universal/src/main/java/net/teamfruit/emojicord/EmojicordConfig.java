@@ -33,12 +33,17 @@ public class EmojicordConfig {
 
 	public static class Suggest {
 		public final CompatConfigSpec.ConfigValue<Boolean> autoSuggest;
+		public final CompatConfigSpec.ConfigValue<Boolean> enterSuggest;
 
 		public Suggest(final CompatConfigSpec.Builder builder) {
 			builder.push("Render");
 			this.autoSuggest = builder
 					.comment("Enables/Disables auto suggest")
 					.translation("config.emojicord.suggest.enabled")
+					.define("Enabled", true);
+			this.enterSuggest = builder
+					.comment("Enter key to suggest")
+					.translation("config.emojicord.suggest.enter")
 					.define("Enabled", true);
 			builder.pop();
 		}

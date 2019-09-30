@@ -31,7 +31,9 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.NewChatGui;
 import net.minecraft.client.gui.fonts.IGlyph;
 import net.minecraft.client.gui.fonts.TexturedGlyph;
+import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.network.play.ClientPlayNetHandler;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
@@ -667,7 +669,7 @@ public class Compat {
 	}
 
 	public static class CompatScreen {
-		private Screen screen;
+		private final Screen screen;
 
 		public CompatScreen(final Screen screen) {
 			this.screen = screen;
@@ -679,6 +681,76 @@ public class Compat {
 
 		public Screen getScreenObj() {
 			return this.screen;
+		}
+
+		public int getWidth() {
+			return this.screen.width;
+		}
+
+		public int getHeight() {
+			return this.screen.height;
+		}
+
+		public static boolean hasShiftDown() {
+			return Screen.hasShiftDown();
+		}
+	}
+
+	public static class CompatChatScreen {
+		private final ChatScreen chatScreen;
+
+		public CompatChatScreen(final ChatScreen chatScreen) {
+			this.chatScreen = chatScreen;
+		}
+
+		public CompatTextFieldWidget getTextField() {
+			return new CompatTextFieldWidget(this.chatScreen.inputField);
+		}
+
+		public @Nonnull CompatScreen cast() {
+			return new CompatScreen(this.chatScreen);
+		}
+
+		public static @Nullable CompatChatScreen cast(final CompatScreen screen) {
+			if (screen.screen instanceof ChatScreen)
+				return new CompatChatScreen((ChatScreen) screen.screen);
+			return null;
+		}
+	}
+
+	public static class CompatTextFieldWidget {
+		private final TextFieldWidget textField;
+
+		public CompatTextFieldWidget(final TextFieldWidget textField) {
+			this.textField = textField;
+		}
+
+		public String getText() {
+			return this.textField.getText();
+		}
+
+		public void setText(final String apply) {
+			this.textField.setText(apply);
+		}
+
+		public int getInsertPos(final int start) {
+			return this.textField.func_195611_j(start);
+		}
+
+		public void setSuggestion(final String string) {
+			this.textField.setSuggestion(string);
+		}
+
+		public int getCursorPosition() {
+			return this.textField.getCursorPosition();
+		}
+
+		public void setCursorPosition(final int i) {
+			this.textField.func_212422_f(i);
+		}
+
+		public void setSelectionPos(final int i) {
+			this.textField.setSelectionPos(i);
 		}
 	}
 
