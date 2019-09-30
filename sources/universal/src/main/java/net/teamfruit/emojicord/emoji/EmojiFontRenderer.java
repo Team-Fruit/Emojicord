@@ -11,8 +11,8 @@ import net.teamfruit.emojicord.compat.Compat;
 import net.teamfruit.emojicord.compat.Compat.CompatBufferBuilder;
 import net.teamfruit.emojicord.compat.Compat.CompatGlyph;
 import net.teamfruit.emojicord.compat.Compat.CompatTexturedGlyph;
-import net.teamfruit.emojicord.compat.Compat.CompatVertex;
 import net.teamfruit.emojicord.compat.CompatBaseVertex;
+import net.teamfruit.emojicord.compat.CompatVertex;
 import net.teamfruit.emojicord.compat.OpenGL;
 import net.teamfruit.emojicord.emoji.EmojiText.EmojiTextElement;
 
