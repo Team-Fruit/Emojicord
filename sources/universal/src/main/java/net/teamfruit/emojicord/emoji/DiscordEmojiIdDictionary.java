@@ -3,7 +3,9 @@ package net.teamfruit.emojicord.emoji;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -46,6 +48,20 @@ public class DiscordEmojiIdDictionary {
 		if (list.size()>num)
 			return list.get(num);
 		return null;
+	}
+
+	public Map<String, EmojiId> get() {
+		final Map<String, EmojiId> dict = Maps.newHashMap();
+		for (final Entry<String, List<EmojiId>> entry : Multimaps.asMap(this.dictionary).entrySet()) {
+			final String key = entry.getKey();
+			final List<EmojiId> values = entry.getValue();
+			if (!values.isEmpty()) {
+				dict.put(key, values.get(0));
+				for (final ListIterator<EmojiId> itr = values.listIterator(); itr.hasNext();)
+					dict.put(key+"~"+itr.nextIndex(), itr.next());
+			}
+		}
+		return dict;
 	}
 
 	public void register(final String name, final EmojiId id) {

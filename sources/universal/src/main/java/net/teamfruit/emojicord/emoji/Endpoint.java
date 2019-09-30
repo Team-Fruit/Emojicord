@@ -33,6 +33,7 @@ public class Endpoint {
 				for (final EmojiStandardGroup emojiGroup : emojiList.groups)
 					for (final EmojiStandard emoji : emojiGroup.emojis) {
 						final EmojiId id = new EmojiId.StandardEmojiId(emojiGroup.location+emoji.location, emoji.name);
+						builder.putName(emoji.name, id);
 						builder.putUtf(emoji.surrogates, id);
 						for (final String string : emoji.strings)
 							builder.putAlias(string, id);

@@ -2,6 +2,7 @@ package net.teamfruit.emojicord.emoji;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -13,12 +14,14 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 public class StandardEmojiIdDictionary {
+	public final ImmutableMap<String, EmojiId> nameDictionary;
 	public final ImmutableMap<String, EmojiId> aliasDictionary;
 	public final ImmutableMap<String, EmojiId> utfDictionary;
 	public final Pattern shortAliasPattern;
 	public final Pattern utfPattern;
 
-	public StandardEmojiIdDictionary(final ImmutableMap<String, EmojiId> aliasDictionary, final ImmutableMap<String, EmojiId> utfDictionary, final Pattern shortAliasPattern, final Pattern utfPattern) {
+	public StandardEmojiIdDictionary(final ImmutableMap<String, EmojiId> nameDictionary, final ImmutableMap<String, EmojiId> aliasDictionary, final ImmutableMap<String, EmojiId> utfDictionary, final Pattern shortAliasPattern, final Pattern utfPattern) {
+		this.nameDictionary = nameDictionary;
 		this.aliasDictionary = aliasDictionary;
 		this.utfDictionary = utfDictionary;
 		this.shortAliasPattern = shortAliasPattern;
@@ -26,10 +29,15 @@ public class StandardEmojiIdDictionary {
 	}
 
 	public static class StandardEmojiIdDictionaryBuilder {
+		private final Map<String, EmojiId> nameDictionary = Maps.newHashMap();
 		private final Map<String, EmojiId> aliasDictionary = Maps.newHashMap();
 		private final Map<String, EmojiId> utfDictionary = Maps.newHashMap();
 		private static final Pattern shortAliasFilterNot = Pattern.compile(".+\\:skin-tone-\\d");
 		private static final Pattern shortAliasFilter = Pattern.compile("^.*[^\\w].*$");
+		private final Supplier<Map<String, EmojiId>> simpleName = Suppliers.memoize(() -> this.nameDictionary.entrySet().stream()
+				.filter(str -> {
+					return !shortAliasFilterNot.matcher(str.getKey()).matches();
+				}).collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
 		private final Supplier<Set<String>> shortAlias = Suppliers.memoize(() -> this.aliasDictionary.keySet().stream()
 				.filter(str -> {
 					return !shortAliasFilterNot.matcher(str).matches()&&shortAliasFilter.matcher(str).matches();
@@ -62,6 +70,11 @@ public class StandardEmojiIdDictionary {
 			return Pattern.compile(String.format("(?:%s)%s?", emojiFilter, toneFilter));
 		});
 
+		public StandardEmojiIdDictionaryBuilder putAllName(final Map<String, EmojiId> dictionary) {
+			this.nameDictionary.putAll(dictionary);
+			return this;
+		}
+
 		public StandardEmojiIdDictionaryBuilder putAllAlias(final Map<String, EmojiId> dictionary) {
 			this.aliasDictionary.putAll(dictionary);
 			return this;
@@ -69,6 +82,11 @@ public class StandardEmojiIdDictionary {
 
 		public StandardEmojiIdDictionaryBuilder putAllUtf(final Map<String, EmojiId> dictionary) {
 			this.utfDictionary.putAll(dictionary);
+			return this;
+		}
+
+		public StandardEmojiIdDictionaryBuilder putName(final String key, final EmojiId emojiId) {
+			this.nameDictionary.put(key, emojiId);
 			return this;
 		}
 
@@ -84,6 +102,7 @@ public class StandardEmojiIdDictionary {
 
 		public StandardEmojiIdDictionary build() {
 			return new StandardEmojiIdDictionary(
+					ImmutableMap.copyOf(this.simpleName.get()),
 					ImmutableMap.copyOf(this.aliasDictionary),
 					ImmutableMap.copyOf(this.utfDictionary),
 					this.shortAliasPattern.get(),
