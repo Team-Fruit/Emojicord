@@ -1108,12 +1108,13 @@ public class Compat {
 		}
 	}
 
-	public static abstract class CompatGlyph extends TexturedGlyph implements IGlyph {
-		private final float width;
+	public static abstract class CompatGlyph implements IGlyph {
+		public final float width;
+		public final float height;
 
-		public CompatGlyph(final ResourceLocation texture, final float width, final float height) {
-			super(texture, 0, 1, 0, 1, 0, width, 0+3, height+3);
+		public CompatGlyph(final float width, final float height) {
 			this.width = width;
+			this.height = height;
 		}
 
 		@Override
@@ -1129,6 +1130,12 @@ public class Compat {
 		@Override
 		public float getShadowOffset() {
 			return 0;
+		}
+	}
+
+	public static abstract class CompatTexturedGlyph extends TexturedGlyph {
+		public CompatTexturedGlyph(final ResourceLocation texture, final float width, final float height) {
+			super(texture, 0, 1, 0, 1, 0, width, 0+3, height+3);
 		}
 
 		public void onRender(final TextureManager textureManager, final boolean hasShadow, final float x, final float y, final CompatBufferBuilder vbuilder, final float red, final float green, final float blue, final float alpha) {

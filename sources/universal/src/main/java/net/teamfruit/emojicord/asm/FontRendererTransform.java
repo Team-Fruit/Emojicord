@@ -78,7 +78,7 @@ public class FontRendererTransform implements INodeTreeTransformer {
 							 447  putstatic net.teamfruit.emojicord.emoji.EmojiFontRenderer.index : int [181]
 							 450  iload_2 [shadow]
 							 451  putstatic net.teamfruit.emojicord.emoji.EmojiFontRenderer.shadow : boolean [183]
-
+							
 							 466  iconst_0
 							 467  putstatic net.teamfruit.emojicord.emoji.EmojiFontRenderer.shadow : boolean [183]
 							*/
@@ -115,7 +115,7 @@ public class FontRendererTransform implements INodeTreeTransformer {
 						 369  iload 23 [index]
 						 371  invokestatic net.teamfruit.emojicord.emoji.EmojiFontRenderer.getEmojiGlyph(char, int) : net.teamfruit.emojicord.emoji.EmojiFontRenderer$EmojiGlyph [208]
 						 374  astore 27 [emojiGlyph]
-
+						
 						 376  aload 27 [emojiGlyph]
 						 378  ifnull 392
 						 381  aload 27 [emojiGlyph]
@@ -123,7 +123,7 @@ public class FontRendererTransform implements INodeTreeTransformer {
 						 385  aload 27 [emojiGlyph]
 						 387  astore 26 [texturedglyph]
 						 389  goto 438
-
+						
 						 392  aload_0 [this]
 						 393  getfield net.minecraft.client.gui.FontRenderer.font : net.minecraft.client.gui.fonts.Font [45]
 						 396  iload 24 [character]
@@ -144,7 +144,7 @@ public class FontRendererTransform implements INodeTreeTransformer {
 						 431  iload 24 [character]
 						 433  invokevirtual net.minecraft.client.gui.fonts.Font.getGlyph(char) : net.minecraft.client.gui.fonts.TexturedGlyph [222]
 						 436  astore 26 [texturedglyph]
-
+						
 						 438 -
 						*/
 						final LabelNode label0 = new LabelNode();
@@ -166,6 +166,7 @@ public class FontRendererTransform implements INodeTreeTransformer {
 							insertion.add(new VarInsnNode(Opcodes.ALOAD, index));
 							insertion.add(new VarInsnNode(Opcodes.ASTORE, 25));
 							insertion.add(new VarInsnNode(Opcodes.ALOAD, index));
+							insertion.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, ClassName.of("net.teamfruit.emojicord.emoji.EmojiFontRenderer$EmojiGlyph").getBytecodeName(), "getTexturedGlyph", DescHelper.toDescMethod(ClassName.of("net.teamfruit.emojicord.emoji.EmojiFontRenderer$EmojiTexturedGlyph")), false));
 							insertion.add(new VarInsnNode(Opcodes.ASTORE, 26));
 							insertion.add(new JumpInsnNode(Opcodes.GOTO, label0));
 
@@ -196,7 +197,7 @@ public class FontRendererTransform implements INodeTreeTransformer {
 						/*
 						 27  iconst_1
 						 28  putstatic net.teamfruit.emojicord.emoji.EmojiFontRenderer.shadow : boolean [351]
-
+						
 						 57  iconst_0
 						 58  putstatic net.teamfruit.emojicord.emoji.EmojiFontRenderer.shadow : boolean [351]
 						*/
@@ -244,7 +245,7 @@ public class FontRendererTransform implements INodeTreeTransformer {
 						{
 							/*
 							 *88  fload_2 [width]
-
+							
 							  89  aload_0 [this]
 							  90  getfield net.minecraft.client.gui.FontRenderer.font : net.minecraft.client.gui.fonts.Font [45]
 							  93  iload 5 [character]
@@ -253,9 +254,9 @@ public class FontRendererTransform implements INodeTreeTransformer {
 							  99  invokeinterface net.minecraft.client.gui.fonts.IGlyph.getAdvance(boolean) : float [254] [nargs: 2]
 							 104  fadd
 							 105  fstore_2 [width]
-
+							
 							  ↓
-
+							
 							  88  iload 5 [character]
 							  90  iload 4 [index]
 							  92  invokestatic net.teamfruit.emojicord.emoji.EmojiFontRenderer.getEmojiGlyph(char, int) : net.teamfruit.emojicord.emoji.EmojiFontRenderer$EmojiGlyph [208]
@@ -265,7 +266,7 @@ public class FontRendererTransform implements INodeTreeTransformer {
 							 100  ifnull 108
 							 103  aload 6 [emojiGlyph]
 							 105  goto 117
-
+							
 							 108  aload_0 [this]
 							 109  getfield net.minecraft.client.gui.FontRenderer.font : net.minecraft.client.gui.fonts.Font [45]
 							 112  iload 5 [character]

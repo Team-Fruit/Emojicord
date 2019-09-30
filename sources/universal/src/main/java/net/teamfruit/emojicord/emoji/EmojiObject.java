@@ -60,7 +60,11 @@ public class EmojiObject {
 		}
 	}
 
-	public ResourceLocation getResourceLocationForBinding() {
+	public ResourceLocation getResourceLocation() {
+		return this.resourceLocation;
+	}
+
+	public ResourceLocation loadAndGetResourceLocation() {
 		checkLoad();
 		if (this.deleteOldTexture) {
 			this.img.deleteGlTexture();

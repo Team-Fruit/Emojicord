@@ -5,12 +5,12 @@ import javax.annotation.Nullable;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.util.ResourceLocation;
 import net.teamfruit.emojicord.CoreInvoke;
 import net.teamfruit.emojicord.EmojicordConfig;
 import net.teamfruit.emojicord.compat.Compat;
 import net.teamfruit.emojicord.compat.Compat.CompatBufferBuilder;
 import net.teamfruit.emojicord.compat.Compat.CompatGlyph;
+import net.teamfruit.emojicord.compat.Compat.CompatTexturedGlyph;
 import net.teamfruit.emojicord.compat.Compat.CompatVertex;
 import net.teamfruit.emojicord.compat.CompatBaseVertex;
 import net.teamfruit.emojicord.compat.OpenGL;
@@ -47,7 +47,7 @@ public class EmojiFontRenderer {
 				if (emojiId!=null) {
 					final EmojiObject emoji = EmojiObject.EmojiObjectCache.instance.getEmojiObject(emojiId);
 					if (!shadow) {
-						Compat.CompatMinecraft.getMinecraft().getTextureManager().bindTexture(emoji.getResourceLocationForBinding());
+						Compat.CompatMinecraft.getMinecraft().getTextureManager().bindTexture(emoji.loadAndGetResourceLocation());
 						renderEmoji(emoji, x, y, red, green, blue, alpha);
 					}
 					return c==EmojiContext.EMOJI_REPLACE_CHARACTOR;
@@ -63,21 +63,35 @@ public class EmojiFontRenderer {
 			final EmojiTextElement emojiElement = CurrentContext.emojis.get(index);
 			if (emojiElement!=null) {
 				final EmojiId emojiId = emojiElement.id;
-				if (emojiId!=null) {
-					final EmojiObject emoji = EmojiObject.EmojiObjectCache.instance.getEmojiObject(emojiId);
-					return new EmojiGlyph(emoji.getResourceLocationForBinding());
-				}
+				if (emojiId!=null)
+					return new EmojiGlyph(emojiId);
 			}
 		}
 		return null;
 	}
 
+	@CoreInvoke
 	public static class EmojiGlyph extends CompatGlyph {
-		private static final float GlyphWidth = 10;
-		private static final float GlyphHeight = 10;
+		public static final float GlyphWidth = 10;
+		public static final float GlyphHeight = 10;
 
-		public EmojiGlyph(final ResourceLocation texture) {
-			super(texture, GlyphWidth, GlyphHeight);
+		private final EmojiId emojiId;
+
+		public EmojiGlyph(final EmojiId emojiId) {
+			super(GlyphWidth, GlyphHeight);
+			this.emojiId = emojiId;
+		}
+
+		@CoreInvoke
+		public EmojiTexturedGlyph getTexturedGlyph() {
+			return new EmojiTexturedGlyph(this.emojiId);
+		}
+	}
+
+	@CoreInvoke
+	public static class EmojiTexturedGlyph extends CompatTexturedGlyph {
+		public EmojiTexturedGlyph(final EmojiId emojiId) {
+			super(EmojiObject.EmojiObjectCache.instance.getEmojiObject(emojiId).loadAndGetResourceLocation(), EmojiGlyph.GlyphWidth, EmojiGlyph.GlyphHeight);
 		}
 
 		@Override
