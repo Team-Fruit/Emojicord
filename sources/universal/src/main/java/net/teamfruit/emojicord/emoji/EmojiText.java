@@ -180,8 +180,8 @@ public class EmojiText {
 
 	public static class EmojiTextParser {
 		static final @Nonnull Pattern colorPattern = Pattern.compile("(?i)\u00A7([0-9A-FK-OR])");
-		// (?:(?i)§[0-9A-FK-OR])|<a?\:(?:\w+?)\:([a-zA-Z0-9+/=]+?)>|\:([\w+-]+?)\:(?:\:skin-tone-(\d)\:)?
-		static final @Nonnull Pattern pattern = Pattern.compile("<a?\\:(\\w+?)\\:([a-zA-Z0-9+/=]+?)>|\\:([\\w+-]+?)\\:(?:\\:skin-tone-(\\d)\\:)?");
+		// <a?\:(?:\w+?)\:([a-zA-Z0-9+/=]+?)>|\:([\w+-]+?(?:~\d+?)?)\:(?:\:skin-tone-(\d)\:)?
+		static final @Nonnull Pattern pattern = Pattern.compile("<a?\\:(\\w+?)\\:([a-zA-Z0-9+/=]+?)>|\\:([\\w+-]+?(?:~\\d+?)?)\\:(?:\\:skin-tone-(\\d)\\:)?");
 
 		public static EmojiText escape(EmojiText emojiText) {
 			emojiText = EmojiTextBuilder.builder(placeHolderPattern, emojiText).apply(matcher -> {
@@ -230,7 +230,7 @@ public class EmojiText {
 					if (EmojiId.StandardEmojiId.fromAlias(g3)==null) {
 						final EmojiId emojiId = DiscordEmojiIdDictionary.instance.get(g3);
 						if (emojiId instanceof EmojiId.DiscordEmojiId)
-							return new EmojiTextElement(emojiId, g0, String.format("<:%s:%s>", g3, ((EmojiId.DiscordEmojiId) emojiId).getEncodedId()));
+							return new EmojiTextElement(emojiId, g0, String.format("<:%s:%s>", StringUtils.substringBeforeLast(g3, "~"), ((EmojiId.DiscordEmojiId) emojiId).getEncodedId()));
 					}
 				return null;
 			});

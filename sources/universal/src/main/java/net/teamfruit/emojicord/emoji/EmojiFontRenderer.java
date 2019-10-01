@@ -112,6 +112,7 @@ public class EmojiFontRenderer {
 
 		OpenGL.glPushAttrib();
 
+		final int rgba = OpenGL.glGetColorRGBA();
 		OpenGL.glColor4f(1.0F, 1.0F, 1.0F, (OpenGL.glGetColorRGBA()>>24&0xff)/256f);
 
 		//OpenGL.glEnable(GL11.GL_BLEND);
@@ -134,7 +135,7 @@ public class EmojiFontRenderer {
 		//OpenGL.glDisable(GL11.GL_ALPHA_TEST);
 		//OpenGL.glDisable(GL11.GL_BLEND);
 
-		OpenGL.glColor4f(red, green, blue, alpha);
+		OpenGL.glColorRGBA(rgba);
 
 		OpenGL.glPopAttrib();
 	}

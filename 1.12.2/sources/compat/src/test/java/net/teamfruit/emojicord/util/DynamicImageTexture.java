@@ -9,7 +9,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import net.minecraft.client.renderer.texture.TextureUtil;
-import net.teamfruit.emojicord.EmojicordConfig;
 import net.teamfruit.emojicord.compat.Compat.CompatMinecraft;
 import net.teamfruit.emojicord.compat.Compat.CompatTextureUtil;
 import net.teamfruit.emojicord.compat.OpenGL;
@@ -59,19 +58,19 @@ public abstract class DynamicImageTexture implements ImageTexture {
 			final @Nonnull BufferedImage image, final int width,
 			final int height
 	) {
-		if (EmojicordConfig.RENDER.renderMipmapEnabled.get())
-			return MipmapDynamicTexture.createFromImage(image, width, height,
-					CompatMinecraft.getMinecraft().getSettings().getSettingsObj().mipmapLevels);
-		else
-			return DynamicTexture.createFromImage(image, width, height);
+		//if (EmojicordConfig.RENDER.renderMipmapEnabled.get())
+		return MipmapDynamicTexture.createFromImage(image, width, height,
+				CompatMinecraft.getMinecraft().getSettings().getSettingsObj().mipmapLevels);
+		//else
+		//	return DynamicTexture.createFromImage(image, width, height);
 	}
 
 	public static @Nonnull DynamicImageTexture createSized(final @Nonnull BufferedImage image) {
-		if (EmojicordConfig.RENDER.renderMipmapEnabled.get())
-			return MipmapDynamicTexture.createFromSizedImage(image,
-					CompatMinecraft.getMinecraft().getSettings().getSettingsObj().mipmapLevels);
-		else
-			return DynamicTexture.createFromSizedImage(image);
+		//if (EmojicordConfig.RENDER.renderMipmapEnabled.get())
+		return MipmapDynamicTexture.createFromSizedImage(image,
+				CompatMinecraft.getMinecraft().getSettings().getSettingsObj().mipmapLevels);
+		//else
+		//	return DynamicTexture.createFromSizedImage(image);
 	}
 
 	public static class DynamicTexture extends DynamicImageTexture {
@@ -129,7 +128,7 @@ public abstract class DynamicImageTexture implements ImageTexture {
 			final BufferedImage s = new BufferedImage(width, height, image.getType());
 			final Graphics2D g = s.createGraphics();
 			g.drawImage(image.getScaledInstance(width, height,
-					EmojicordConfig.RENDER.renderMipmapFastResize.get() ? java.awt.Image.SCALE_FAST : java.awt.Image.SCALE_SMOOTH),
+					/*EmojicordConfig.RENDER.renderMipmapFastResize.get() ? java.awt.Image.SCALE_FAST : */java.awt.Image.SCALE_SMOOTH),
 					0, 0, null);
 			g.dispose();
 			return createFromSizedImage(s);
@@ -220,7 +219,7 @@ public abstract class DynamicImageTexture implements ImageTexture {
 			final BufferedImage s = new BufferedImage(nwidth, nheight, image.getType());
 			final Graphics2D g = s.createGraphics();
 			g.drawImage(image.getScaledInstance(nwidth, nheight,
-					EmojicordConfig.RENDER.renderMipmapFastResize.get() ? java.awt.Image.SCALE_FAST : java.awt.Image.SCALE_SMOOTH),
+					/*EmojicordConfig.RENDER.renderMipmapFastResize.get() ? java.awt.Image.SCALE_FAST : */java.awt.Image.SCALE_SMOOTH),
 					0, 0, null);
 			g.dispose();
 			return createFromSizedImage(s, miplevel);

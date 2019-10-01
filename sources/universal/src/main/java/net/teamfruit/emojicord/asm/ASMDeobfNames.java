@@ -9,8 +9,10 @@ import net.teamfruit.emojicord.compat.CompatBaseVersion;
 import net.teamfruit.emojicord.compat.CompatVersion;
 
 public class ASMDeobfNames {
+	//public static final @Nonnull RefName GuiDrawRect = RefName.deobName("drawRect", "func_73734_a");
 	public static final @Nonnull RefName GuiScreenSendChatMessage = RefName.deobName("sendChatMessage", "func_175281_b");
 	public static final @Nonnull RefName GuiChatSendChatMessage = RefName.deobName("func_146403_a", "func_146403_a");
+	public static final @Nonnull RefName GuiTextFieldFontRenderer = RefName.deobName("fontRenderer", "field_146211_a");
 	public static final @Nonnull RefName GuiTextFieldDrawTextBox = RefName.deobName("drawTextBox", "func_146194_f");
 	public static final @Nonnull RefName GuiTextFieldDrawTextField = ((Supplier<RefName>) () -> {
 		if (CompatVersion.version().older(CompatBaseVersion.V13))
@@ -18,6 +20,7 @@ public class ASMDeobfNames {
 		else
 			return RefName.deobName("renderButton", "renderButton");
 	}).get();
+	public static final @Nonnull RefName FontRendererDrawStringWithShadow = RefName.deobName("drawStringWithShadow", "func_175063_a");
 	public static final @Nonnull RefName FontRendererRenderStringAtPos = ((Supplier<RefName>) () -> {
 		if (CompatVersion.version().older(CompatBaseVersion.V11))
 			return RefName.deobName("renderStringAtPos", "func_78255_a");

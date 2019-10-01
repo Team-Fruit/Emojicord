@@ -1,12 +1,17 @@
 package net.teamfruit.emojicord.asm;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
+import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.VarInsnNode;
 
 import net.teamfruit.emojicord.asm.lib.ASMValidate;
 import net.teamfruit.emojicord.asm.lib.ClassName;
@@ -30,8 +35,10 @@ public class GuiTextFieldTransform implements INodeTreeTransformer {
 	public ClassNode apply(final ClassNode node) {
 		final ASMValidate validator = ASMValidate.create(getSimpleName());
 		validator.test("drawTextBox.begin");
-		//validator.test("drawTextBox.return", CompatVersion.version().older(CompatBaseVersion.V11));
 		validator.test("drawTextBox.return");
+		validator.test("drawTextBox.suggestion", CompatVersion.version().older(CompatBaseVersion.V11));
+
+		node.fields.add(new FieldNode(Opcodes.ACC_PUBLIC, "suggestion", DescHelper.toDesc(ClassName.of("java.lang.String")), null, null));
 
 		{
 			final MethodMatcher matcher = ((Supplier<MethodMatcher>) () -> {
@@ -67,9 +74,48 @@ public class GuiTextFieldTransform implements INodeTreeTransformer {
 						validator.checks("drawTextBox.return");
 					}
 				});
+				if (CompatVersion.version().older(CompatBaseVersion.V11)) {
+					final MethodMatcher matcher0 = new MethodMatcher(ClassName.of("net.minecraft.client.gui.FontRenderer"), DescHelper.toDescMethod(int.class, ClassName.of("java.lang.String"), float.class, float.class, int.class), ASMDeobfNames.FontRendererDrawStringWithShadow);
+					final Optional<AbstractInsnNode> marker1 = VisitorHelper.stream(method.instructions).filter(e -> {
+						return e instanceof VarInsnNode&&e.getOpcode()==Opcodes.ISTORE&&((VarInsnNode) e).var==10;
+					}).findFirst();
+					VisitorHelper.stream(method.instructions)
+							.filter(matcher0.insnMatcher())
+							.filter(e -> !marker1.isPresent()||method.instructions.indexOf(e)>method.instructions.indexOf(marker1.get()))
+							.findFirst().ifPresent(marker -> {
+								final AbstractInsnNode marker0 = marker.getNext().getNext().getNext();
+								{
+									/*
+									 433  iload_1 [i]
+									 434  invokevirtual net.minecraft.client.gui.FontRenderer.drawStringWithShadow(java.lang.String, float, float, int) : int [320]
+									 437  istore 9 [j1]
+									 438  [Label Node]
+									
+									 439  aload_0 [this]
+									 440  getfield net.minecraft.client.gui.GuiTextField.fontRenderer : net.minecraft.client.gui.FontRenderer [71]
+									 443  iload 10 [flag2]
+									 445  aload_0 [this]
+									 446  getfield net.minecraft.client.gui.GuiTextField.suggestion : java.lang.String [327]
+									 449  iload 11 [k1]
+									 451  iload 8 [i1]
+									 453  invokestatic net.teamfruit.emojicord.compat.Compat$CompatTextFieldWidget.renderSuggestion(net.minecraft.client.gui.FontRenderer, boolean, java.lang.String, int, int) : void [329]
+									*/
+									final InsnList insertion = new InsnList();
+									insertion.add(new VarInsnNode(Opcodes.ALOAD, 0));
+									insertion.add(new FieldInsnNode(Opcodes.GETFIELD, getClassName().getBytecodeName(), ASMDeobfNames.GuiTextFieldFontRenderer.name(), DescHelper.toDesc(ClassName.of("net.minecraft.client.gui.FontRenderer"))));
+									insertion.add(new VarInsnNode(Opcodes.ILOAD, 10));
+									insertion.add(new VarInsnNode(Opcodes.ALOAD, 0));
+									insertion.add(new FieldInsnNode(Opcodes.GETFIELD, getClassName().getBytecodeName(), "suggestion", DescHelper.toDesc(ClassName.of("java.lang.String"))));
+									insertion.add(new VarInsnNode(Opcodes.ILOAD, 11));
+									insertion.add(new VarInsnNode(Opcodes.ILOAD, 8));
+									insertion.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ClassName.of("net.teamfruit.emojicord.compat.Compat$CompatTextFieldWidget").getBytecodeName(), "renderSuggestion", DescHelper.toDescMethod(void.class, ClassName.of("net.minecraft.client.gui.FontRenderer"), boolean.class, ClassName.of("java.lang.String"), int.class, int.class), false));
+									method.instructions.insert(marker0, insertion);
+									validator.check("drawTextBox.suggestion");
+								}
+							});
+				}
 			});
 		}
-
 		validator.validate();
 		return node;
 	}

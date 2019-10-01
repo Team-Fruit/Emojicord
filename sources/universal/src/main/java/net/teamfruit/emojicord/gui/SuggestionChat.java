@@ -213,7 +213,6 @@ public class SuggestionChat {
 
 		public void render() {
 			final int i = Math.min(this.suggestions.getList().size(), 10);
-			final int j = -5592406;
 			final boolean isScrollTop = this.scrollY>0;
 			final boolean isScrollBottom = this.suggestions.getList().size()>this.scrollY+i;
 			final boolean isScroll = isScrollTop||isScrollBottom;
@@ -249,7 +248,7 @@ public class SuggestionChat {
 					flag4 = true;
 				}
 
-				SuggestionChat.this.font.drawStringWithShadow(getEmojiDisplayText(suggestion.getText()), this.rectangle.getX()+1, this.rectangle.getY()+2+12*l, l+this.scrollY==this.selectedIndex ? -256 : j);
+				SuggestionChat.this.font.drawStringWithShadow(getEmojiDisplayText(suggestion.getText()), this.rectangle.getX()+1, this.rectangle.getY()+2+12*l, l+this.scrollY==this.selectedIndex ? 0xFFFFFF00 : 0xFFAAAAAA);
 			}
 
 			if (flag4) {
@@ -295,7 +294,7 @@ public class SuggestionChat {
 					cycle(CompatScreen.hasShiftDown() ? -1 : 1);
 				useSuggestion();
 				return true;
-			} else if (keyTyped==257||keyTyped==335&&EmojicordConfig.SUGGEST.enterSuggest.get()) {
+			} else if ((keyTyped==257||keyTyped==335)&&EmojicordConfig.SUGGEST.enterSuggest.get()) {
 				useSuggestion();
 				return true;
 			} else if (keyTyped==256) {
