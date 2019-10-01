@@ -60,9 +60,9 @@ public class SuggestionChat {
 		return this.suggestions!=null&&this.suggestions.mouseScrolled(scrollDelta);
 	}
 
-	public boolean onMouseInput(final double mouseX, final double mouseY) {
-		this.mouseX = (int) mouseX;
-		this.mouseY = (int) mouseY;
+	public boolean onMouseInput(final int mouseX, final int mouseY) {
+		this.mouseX = mouseX;
+		this.mouseY = mouseY;
 		return false;
 	}
 

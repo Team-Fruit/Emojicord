@@ -21,7 +21,7 @@ public class CompatEvents {
 			MinecraftForge.EVENT_BUS.register(this);
 		}
 
-		@SubscribeEvent()
+		@SubscribeEvent
 		public void onChat(final @Nonnull ClientChatEvent event) {
 			onChat(new CompatClientChatEvent(event));
 		}
@@ -29,7 +29,7 @@ public class CompatEvents {
 		@CoreEvent
 		public abstract void onChat(final @Nonnull CompatClientChatEvent event);
 
-		@SubscribeEvent()
+		@SubscribeEvent
 		public void onDraw(final @Nonnull RenderGameOverlayEvent.Post event) {
 			onDraw(new CompatRenderGameOverlayEvent.CompatPost(event));
 		}
@@ -45,13 +45,45 @@ public class CompatEvents {
 		@CoreEvent
 		public abstract void onText(final @Nonnull CompatRenderGameOverlayEvent.CompatText event);
 
-		@SubscribeEvent()
+		@SubscribeEvent
 		public void onDraw(final @Nonnull GuiScreenEvent.DrawScreenEvent.Post event) {
 			onDraw(new CompatGuiScreenEvent.CompatDrawScreenEvent.CompatPost(event));
 		}
 
 		@CoreEvent
 		public abstract void onDraw(final @Nonnull CompatGuiScreenEvent.CompatDrawScreenEvent.CompatPost event);
+
+		@SubscribeEvent
+		public void onInitGui(final @Nonnull GuiScreenEvent.InitGuiEvent.Post event) {
+			onInitGui(new CompatGuiScreenEvent.CompatInitGuiEvent.CompatPost(event));
+		}
+
+		@CoreEvent
+		public abstract void onInitGui(final @Nonnull CompatGuiScreenEvent.CompatInitGuiEvent.CompatPost event);
+
+		@SubscribeEvent
+		public void onMouseClicked(final @Nonnull GuiScreenEvent.MouseClickedEvent.Pre event) {
+			onMouseClicked(new CompatGuiScreenEvent.CompatMouseClickedEvent.CompatPre(event));
+		}
+
+		@CoreEvent
+		public abstract void onMouseClicked(final @Nonnull CompatGuiScreenEvent.CompatMouseClickedEvent.CompatPre event);
+
+		@SubscribeEvent
+		public void onMouseScroll(final @Nonnull GuiScreenEvent.MouseScrollEvent.Pre event) {
+			onMouseScroll(new CompatGuiScreenEvent.CompatMouseScrollEvent.CompatPre(event));
+		}
+
+		@CoreEvent
+		public abstract void onMouseScroll(final @Nonnull CompatGuiScreenEvent.CompatMouseScrollEvent.CompatPre event);
+
+		@SubscribeEvent
+		public void onKeyPressed(final @Nonnull GuiScreenEvent.KeyboardKeyPressedEvent.Pre event) {
+			onKeyPressed(new CompatGuiScreenEvent.CompatKeyboardKeyPressedEvent.CompatPre(event));
+		}
+
+		@CoreEvent
+		public abstract void onKeyPressed(final @Nonnull CompatGuiScreenEvent.CompatKeyboardKeyPressedEvent.CompatPre event);
 
 		@SubscribeEvent
 		public void onConfigChanged(final @Nonnull ConfigChangedEvent.OnConfigChangedEvent event) {
@@ -147,13 +179,13 @@ public class CompatEvents {
 			super(event);
 		}
 
+		public CompatScreen getGui() {
+			return new CompatScreen(this.event.getGui());
+		}
+
 		public static class CompatDrawScreenEvent extends CompatGuiScreenEvent<GuiScreenEvent.DrawScreenEvent> {
 			public CompatDrawScreenEvent(final GuiScreenEvent.DrawScreenEvent event) {
 				super(event);
-			}
-
-			public CompatScreen getGui() {
-				return new CompatScreen(this.event.getGui());
 			}
 
 			public int getMouseX() {
@@ -169,7 +201,67 @@ public class CompatEvents {
 			}
 
 			public static class CompatPost extends CompatDrawScreenEvent {
-				public CompatPost(final GuiScreenEvent.DrawScreenEvent event) {
+				public CompatPost(final GuiScreenEvent.DrawScreenEvent.Post event) {
+					super(event);
+				}
+			}
+		}
+
+		public static class CompatInitGuiEvent extends CompatGuiScreenEvent<GuiScreenEvent.InitGuiEvent> {
+			public CompatInitGuiEvent(final GuiScreenEvent.InitGuiEvent event) {
+				super(event);
+			}
+
+			public static class CompatPost extends CompatInitGuiEvent {
+				public CompatPost(final GuiScreenEvent.InitGuiEvent.Post event) {
+					super(event);
+				}
+			}
+		}
+
+		public static class CompatMouseClickedEvent extends CompatGuiScreenEvent<GuiScreenEvent.MouseClickedEvent> {
+			public CompatMouseClickedEvent(final GuiScreenEvent.MouseClickedEvent event) {
+				super(event);
+			}
+
+			public int getButton() {
+				return this.event.getButton();
+			}
+
+			public static class CompatPre extends CompatMouseClickedEvent {
+				public CompatPre(final GuiScreenEvent.MouseClickedEvent.Pre event) {
+					super(event);
+				}
+			}
+		}
+
+		public static class CompatMouseScrollEvent extends CompatGuiScreenEvent<GuiScreenEvent.MouseScrollEvent> {
+			public CompatMouseScrollEvent(final GuiScreenEvent.MouseScrollEvent event) {
+				super(event);
+			}
+
+			public double getScrollDelta() {
+				return this.event.getScrollDelta();
+			}
+
+			public static class CompatPre extends CompatMouseScrollEvent {
+				public CompatPre(final GuiScreenEvent.MouseScrollEvent.Pre event) {
+					super(event);
+				}
+			}
+		}
+
+		public static class CompatKeyboardKeyPressedEvent extends CompatGuiScreenEvent<GuiScreenEvent.KeyboardKeyPressedEvent> {
+			public CompatKeyboardKeyPressedEvent(final GuiScreenEvent.KeyboardKeyPressedEvent event) {
+				super(event);
+			}
+
+			public int getKeyCode() {
+				return this.event.getKeyCode();
+			}
+
+			public static class CompatPre extends CompatKeyboardKeyPressedEvent {
+				public CompatPre(final GuiScreenEvent.KeyboardKeyPressedEvent.Pre event) {
 					super(event);
 				}
 			}

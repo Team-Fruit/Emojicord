@@ -26,7 +26,7 @@ public class EmojicordConfig {
 		public final CompatConfigSpec.ConfigValue<Boolean> enterSuggest;
 
 		public Suggest(final CompatConfigSpec.Builder builder) {
-			builder.push("Render");
+			builder.push("Suggest");
 			this.autoSuggest = builder
 					.comment("Enables/Disables auto suggest")
 					.translation("config.emojicord.suggest.enabled")
@@ -34,7 +34,7 @@ public class EmojicordConfig {
 			this.enterSuggest = builder
 					.comment("Enter key to suggest")
 					.translation("config.emojicord.suggest.enter")
-					.define("Enabled", true);
+					.define("EnterToSuggest", true);
 			builder.pop();
 		}
 	}

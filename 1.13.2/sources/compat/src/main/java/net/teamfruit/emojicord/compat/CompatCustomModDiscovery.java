@@ -25,7 +25,7 @@ import net.teamfruit.emojicord.Log;
 
 // Since FML does not load this mod that implements ITransformerService, load it manually.
 public class CompatCustomModDiscovery extends AbstractJarFileLocator implements CompatBaseCustomModDiscovery {
-	private List<Path> modList = Lists.newArrayList();
+	private final List<Path> modList = Lists.newArrayList();
 
 	@Override
 	public void registerModList(final List<Path> modList) {

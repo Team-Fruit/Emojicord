@@ -43,8 +43,11 @@ public class EventHandler extends CompatHandler {
 
 	@Override
 	public void onDraw(final CompatGuiScreenEvent.CompatDrawScreenEvent.CompatPost event) {
-		if (this.chat!=null&&this.chat.onDraw())
-			event.setCanceled(true);
+		if (this.chat!=null) {
+			this.chat.onMouseInput(event.getMouseX(), event.getMouseY());
+			if (this.chat.onDraw())
+				event.setCanceled(true);
+		}
 	}
 
 	@Override
@@ -56,12 +59,6 @@ public class EventHandler extends CompatHandler {
 	@Override
 	public void onMouseScroll(final CompatGuiScreenEvent.CompatMouseScrollEvent.CompatPre event) {
 		if (this.chat!=null&&this.chat.onMouseScroll(event.getScrollDelta()))
-			event.setCanceled(true);
-	}
-
-	@Override
-	public void onMouseInput(final CompatGuiScreenEvent.CompatMouseInputEvent event) {
-		if (this.chat!=null&&this.chat.onMouseInput(event.getMouseX(), event.getMouseY()))
 			event.setCanceled(true);
 	}
 

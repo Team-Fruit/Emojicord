@@ -78,14 +78,6 @@ public class CompatEvents {
 		public abstract void onMouseScroll(final @Nonnull CompatGuiScreenEvent.CompatMouseScrollEvent.CompatPre event);
 
 		@SubscribeEvent
-		public void onMouseInput(final @Nonnull GuiScreenEvent.MouseInputEvent event) {
-			onMouseInput(new CompatGuiScreenEvent.CompatMouseInputEvent(event));
-		}
-
-		@CoreEvent
-		public abstract void onMouseInput(final @Nonnull CompatGuiScreenEvent.CompatMouseInputEvent event);
-
-		@SubscribeEvent
 		public void onKeyPressed(final @Nonnull GuiScreenEvent.KeyboardKeyPressedEvent.Pre event) {
 			onKeyPressed(new CompatGuiScreenEvent.CompatKeyboardKeyPressedEvent.CompatPre(event));
 		}
@@ -256,20 +248,6 @@ public class CompatEvents {
 				public CompatPre(final GuiScreenEvent.MouseScrollEvent.Pre event) {
 					super(event);
 				}
-			}
-		}
-
-		public static class CompatMouseInputEvent extends CompatGuiScreenEvent<GuiScreenEvent.MouseInputEvent> {
-			public CompatMouseInputEvent(final GuiScreenEvent.MouseInputEvent event) {
-				super(event);
-			}
-
-			public double getMouseX() {
-				return this.event.getMouseX();
-			}
-
-			public double getMouseY() {
-				return this.event.getMouseY();
 			}
 		}
 
