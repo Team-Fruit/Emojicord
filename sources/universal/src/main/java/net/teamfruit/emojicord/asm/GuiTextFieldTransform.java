@@ -39,11 +39,14 @@ public class GuiTextFieldTransform implements INodeTreeTransformer {
 		validator.test("drawTextBox.begin");
 		validator.test("drawTextBox.return");
 		validator.test("drawTextBox.suggestion", !CompatVersion.version().newer(CompatBaseVersion.V13));
+		validator.test("drawTextBox.suggestion.field", !CompatVersion.version().newer(CompatBaseVersion.V13));
 
 		if (!CompatVersion.version().newer(CompatBaseVersion.V13)) {
 			final FieldMatcher matcher = new FieldMatcher(getClassName(), DescHelper.toDesc(ClassName.of("java.lang.String")), RefName.name("suggestion"));
-			if (node.fields.stream().noneMatch(matcher))
+			if (node.fields.stream().noneMatch(matcher)) {
 				node.fields.add(new FieldNode(Opcodes.ACC_PUBLIC, "suggestion", DescHelper.toDesc(ClassName.of("java.lang.String")), null, null));
+				validator.check("drawTextBox.suggestion.field");
+			}
 		}
 
 		{
@@ -81,7 +84,12 @@ public class GuiTextFieldTransform implements INodeTreeTransformer {
 					}
 				});
 				if (!CompatVersion.version().newer(CompatBaseVersion.V13)) {
-					final MethodMatcher matcher0 = new MethodMatcher(ClassName.of("net.minecraft.client.gui.FontRenderer"), DescHelper.toDescMethod(int.class, ClassName.of("java.lang.String"), float.class, float.class, int.class), ASMDeobfNames.FontRendererDrawStringWithShadow);
+					final MethodMatcher matcher0 = ((Supplier<MethodMatcher>) () -> {
+						if (CompatVersion.version().older(CompatBaseVersion.V7))
+							return new MethodMatcher(ClassName.of("net.minecraft.client.gui.FontRenderer"), DescHelper.toDescMethod(int.class, ClassName.of("java.lang.String"), int.class, int.class, int.class), ASMDeobfNames.FontRendererDrawStringWithShadow);
+						else
+							return new MethodMatcher(ClassName.of("net.minecraft.client.gui.FontRenderer"), DescHelper.toDescMethod(int.class, ClassName.of("java.lang.String"), float.class, float.class, int.class), ASMDeobfNames.FontRendererDrawStringWithShadow);
+					}).get();
 					final Optional<AbstractInsnNode> marker1 = VisitorHelper.stream(method.instructions).filter(e -> {
 						return e instanceof VarInsnNode&&e.getOpcode()==Opcodes.ISTORE&&((VarInsnNode) e).var==10;
 					}).findFirst();

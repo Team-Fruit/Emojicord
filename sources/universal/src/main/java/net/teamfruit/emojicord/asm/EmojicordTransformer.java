@@ -32,6 +32,7 @@ public class EmojicordTransformer extends CompatTransformer {
 			new SendChatMessageTransform(),
 			new GuiTextFieldTransform(),
 			new FontRendererTransform(),
+			new GuiScreenInputEventTransform(),
 	};
 
 	private final Set<String> transformerNames = Stream.of(this.transformers).map(INodeTransformer::getClassName).map(ClassName::getName).collect(Collectors.toSet());

@@ -6,6 +6,10 @@ import cpw.mods.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper;
 import net.minecraft.launchwrapper.Launch;
 
 public class CompatFMLDeobfuscatingRemapper {
+	public static @Nonnull String mapDesc(@Nonnull final String desc) {
+		return FMLDeobfuscatingRemapper.INSTANCE.mapDesc(desc);
+	}
+
 	public static @Nonnull String mapMethodDesc(@Nonnull final String desc) {
 		return FMLDeobfuscatingRemapper.INSTANCE.mapMethodDesc(desc);
 	}
@@ -14,12 +18,12 @@ public class CompatFMLDeobfuscatingRemapper {
 		return FMLDeobfuscatingRemapper.INSTANCE.mapFieldName(owner, name, desc);
 	}
 
-	public static @Nonnull String unmap(@Nonnull final String typeName) {
-		return FMLDeobfuscatingRemapper.INSTANCE.unmap(typeName);
-	}
-
 	public static @Nonnull String mapMethodName(@Nonnull final String owner, @Nonnull final String name, @Nonnull final String desc) {
 		return FMLDeobfuscatingRemapper.INSTANCE.mapMethodName(owner, name, desc);
+	}
+
+	public static @Nonnull String unmap(@Nonnull final String typeName) {
+		return FMLDeobfuscatingRemapper.INSTANCE.unmap(typeName);
 	}
 
 	public static boolean useMcpNames() {

@@ -31,10 +31,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.ChatLine;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.GuiNewChat;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.network.NetHandlerPlayClient;
-import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -712,11 +713,96 @@ public class Compat {
 		public GuiScreen getScreenObj() {
 			return this.screen;
 		}
+
+		public int getWidth() {
+			return this.screen.width;
+		}
+
+		public int getHeight() {
+			return this.screen.height;
+		}
+
+		public static boolean hasShiftDown() {
+			return GuiScreen.isShiftKeyDown();
+		}
+	}
+
+	public static class CompatChatScreen {
+		private final GuiChat chatScreen;
+
+		public CompatChatScreen(final GuiChat chatScreen) {
+			this.chatScreen = chatScreen;
+		}
+
+		public CompatTextFieldWidget getTextField() {
+			return new CompatTextFieldWidget(this.chatScreen.inputField);
+		}
+
+		public @Nonnull CompatScreen cast() {
+			return new CompatScreen(this.chatScreen);
+		}
+
+		public static @Nullable CompatChatScreen cast(final CompatScreen screen) {
+			if (screen.screen instanceof GuiChat)
+				return new CompatChatScreen((GuiChat) screen.screen);
+			return null;
+		}
+	}
+
+	public static class CompatTextFieldWidget {
+		private final GuiTextField textField;
+		private final CompatFontRenderer font;
+
+		public CompatTextFieldWidget(final GuiTextField inputField) {
+			this.textField = inputField;
+			this.font = CompatMinecraft.getMinecraft().getFontRenderer();
+		}
+
+		public String getText() {
+			return this.textField.getText();
+		}
+
+		public void setText(final String apply) {
+			this.textField.setText(apply);
+		}
+
+		public int getInsertPos(final int start) {
+			final String text = this.textField.getText();
+			if (start>text.length())
+				return this.textField.xPosition;
+			return this.textField.xPosition+this.font.getStringWidth(text.substring(0, start));
+		}
+
+		public void setSuggestion(final String string) {
+			try {
+				this.textField.getClass().getField("suggestion").set(this.textField, string);
+			} catch (final ReflectiveOperationException e) {
+				throw new RuntimeException("Could not set suggestion: ", e);
+			}
+		}
+
+		public int getCursorPosition() {
+			return this.textField.getCursorPosition();
+		}
+
+		public void setCursorPosition(final int i) {
+			this.textField.setCursorPosition(i);
+		}
+
+		public void setSelectionPos(final int i) {
+			this.textField.setSelectionPos(i);
+		}
+
+		@CoreInvoke
+		public static void renderSuggestion(final FontRenderer font, final boolean flag, final String suggestion, final int posX, final int posY) {
+			if (!flag&&suggestion!=null)
+				font.drawStringWithShadow(suggestion, posX-1, posY, 0xFF808080);
+		}
 	}
 
 	public static class CompatGuiConfig extends GuiConfig {
 		public CompatGuiConfig(final CompatScreen parentScreen, final List<CompatConfigElement> configElements, final String modID, final boolean allRequireWorldRestart, final boolean allRequireMcRestart, final String title) {
-			super(parentScreen.screen, CompatConfigElement.getConfigElements(configElements), modID, allRequireWorldRestart, allRequireMcRestart, GuiConfig.getAbridgedConfigPath(title));
+			super(parentScreen.getScreenObj(), CompatConfigElement.getConfigElements(configElements), modID, allRequireWorldRestart, allRequireMcRestart, GuiConfig.getAbridgedConfigPath(title));
 		}
 	}
 
@@ -968,93 +1054,6 @@ public class Compat {
 	public static class CompatBakedModel {
 	}
 
-	public static class CompatVertex {
-		private static class CompatBaseVertexImpl implements CompatBaseVertex {
-			public static final @Nonnull Tessellator t = Tessellator.instance;
-
-			public CompatBaseVertexImpl() {
-			}
-
-			@Override
-			public void draw() {
-				endVertex();
-				t.draw();
-			}
-
-			@Override
-			public CompatBaseVertex begin(final int mode) {
-				t.startDrawing(mode);
-				init();
-				return this;
-			}
-
-			@Override
-			public CompatBaseVertex beginTexture(final int mode) {
-				t.startDrawing(mode);
-				init();
-				return this;
-			}
-
-			private void init() {
-				this.stack = false;
-			}
-
-			private boolean stack;
-			private double stack_x;
-			private double stack_y;
-			private double stack_z;
-
-			@Override
-			public CompatBaseVertex pos(final double x, final double y, final double z) {
-				endVertex();
-				this.stack_x = x;
-				this.stack_y = y;
-				this.stack_z = z;
-				this.stack = true;
-				return this;
-			}
-
-			@Override
-			public CompatBaseVertex tex(final double u, final double v) {
-				t.setTextureUV(u, v);
-				return this;
-			}
-
-			@Override
-			public CompatBaseVertex color(final float red, final float green, final float blue, final float alpha) {
-				return this.color((int) (red*255.0F), (int) (green*255.0F), (int) (blue*255.0F), (int) (alpha*255.0F));
-			}
-
-			@Override
-			public CompatBaseVertex color(final int red, final int green, final int blue, final int alpha) {
-				t.setColorRGBA(red, green, blue, alpha);
-				return this;
-			}
-
-			@Override
-			public CompatBaseVertex normal(final float nx, final float ny, final float nz) {
-				t.setNormal(nx, ny, nz);
-				return this;
-			}
-
-			@Override
-			public void setTranslation(final double x, final double y, final double z) {
-				t.setTranslation(x, y, z);
-			}
-
-			private void endVertex() {
-				if (this.stack) {
-					this.stack = false;
-					t.addVertex(this.stack_x, this.stack_y, this.stack_z);
-				}
-			}
-		}
-
-		public static @Nonnull CompatBaseVertex getTessellator() {
-			return new CompatBaseVertexImpl();
-		}
-	}
-
 	public static class CompatTexture {
 		private final CompatSimpleTexture texture;
 
@@ -1151,7 +1150,12 @@ public class Compat {
 	}
 
 	public static abstract class CompatGlyph {
-		public CompatGlyph(final ResourceLocation texture, final float width, final float height) {
+		public CompatGlyph(final float width, final float height) {
+		}
+	}
+
+	public static abstract class CompatTexturedGlyph {
+		public CompatTexturedGlyph(final ResourceLocation texture, final float width, final float height) {
 		}
 
 		public void onRender(final TextureManager textureManager, final boolean hasShadow, final float x, final float y, final CompatBufferBuilder vbuilder, final float red, final float green, final float blue, final float alpha) {
