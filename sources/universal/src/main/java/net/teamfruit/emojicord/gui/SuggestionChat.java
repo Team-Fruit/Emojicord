@@ -301,6 +301,7 @@ public class SuggestionChat {
 				hide();
 				return true;
 			} else if (keyTyped==262||keyTyped==263) {
+				SuggestionChat.this.inputField.setSuggestion("");
 				hide();
 				return false;
 			} else

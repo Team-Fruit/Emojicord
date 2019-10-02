@@ -38,9 +38,9 @@ public class GuiTextFieldTransform implements INodeTreeTransformer {
 		final ASMValidate validator = ASMValidate.create(getSimpleName());
 		validator.test("drawTextBox.begin");
 		validator.test("drawTextBox.return");
-		validator.test("drawTextBox.suggestion", CompatVersion.version().older(CompatBaseVersion.V11));
+		validator.test("drawTextBox.suggestion", !CompatVersion.version().newer(CompatBaseVersion.V13));
 
-		if (CompatVersion.version().older(CompatBaseVersion.V11)) {
+		if (!CompatVersion.version().newer(CompatBaseVersion.V13)) {
 			final FieldMatcher matcher = new FieldMatcher(getClassName(), DescHelper.toDesc(ClassName.of("java.lang.String")), RefName.name("suggestion"));
 			if (node.fields.stream().noneMatch(matcher))
 				node.fields.add(new FieldNode(Opcodes.ACC_PUBLIC, "suggestion", DescHelper.toDesc(ClassName.of("java.lang.String")), null, null));
@@ -48,7 +48,7 @@ public class GuiTextFieldTransform implements INodeTreeTransformer {
 
 		{
 			final MethodMatcher matcher = ((Supplier<MethodMatcher>) () -> {
-				if (CompatVersion.version().older(CompatBaseVersion.V11))
+				if (!CompatVersion.version().newer(CompatBaseVersion.V13))
 					return new MethodMatcher(getClassName(), DescHelper.toDescMethod(void.class, int.class), ASMDeobfNames.GuiTextFieldDrawTextBox);
 				else
 					return new MethodMatcher(getClassName(), DescHelper.toDescMethod(void.class, int.class, int.class, float.class), ASMDeobfNames.GuiTextFieldDrawTextField);
@@ -80,7 +80,7 @@ public class GuiTextFieldTransform implements INodeTreeTransformer {
 						validator.checks("drawTextBox.return");
 					}
 				});
-				if (CompatVersion.version().older(CompatBaseVersion.V11)) {
+				if (!CompatVersion.version().newer(CompatBaseVersion.V13)) {
 					final MethodMatcher matcher0 = new MethodMatcher(ClassName.of("net.minecraft.client.gui.FontRenderer"), DescHelper.toDescMethod(int.class, ClassName.of("java.lang.String"), float.class, float.class, int.class), ASMDeobfNames.FontRendererDrawStringWithShadow);
 					final Optional<AbstractInsnNode> marker1 = VisitorHelper.stream(method.instructions).filter(e -> {
 						return e instanceof VarInsnNode&&e.getOpcode()==Opcodes.ISTORE&&((VarInsnNode) e).var==10;

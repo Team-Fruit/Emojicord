@@ -40,11 +40,11 @@ public class FontRendererTransform implements INodeTreeTransformer {
 		validator.test("getStringWidth.updateEmojiContext");
 		validator.test("getStringWidth.findGlyph", CompatVersion.version().newer(CompatBaseVersion.V13));
 		validator.test("getCharWidth.width");
-		validator.test("renderChar", CompatVersion.version().older(CompatBaseVersion.V11));
+		validator.test("renderChar", !CompatVersion.version().newer(CompatBaseVersion.V13));
 
 		{
 			final MethodMatcher matcher = ((Supplier<MethodMatcher>) () -> {
-				if (CompatVersion.version().older(CompatBaseVersion.V11))
+				if (!CompatVersion.version().newer(CompatBaseVersion.V13))
 					return new MethodMatcher(getClassName(), DescHelper.toDescMethod(void.class, ClassName.of("java.lang.String"), boolean.class), ASMDeobfNames.FontRendererRenderStringAtPos);
 				else
 					return new MethodMatcher(getClassName(), DescHelper.toDescMethod(float.class, ClassName.of("java.lang.String"), float.class, float.class, int.class, boolean.class), ASMDeobfNames.FontRendererRenderStringAtPos);
@@ -64,7 +64,7 @@ public class FontRendererTransform implements INodeTreeTransformer {
 					validator.check("renderStringAtPos.updateEmojiContext");
 				}
 
-				if (CompatVersion.version().older(CompatBaseVersion.V11)) {
+				if (!CompatVersion.version().newer(CompatBaseVersion.V13)) {
 					final MethodMatcher matcher0 = ((Supplier<MethodMatcher>) () -> {
 						if (CompatVersion.version().older(CompatBaseVersion.V7))
 							return new MethodMatcher(getClassName(), DescHelper.toDescMethod(float.class, int.class, char.class, boolean.class), ASMDeobfNames.FontRendererRenderCharAtPos);
@@ -315,7 +315,7 @@ public class FontRendererTransform implements INodeTreeTransformer {
 		}
 		{
 			final MethodMatcher matcher = ((Supplier<MethodMatcher>) () -> {
-				if (CompatVersion.version().older(CompatBaseVersion.V11))
+				if (!CompatVersion.version().newer(CompatBaseVersion.V13))
 					return new MethodMatcher(getClassName(), DescHelper.toDescMethod(int.class, char.class), ASMDeobfNames.FontRendererGetCharWidth);
 				else
 					return new MethodMatcher(getClassName(), DescHelper.toDescMethod(float.class, char.class), ASMDeobfNames.FontRendererGetCharWidth);
@@ -335,7 +335,7 @@ public class FontRendererTransform implements INodeTreeTransformer {
 					insertion.add(new IntInsnNode(Opcodes.BIPUSH, '\u0000'));
 					final LabelNode label = new LabelNode();
 					insertion.add(new JumpInsnNode(Opcodes.IF_ICMPNE, label));
-					if (CompatVersion.version().older(CompatBaseVersion.V11)) {
+					if (!CompatVersion.version().newer(CompatBaseVersion.V13)) {
 						insertion.add(new IntInsnNode(Opcodes.BIPUSH, 10));
 						insertion.add(new InsnNode(Opcodes.IRETURN));
 					} else {
@@ -348,7 +348,7 @@ public class FontRendererTransform implements INodeTreeTransformer {
 				}
 			});
 		}
-		if (CompatVersion.version().older(CompatBaseVersion.V11)) {
+		if (!CompatVersion.version().newer(CompatBaseVersion.V13)) {
 			final MethodMatcher matcher = ((Supplier<MethodMatcher>) () -> {
 				if (CompatVersion.version().older(CompatBaseVersion.V7))
 					return new MethodMatcher(getClassName(), DescHelper.toDescMethod(float.class, int.class, char.class, boolean.class), ASMDeobfNames.FontRendererRenderCharAtPos);

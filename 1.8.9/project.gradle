@@ -1,0 +1,3 @@
+dependencies {
+	shade 'com.mojang:brigadier:1.0.17'
+}

@@ -12,7 +12,12 @@ public class ASMDeobfNames {
 	//public static final @Nonnull RefName GuiDrawRect = RefName.deobName("drawRect", "func_73734_a");
 	public static final @Nonnull RefName GuiScreenSendChatMessage = RefName.deobName("sendChatMessage", "func_175281_b");
 	public static final @Nonnull RefName GuiChatSendChatMessage = RefName.deobName("func_146403_a", "func_146403_a");
-	public static final @Nonnull RefName GuiTextFieldFontRenderer = RefName.deobName("fontRenderer", "field_146211_a");
+	public static final @Nonnull RefName GuiTextFieldFontRenderer = ((Supplier<RefName>) () -> {
+		if (CompatVersion.version().older(CompatBaseVersion.V11))
+			return RefName.deobName("fontRendererInstance", "field_146211_a");
+		else
+			return RefName.deobName("fontRenderer", "field_146211_a");
+	}).get();
 	public static final @Nonnull RefName GuiTextFieldDrawTextBox = RefName.deobName("drawTextBox", "func_146194_f");
 	public static final @Nonnull RefName GuiTextFieldDrawTextField = ((Supplier<RefName>) () -> {
 		if (CompatVersion.version().older(CompatBaseVersion.V13))
@@ -22,7 +27,7 @@ public class ASMDeobfNames {
 	}).get();
 	public static final @Nonnull RefName FontRendererDrawStringWithShadow = RefName.deobName("drawStringWithShadow", "func_175063_a");
 	public static final @Nonnull RefName FontRendererRenderStringAtPos = ((Supplier<RefName>) () -> {
-		if (CompatVersion.version().older(CompatBaseVersion.V11))
+		if (!CompatVersion.version().newer(CompatBaseVersion.V13))
 			return RefName.deobName("renderStringAtPos", "func_78255_a");
 		else
 			return RefName.deobName("renderStringAtPos", "func_211843_b");
@@ -37,7 +42,7 @@ public class ASMDeobfNames {
 	}).get();
 	public static final @Nonnull RefName FontRendererGetStringWidth = RefName.deobName("getStringWidth", "func_78256_a");
 	public static final @Nonnull RefName FontRendererGetCharWidth = ((Supplier<RefName>) () -> {
-		if (CompatVersion.version().older(CompatBaseVersion.V11))
+		if (!CompatVersion.version().newer(CompatBaseVersion.V13))
 			return RefName.deobName("getCharWidth", "func_78263_a");
 		else
 			return RefName.deobName("getCharWidth", "func_211125_a");
