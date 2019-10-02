@@ -29,7 +29,7 @@ import net.teamfruit.emojicord.compat.OpenGL;
 import net.teamfruit.emojicord.emoji.DiscordEmojiIdDictionary;
 import net.teamfruit.emojicord.emoji.StandardEmojiIdDictionary;
 
-public class SuggestionChat {
+public class SuggestionChat implements IChatOverlay {
 	public final CompatScreen screen;
 	public final CompatChatScreen chatScreen;
 	public final CompatTextFieldWidget inputField;
@@ -47,6 +47,7 @@ public class SuggestionChat {
 		this.inputField = chatScreen.getTextField();
 	}
 
+	@Override
 	public boolean onDraw() {
 		if (this.suggestions!=null)
 			this.suggestions.render();
@@ -54,20 +55,24 @@ public class SuggestionChat {
 		return false;
 	}
 
+	@Override
 	public boolean onMouseClicked(final int button) {
 		return this.suggestions!=null&&this.suggestions.mouseClicked(button);
 	}
 
+	@Override
 	public boolean onMouseScroll(final double scrollDelta) {
 		return this.suggestions!=null&&this.suggestions.mouseScrolled(scrollDelta);
 	}
 
+	@Override
 	public boolean onMouseInput(final int mouseX, final int mouseY) {
 		this.mouseX = mouseX;
 		this.mouseY = mouseY;
 		return false;
 	}
 
+	@Override
 	public boolean onKeyPressed(final int keycode) {
 		if (this.suggestions!=null&&this.suggestions.keyPressed(keycode))
 			return true;
