@@ -21,7 +21,9 @@ import net.teamfruit.emojicord.compat.Compat.CompatFontRenderer;
 import net.teamfruit.emojicord.compat.Compat.CompatMinecraft;
 import net.teamfruit.emojicord.compat.Compat.CompatScreen;
 import net.teamfruit.emojicord.compat.Compat.CompatTextFieldWidget;
+import net.teamfruit.emojicord.compat.CompatBaseVersion;
 import net.teamfruit.emojicord.compat.CompatBaseVertex;
+import net.teamfruit.emojicord.compat.CompatVersion;
 import net.teamfruit.emojicord.compat.CompatVertex;
 import net.teamfruit.emojicord.compat.OpenGL;
 import net.teamfruit.emojicord.emoji.DiscordEmojiIdDictionary;
@@ -300,7 +302,7 @@ public class SuggestionChat {
 			} else if (keyTyped==256) {
 				hide();
 				return true;
-			} else if (keyTyped==262||keyTyped==263) {
+			} else if ((keyTyped==262||keyTyped==263)&&!CompatVersion.version().newer(CompatBaseVersion.V13)) {
 				SuggestionChat.this.inputField.setSuggestion("");
 				hide();
 				return false;

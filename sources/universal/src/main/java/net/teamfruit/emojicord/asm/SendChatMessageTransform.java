@@ -16,7 +16,7 @@ import net.teamfruit.emojicord.asm.lib.MethodMatcher;
 import net.teamfruit.emojicord.compat.CompatBaseVersion;
 import net.teamfruit.emojicord.compat.CompatVersion;
 
-public class GuiScreenTransform implements INodeTreeTransformer {
+public class SendChatMessageTransform implements INodeTreeTransformer {
 	@Override
 	public ClassName getClassName() {
 		if (CompatVersion.version().older(CompatBaseVersion.V7))

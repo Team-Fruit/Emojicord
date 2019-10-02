@@ -29,7 +29,7 @@ public class EmojicordTransformer extends CompatTransformer {
 	}
 
 	private final INodeTreeTransformer transformers[] = {
-			new GuiScreenTransform(),
+			new SendChatMessageTransform(),
 			new GuiTextFieldTransform(),
 			new FontRendererTransform(),
 	};

@@ -1,11 +1,3 @@
-/*
- * This class is from the OpenModsLib.
- * https://github.com/OpenMods/OpenModsLib
- *
- * Code Copyright (c) 2013 Open Mods
- * Code released under the MIT license
- * https://github.com/OpenMods/OpenModsLib/blob/master/LICENSE
- */
 package net.teamfruit.emojicord.asm.lib;
 
 import java.util.function.Predicate;
@@ -30,10 +22,8 @@ public class MethodMatcher implements Predicate<MethodNode> {
 	}
 
 	public boolean match(final @Nonnull String methodName, final @Nonnull String methodDesc) {
-		if (methodName.equals(this.refname.mcpName()))
-			return true;
 		if (CompatFMLDeobfuscatingRemapper.useMcpNames())
-			return false;
+			return methodName.equals(this.refname.mcpName())&&methodDesc.equals(this.description);
 		final String srgMethodDesc = CompatFMLDeobfuscatingRemapper.mapMethodDesc(methodDesc);
 		if (!srgMethodDesc.equals(this.description))
 			return false;

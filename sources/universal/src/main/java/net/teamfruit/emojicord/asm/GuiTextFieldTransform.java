@@ -49,7 +49,7 @@ public class GuiTextFieldTransform implements INodeTreeTransformer {
 		{
 			final MethodMatcher matcher = ((Supplier<MethodMatcher>) () -> {
 				if (!CompatVersion.version().newer(CompatBaseVersion.V13))
-					return new MethodMatcher(getClassName(), DescHelper.toDescMethod(void.class, int.class), ASMDeobfNames.GuiTextFieldDrawTextBox);
+					return new MethodMatcher(getClassName(), DescHelper.toDescMethod(void.class), ASMDeobfNames.GuiTextFieldDrawTextBox);
 				else
 					return new MethodMatcher(getClassName(), DescHelper.toDescMethod(void.class, int.class, int.class, float.class), ASMDeobfNames.GuiTextFieldDrawTextField);
 			}).get();

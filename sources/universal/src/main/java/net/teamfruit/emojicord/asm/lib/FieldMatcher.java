@@ -1,11 +1,3 @@
-/*
- * This class is from the OpenModsLib.
- * https://github.com/OpenMods/OpenModsLib
- *
- * Code Copyright (c) 2013 Open Mods
- * Code released under the MIT license
- * https://github.com/OpenMods/OpenModsLib/blob/master/LICENSE
- */
 package net.teamfruit.emojicord.asm.lib;
 
 import java.util.function.Predicate;
@@ -30,11 +22,10 @@ public class FieldMatcher implements Predicate<FieldNode> {
 	}
 
 	public boolean match(final @Nonnull String fieldName, final @Nonnull String fieldDesc) {
-		if (!fieldDesc.equals(this.description))
-			return false;
-		if (fieldName.equals(this.refname.mcpName()))
-			return true;
 		if (CompatFMLDeobfuscatingRemapper.useMcpNames())
+			return fieldName.equals(this.refname.mcpName())&&fieldDesc.equals(this.description);
+		final String srgDesc = CompatFMLDeobfuscatingRemapper.mapDesc(fieldDesc);
+		if (!srgDesc.equals(this.description))
 			return false;
 		final String srgFieldName = CompatFMLDeobfuscatingRemapper.mapFieldName(CompatFMLDeobfuscatingRemapper.unmap(this.clsName.getBytecodeName()), fieldName, fieldDesc);
 		return srgFieldName.equals(this.refname.srgName());
