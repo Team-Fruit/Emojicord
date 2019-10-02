@@ -16,8 +16,10 @@ import org.objectweb.asm.tree.VarInsnNode;
 import net.teamfruit.emojicord.asm.lib.ASMValidate;
 import net.teamfruit.emojicord.asm.lib.ClassName;
 import net.teamfruit.emojicord.asm.lib.DescHelper;
+import net.teamfruit.emojicord.asm.lib.FieldMatcher;
 import net.teamfruit.emojicord.asm.lib.INodeTreeTransformer;
 import net.teamfruit.emojicord.asm.lib.MethodMatcher;
+import net.teamfruit.emojicord.asm.lib.RefName;
 import net.teamfruit.emojicord.asm.lib.VisitorHelper;
 import net.teamfruit.emojicord.compat.CompatBaseVersion;
 import net.teamfruit.emojicord.compat.CompatVersion;
@@ -38,7 +40,11 @@ public class GuiTextFieldTransform implements INodeTreeTransformer {
 		validator.test("drawTextBox.return");
 		validator.test("drawTextBox.suggestion", CompatVersion.version().older(CompatBaseVersion.V11));
 
-		node.fields.add(new FieldNode(Opcodes.ACC_PUBLIC, "suggestion", DescHelper.toDesc(ClassName.of("java.lang.String")), null, null));
+		if (CompatVersion.version().older(CompatBaseVersion.V11)) {
+			final FieldMatcher matcher = new FieldMatcher(getClassName(), DescHelper.toDesc(ClassName.of("java.lang.String")), RefName.name("suggestion"));
+			if (node.fields.stream().noneMatch(matcher))
+				node.fields.add(new FieldNode(Opcodes.ACC_PUBLIC, "suggestion", DescHelper.toDesc(ClassName.of("java.lang.String")), null, null));
+		}
 
 		{
 			final MethodMatcher matcher = ((Supplier<MethodMatcher>) () -> {

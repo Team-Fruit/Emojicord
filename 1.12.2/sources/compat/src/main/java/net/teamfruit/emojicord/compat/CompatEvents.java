@@ -82,7 +82,7 @@ public class CompatEvents {
 
 		@SubscribeEvent
 		public void onMouseScroll(final @Nonnull GuiScreenEvent.MouseInputEvent.Pre event) {
-			final int dwheel = Mouse.getEventDWheel();
+			final int dwheel = Integer.valueOf(Mouse.getEventDWheel()).compareTo(0);
 			if (dwheel!=0)
 				onMouseScroll(new CompatGuiScreenEvent.CompatMouseScrollEvent.CompatPre(event, dwheel));
 		}
@@ -92,12 +92,14 @@ public class CompatEvents {
 
 		private final Map<Integer, Integer> lwjgl2glfwKeyMappings = ((Supplier<Map<Integer, Integer>>) () -> {
 			final Map<Integer, Integer> map = Maps.newHashMap();
-			map.put(200, 265); //	KEY_UP		200	265
+			map.put(205, 262); //	KEY_RIGHT		205	262
+			map.put(203, 263); //	KEY_LEFT		203	263
 			map.put(208, 264); //	KEY_DOWN		208	264
-			map.put(15, 258); //	KEY_TAB		15	258
-			map.put(28, 257); //	KEY_ENTER	28	257
+			map.put(200, 265); //	KEY_UP			200	265
+			map.put(15, 258); //	KEY_TAB			15	258
+			map.put(28, 257); //	KEY_ENTER		28	257
 			map.put(156, 335); //	KEY_KP_ENTER	156	335
-			map.put(1, 256); //		KEY_ESC		1	256
+			map.put(1, 256); //		KEY_ESC			1	256
 			return map;
 		}).get();
 

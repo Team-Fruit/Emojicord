@@ -300,6 +300,9 @@ public class SuggestionChat {
 			} else if (keyTyped==256) {
 				hide();
 				return true;
+			} else if (keyTyped==262||keyTyped==263) {
+				hide();
+				return false;
 			} else
 				return false;
 		}
