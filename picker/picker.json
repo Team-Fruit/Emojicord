@@ -52,12 +52,7 @@
         ":tired_face:",
         ":weary:",
         ":triumph:",
-        ":open_mouth:"
-      ]
-    },
-    {
-      "name": "PEOPLE",
-      "emojis": [
+        ":open_mouth:",
         ":scream:",
         ":fearful:",
         ":cold_sweat:",
@@ -567,10 +562,6 @@
       ]
     },
     {
-      "name": "ACTIVITIES",
-      "emojis": []
-    },
-    {
       "name": "TRAVEL",
       "emojis": [
         ":red_car:",
@@ -632,12 +623,7 @@
         ":ferris_wheel:",
         ":roller_coaster:",
         ":carousel_horse:",
-        ":construction_site: :building_construction:"
-      ]
-    },
-    {
-      "name": "TRAVEL",
-      "emojis": [
+        ":construction_site: :building_construction:",
         ":foggy:",
         ":tokyo_tower:",
         ":factory:",
@@ -770,12 +756,7 @@
         ":crossed_swords:",
         ":shield:",
         ":smoking:",
-        ":skull_crossbones: :skull_and_crossbones:"
-      ]
-    },
-    {
-      "name": "OBJECTS",
-      "emojis": [
+        ":skull_crossbones: :skull_and_crossbones:",
         ":coffin:",
         ":urn: :funeral_urn:",
         ":amphora:",
@@ -959,12 +940,7 @@
         ":ab:",
         ":cl:",
         ":o2:",
-        ":sos:"
-      ]
-    },
-    {
-      "name": "SYMBOLS",
-      "emojis": [
+        ":sos:",
         ":no_entry:",
         ":name_badge:",
         ":no_entry_sign:",
@@ -1278,12 +1254,7 @@
         ":flag_gu:",
         ":flag_gt:",
         ":flag_gn:",
-        ":flag_gw:"
-      ]
-    },
-    {
-      "name": "FLAGS",
-      "emojis": [
+        ":flag_gw:",
         ":flag_gy:",
         ":flag_ht:",
         ":flag_hn:",
