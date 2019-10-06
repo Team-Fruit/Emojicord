@@ -29,6 +29,14 @@ public class Rectangle2d {
 		return this.height;
 	}
 
+	public Rectangle2d inner(final int left, final int top, final int right, final int bottom) {
+		return new Rectangle2d(this.x+left, this.y+top, this.width-right*2, this.height-bottom*2);
+	}
+
+	public Rectangle2d outer(final int left, final int top, final int right, final int bottom) {
+		return new Rectangle2d(this.x-left, this.y-top, this.width+right*2, this.height+bottom*2);
+	}
+
 	public boolean contains(final int x, final int y) {
 		return x>=this.x&&x<=this.x+this.width&&y>=this.y&&y<=this.y+this.height;
 	}

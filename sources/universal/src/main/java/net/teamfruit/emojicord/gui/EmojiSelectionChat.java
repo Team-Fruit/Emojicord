@@ -1,8 +1,12 @@
 package net.teamfruit.emojicord.gui;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.codehaus.plexus.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.lwjgl.glfw.GLFW;
+
+import com.google.common.collect.Lists;
 
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.teamfruit.emojicord.compat.Compat.CompatChatScreen;
@@ -93,13 +97,54 @@ public class EmojiSelectionChat implements IChatOverlay {
 		private final Rectangle2d rectInput;
 		private final Rectangle2d rectBottom;
 		private final Rectangle2d rectMain;
-		private final List<PickerGroup> categories;
+		private TextFieldWidget searchField;
+		private final List<PickerGroup> baseCategories;
+		private List<PickerGroup> categories;
 		private float scrollY;
 		private int scrollY0;
-		private int selectedGroupIndex;
-		private int selectedIndex;
+		private int selectedGroupIndex = -1;
+		private int selectedIndex = -1;
 		private PickerItem selecting;
-		private TextFieldWidget searchField;
+		private int selectingGroupButton = -1;
+
+		/*
+		public class Layout {
+			private final int row = 10;
+			private final int emojiSize = 10;
+			private final int emojiMargin = 2;
+		
+			private final int paddingLeft = 8;
+			private final int spanX = 14;
+			private final int spanY = 14;
+			private final int titleSpanY = 4;
+			private final int titleSpanY2 = 12;
+		
+			public final Rectangle2d rectLayout;
+		
+			public class Group {
+				public final Rectangle2d rectGroup;
+				public final PickerGroup group;
+				public final List<Item> children;
+		
+				public Group(final PickerGroup group) {
+					this.children = Streams.mapWithIndex(group.items.stream(), (i, e) -> new Item((int) e, i)).collect(Collectors.toList());
+					this.rectGroup = new Rectangle2d(Layout.this.rectLayout.getX(), posY, Layout.this.rectLayout.getWidth(), Layout.this.emojiSize+Layout.this.emojiMargin*2);
+				}
+		
+				public class Item {
+					public final Rectangle2d rectItem;
+					public final PickerItem item;
+		
+					public Item(final int index, final PickerItem item) {
+						final int ix = index%Layout.this.row;
+						final int px = ix*Layout.this.spanX;
+						this.rectItem = new Rectangle2d(px-Layout.this.emojiMargin, Group.this.rectGroup.getY(), Layout.this.emojiSize+Layout.this.emojiMargin*2, Group.this.rectGroup.getHeight());
+						this.item = item;
+					}
+				}
+			}
+		}
+		*/
 
 		private EmojiSelectionList(final int posX, final int posY, final int width, final int height, final List<PickerGroup> categories) {
 			this.rectangle = new Rectangle2d(posX-3-width, posY-4-height, width+1, height+1);
@@ -109,11 +154,13 @@ public class EmojiSelectionChat implements IChatOverlay {
 			final int bannerTopHeight = 12+(marginTop+paddingTop)*2;
 			final int bannerBottomHeight = 16;
 			this.rectTop = new Rectangle2d(this.rectangle.getX(), this.rectangle.getY(), this.rectangle.getWidth(), bannerTopHeight);
-			this.rectInput = new Rectangle2d(this.rectTop.getX()+marginTop, this.rectTop.getY()+marginTop, this.rectTop.getWidth()-marginTop*2, this.rectTop.getHeight()-marginTop*2);
+			this.rectInput = this.rectTop.inner(marginTop, marginTop, marginTop, marginTop);
 			this.rectBottom = new Rectangle2d(this.rectangle.getX(), this.rectangle.getY()+this.rectangle.getHeight()-bannerBottomHeight, this.rectangle.getWidth(), bannerBottomHeight);
 			this.rectMain = new Rectangle2d(this.rectangle.getX(), this.rectTop.getY()+this.rectTop.getHeight(), this.rectangle.getWidth(), this.rectBottom.getY()-(this.rectTop.getY()+this.rectTop.getHeight()));
 
+			this.baseCategories = categories;
 			this.categories = categories;
+
 			select(0, 0);
 			this.searchField = new TextFieldWidget(EmojiSelectionChat.this.font.getFontRendererObj(), this.rectInput.getX()+paddingTop+2, this.rectInput.getY()+paddingTop+2, this.rectInput.getWidth()-paddingTop-2, this.rectInput.getHeight()-paddingTop-2, "");
 			this.searchField.setMaxStringLength(256);
@@ -125,19 +172,21 @@ public class EmojiSelectionChat implements IChatOverlay {
 		}
 
 		public boolean onDraw() {
-			IChatOverlay.fill(this.rectangle.getX(), this.rectangle.getY(), this.rectangle.getX()+this.rectangle.getWidth(), this.rectangle.getY()+this.rectangle.getHeight(), 0xFFFFFFFF);
+			IChatOverlay.fill(this.rectangle, 0xFFFFFFFF);
+
+			final int row = 10;
+			final int emojiSize = 10;
+			final int emojiMargin = 2;
+
+			final int paddingLeft = 8;
+			final int spanX = 14;
+			final int spanY = 14;
+			final int titleSpanY = 4;
+			final int titleSpanY2 = 12;
+
+			final int scrollbarWidth = 6;
 
 			{
-				final int row = 10;
-				final int emojiSize = 10;
-				final int emojiMargin = 2;
-
-				final int paddingLeft = 8;
-				final int spanX = 14;
-				final int spanY = 14;
-				final int titleSpanY = 4;
-				final int titleSpanY2 = 12;
-
 				this.scrollY = MathHelper.lerp(this.scrollY, this.scrollY0, .5f);
 
 				final int posX = this.rectMain.getX()+paddingLeft;
@@ -158,7 +207,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 						final Rectangle2d rect = new Rectangle2d(px-emojiMargin, py-emojiMargin, emojiSize+emojiMargin*2, emojiSize+emojiMargin*2);
 						if (this.rectMain.overlap(rect)) {
 							if (this.selectedGroupIndex==groupIndex&&this.selectedIndex==index)
-								IChatOverlay.fill(rect.getX(), rect.getY(), rect.getX()+rect.getWidth(), rect.getY()+rect.getHeight(), 0xFFEBEBEB);
+								IChatOverlay.fill(rect, 0xFFEBEBEB);
 							EmojiSelectionChat.this.font.drawString(":"+item.name+":", rect.getX()+emojiMargin, rect.getY()+emojiMargin, 0xFFFFFFFF);
 							if (rect.contains(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY)) {
 								this.selecting = item;
@@ -172,20 +221,75 @@ public class EmojiSelectionChat implements IChatOverlay {
 						}
 						++index;
 					}
-					posY += ((index-1)/row+1)*spanY;
+					posY += ((group.items.size()-1)/row+1)*spanY;
 					++groupIndex;
 					if (posY>this.rectMain.getY()+this.rectMain.getHeight())
 						break;
 				}
+				final int height = this.categories.stream().mapToInt(e -> titleSpanY+titleSpanY2+((e.items.size()-1)/row+1)*spanY).sum();
+				this.scrollY0 = height<=this.rectMain.getHeight() ? 0 : -MathHelper.clamp(-this.scrollY0, 0, height-this.rectMain.getHeight());
+
+				final Rectangle2d rectScroll0 = new Rectangle2d(this.rectMain.getX()+this.rectMain.getWidth()-scrollbarWidth, this.rectMain.getY(), scrollbarWidth, this.rectMain.getHeight());
+				final Rectangle2d rectScroll = rectScroll0.inner(1, 2, 1, 2);
+				final int scrollbarHeight = Math.min(rectScroll.getHeight(), rectScroll.getHeight()*rectScroll.getHeight()/height);
+				IChatOverlay.fill(rectScroll, 0xFFEBEBEB);
+				if (height>this.rectMain.getHeight()) {
+					IChatOverlay.fill(new Rectangle2d(
+							rectScroll.getX(),
+							rectScroll.getY()+(int) MathHelper.lerp(0, rectScroll.getHeight()-scrollbarHeight, -this.scrollY/(height-this.rectMain.getHeight())),
+							rectScroll.getWidth(),
+							scrollbarHeight), 0xFFABABAB);
+					if (rectScroll0.contains(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY))
+						if (GLFW.glfwGetMouseButton(CompatMinecraft.getMinecraft().getMinecraftObj().mainWindow.getHandle(), GLFW.GLFW_MOUSE_BUTTON_1)==GLFW.GLFW_PRESS)
+							this.scrollY0 = (int) -MathHelper.lerp(0, height-this.rectMain.getHeight(), ((float) EmojiSelectionChat.this.mouseY-rectScroll.getY())/rectScroll.getHeight());
+				}
 			}
 
-			IChatOverlay.fill(this.rectTop.getX(), this.rectTop.getY(), this.rectTop.getX()+this.rectTop.getWidth(), this.rectTop.getY()+this.rectTop.getHeight(), 0xFFFFFFFF);
-			IChatOverlay.fill(this.rectInput.getX(), this.rectInput.getY(), this.rectInput.getX()+this.rectInput.getWidth(), this.rectInput.getY()+this.rectInput.getHeight(), 0xFFABABAB);
-			IChatOverlay.fill(this.rectBottom.getX(), this.rectBottom.getY(), this.rectBottom.getX()+this.rectBottom.getWidth(), this.rectBottom.getY()+this.rectBottom.getHeight(), 0xFFFFFFFF);
+			IChatOverlay.fill(this.rectTop, 0xFFFFFFFF);
+			IChatOverlay.fill(this.rectInput, 0xFFABABAB);
+			IChatOverlay.fill(this.rectBottom, 0xFFFFFFFF);
 			IChatOverlay.fill(this.rectTop.getX(), this.rectTop.getY()+this.rectTop.getHeight(), this.rectTop.getX()+this.rectTop.getWidth(), this.rectTop.getY()+this.rectTop.getHeight()+1, 0xFFEBEBEB);
 			IChatOverlay.fill(this.rectBottom.getX(), this.rectBottom.getY()-1, this.rectBottom.getX()+this.rectBottom.getWidth(), this.rectBottom.getY(), 0xFFEBEBEB);
+
+			{
+				int count = -1;
+				{
+					int index = 0;
+					int height = 0;
+					for (final PickerGroup group : this.categories) {
+						height += titleSpanY+titleSpanY2+((group.items.size()-1)/row+1)*spanY;
+						if (height+this.scrollY0>0) {
+							count = index;
+							break;
+						}
+						++index;
+					}
+				}
+
+				final int posX = this.rectBottom.getX()+paddingLeft;
+				final int posY = this.rectBottom.getY()+2;
+				int index = 0;
+				this.selectingGroupButton = -1;
+				for (final PickerGroup group : this.categories) {
+					final int px = posX+index*spanX;
+					final Rectangle2d rect = new Rectangle2d(px-emojiMargin, posY-emojiMargin, emojiSize+emojiMargin*2, emojiSize+emojiMargin*2);
+					{
+						if (this.selectingGroupButton==index)
+							IChatOverlay.fill(rect, 0xFFEBEBEB);
+						if (count==index)
+							IChatOverlay.fill(new Rectangle2d(rect.getX(), rect.getY()+rect.getHeight(), rect.getWidth(), 2), 0xFF0000FF);
+						EmojiSelectionChat.this.font.drawString(":"+"sushi"+":", rect.getX()+emojiMargin, rect.getY()+emojiMargin, 0xFFFFFFFF);
+						if (rect.contains(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY))
+							//if (!(this.selectingGroupButton==index))
+							this.selectingGroupButton = index;
+					}
+					++index;
+				}
+			}
+
 			final float partialTicks = 0.066f;
 			this.searchField.render(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY, partialTicks);
+
 			return false;
 		}
 
@@ -201,12 +305,34 @@ public class EmojiSelectionChat implements IChatOverlay {
 				hide();
 				return true;
 			}
+			if (this.rectBottom.contains(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY)&&this.selectingGroupButton>=0) {
+				{
+					final int row = 10;
+					final int spanY = 14;
+					final int titleSpanY = 4;
+					final int titleSpanY2 = 12;
+
+					{
+						int index = 0;
+						int height = 0;
+						for (final PickerGroup group : this.categories) {
+							if (index==this.selectingGroupButton) {
+								this.scrollY0 = -height;
+								break;
+							}
+							height += titleSpanY+titleSpanY2+((group.items.size()-1)/row+1)*spanY;
+							++index;
+						}
+					}
+				}
+				return true;
+			}
 			return false;
 		}
 
 		public boolean onMouseScroll(final double scrollDelta) {
 			if (this.rectMain.contains(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY)) {
-				this.scrollY0 -= Double.valueOf(0).compareTo(scrollDelta)*10;
+				this.scrollY0 += scrollDelta*10;
 				return true;
 			}
 			return false;
@@ -215,10 +341,15 @@ public class EmojiSelectionChat implements IChatOverlay {
 		private void onTextChanged() {
 			this.selectedGroupIndex = -1;
 			this.selectedIndex = -1;
-			if (StringUtils.isNotEmpty(this.searchField.getText()))
+			if (StringUtils.isNotEmpty(this.searchField.getText())) {
 				this.searchField.setSuggestion("");
-			else
+				final String searchText = StringUtils.strip(this.searchField.getText(), ":");
+				final List<PickerItem> candidates = this.baseCategories.stream().flatMap(e -> e.items.stream()).filter(e -> e.alias.stream().anyMatch(s -> s.contains(searchText))).collect(Collectors.toList());
+				this.categories = Lists.newArrayList(new PickerGroup("Search", candidates));
+			} else {
 				this.searchField.setSuggestion("Find the perfect emoji");
+				this.categories = this.baseCategories;
+			}
 		}
 
 		public boolean onCharTyped(final char typed, final int keycode) {

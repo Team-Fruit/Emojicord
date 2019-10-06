@@ -2,6 +2,8 @@ package net.teamfruit.emojicord.gui;
 
 public class MathHelper {
 	public static int clamp(final int num, final int min, final int max) {
+		if (max<min)
+			return clamp(num, max, min);
 		if (num<min)
 			return min;
 		else
@@ -9,6 +11,6 @@ public class MathHelper {
 	}
 
 	public static float lerp(final float start, final float end, final float percent) {
-		return start+percent*(end-start);
+		return start+Math.max(0, Math.min(1, percent))*(end-start);
 	}
 }

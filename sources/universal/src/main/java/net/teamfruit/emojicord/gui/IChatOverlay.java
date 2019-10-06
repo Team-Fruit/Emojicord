@@ -65,4 +65,8 @@ public interface IChatOverlay {
 		OpenGL.glEnable(GL11.GL_TEXTURE_2D);
 		OpenGL.glDisable(GL11.GL_BLEND);
 	}
+
+	public static void fill(final Rectangle2d rect, final int color) {
+		fill(rect.getX(), rect.getY(), rect.getX()+rect.getWidth(), rect.getY()+rect.getHeight(), color);
+	}
 }
