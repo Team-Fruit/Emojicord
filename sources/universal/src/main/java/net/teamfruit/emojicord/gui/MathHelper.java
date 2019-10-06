@@ -7,4 +7,8 @@ public class MathHelper {
 		else
 			return num>max ? max : num;
 	}
+
+	public static float lerp(final float start, final float end, final float percent) {
+		return start+percent*(end-start);
+	}
 }

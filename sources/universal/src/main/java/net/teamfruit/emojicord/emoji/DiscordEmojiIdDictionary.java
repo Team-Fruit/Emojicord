@@ -3,9 +3,9 @@ package net.teamfruit.emojicord.emoji;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -13,7 +13,6 @@ import java.util.stream.IntStream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
@@ -36,18 +35,9 @@ public class DiscordEmojiIdDictionary {
 			() -> Lists.newArrayList());
 
 	public EmojiId get(final String name) {
-		final String str = StringUtils.substringBeforeLast(name, "~");
-		final String numstr = StringUtils.substringAfterLast(str, "~");
-		int num = 0;
-		if (!StringUtils.isEmpty(numstr)) {
-			if (!NumberUtils.isDigits(numstr))
-				return null;
-			num = NumberUtils.toInt(numstr);
-		}
-		final List<EmojiId> list = this.dictionary.get(str);
-		if (list.size()>num)
-			return list.get(num);
-		return null;
+		final String str = StringUtils.substringBefore(name, "~"); // not substringBeforeLast
+		final Optional<EmojiId> result = this.dictionary.get(str).stream().filter(e -> e.node.getUid().equals(name)).findFirst();
+		return result.orElse(null);
 	}
 
 	public Map<String, EmojiId> get() {
@@ -55,17 +45,26 @@ public class DiscordEmojiIdDictionary {
 		for (final Entry<String, List<EmojiId>> entry : Multimaps.asMap(this.dictionary).entrySet()) {
 			final String key = entry.getKey();
 			final List<EmojiId> values = entry.getValue();
-			if (!values.isEmpty()) {
+			if (!values.isEmpty())
 				dict.put(key, values.get(0));
-				for (final ListIterator<EmojiId> itr = values.listIterator(); itr.hasNext();)
-					dict.put(key+"~"+itr.nextIndex(), itr.next());
-			}
+			values.stream().filter(e -> e.node.countPrev()>0).forEach(e -> {
+				dict.put(e.node.getUid(), e);
+			});
 		}
 		return dict;
 	}
 
 	public void register(final String name, final EmojiId id) {
-		this.dictionary.put(name, id);
+		final List<EmojiId> list = this.dictionary.get(name);
+		if (!list.isEmpty()) {
+			final EmojiId last = list.get(list.size()-1);
+			last.node.linkNext(id.node);
+		} else {
+			final EmojiId stdId = StandardEmojiIdDictionary.instance.nameDictionary.get(name);
+			if (stdId!=null)
+				stdId.node.linkNext(id.node);
+		}
+		list.add(id);
 	}
 
 	public void clear() {

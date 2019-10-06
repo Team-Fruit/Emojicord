@@ -14,6 +14,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 public class StandardEmojiIdDictionary {
+	public static StandardEmojiIdDictionary instance = new StandardEmojiIdDictionaryBuilder().build();
+
 	public final ImmutableMap<String, EmojiId> nameDictionary;
 	public final ImmutableMap<String, EmojiId> aliasDictionary;
 	public final ImmutableMap<String, EmojiId> utfDictionary;
@@ -108,9 +110,5 @@ public class StandardEmojiIdDictionary {
 					this.shortAliasPattern.get(),
 					this.utfPattern.get());
 		}
-	}
-
-	public static class StandardEmojiIdRepository {
-		public static StandardEmojiIdDictionary instance = new StandardEmojiIdDictionaryBuilder().build();
 	}
 }

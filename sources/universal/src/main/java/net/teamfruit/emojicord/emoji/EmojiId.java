@@ -10,10 +10,11 @@ import org.apache.commons.lang3.math.NumberUtils;
 import net.minecraft.util.ResourceLocation;
 import net.teamfruit.emojicord.Locations;
 import net.teamfruit.emojicord.Reference;
-import net.teamfruit.emojicord.emoji.StandardEmojiIdDictionary.StandardEmojiIdRepository;
 import net.teamfruit.emojicord.util.Base64Utils;
 
 public abstract class EmojiId {
+	public final EmojiIdNode node = new EmojiIdNode();
+
 	public abstract String getId();
 
 	public abstract String getType();
@@ -54,6 +55,62 @@ public abstract class EmojiId {
 		return "EmojiId [id="+getId()+", type="+getType()+"]";
 	}
 
+	public class EmojiIdNode extends Node<EmojiId> {
+		public EmojiIdNode() {
+			super(EmojiId.this);
+		}
+
+		public String getUid() {
+			return getId()+"~"+countPrev();
+		}
+	}
+
+	public static class Node<T> {
+		public final T value;
+		public Node<T> next;
+		public Node<T> prev;
+
+		public Node(final T value) {
+			this.value = value;
+		}
+
+		public void linkNext(final Node<T> insert) {
+			if (insert!=null) {
+				insert.prev = this;
+				if (this.next!=null)
+					insert.next = this.next;
+			}
+			if (this.next!=null)
+				this.next.prev = insert;
+			this.next = insert;
+		}
+
+		public void linkPrev(final Node<T> insert) {
+			if (insert!=null) {
+				insert.next = this;
+				if (this.prev!=null)
+					insert.prev = this.prev;
+			}
+			if (this.prev!=null)
+				this.prev.next = insert;
+			this.prev = insert;
+		}
+
+		public int countNext() {
+			int count = 0;
+			for (Node<T> i = this.next; i.next!=null; i = i.next)
+				count++;
+			return count;
+		}
+
+		public int countPrev() {
+			int count = 0;
+			for (Node<T> i = this.prev; i.prev!=null; i = i.prev)
+				count++;
+			return count;
+		}
+	}
+
 	public static class StandardEmojiId extends EmojiId {
 		private final String url;
 		private final String cache;
@@ -84,11 +141,11 @@ public abstract class EmojiId {
 		}
 
 		public static @Nullable EmojiId fromAlias(final String id) {
-			return StandardEmojiIdRepository.instance.aliasDictionary.get(id);
+			return StandardEmojiIdDictionary.instance.aliasDictionary.get(id);
 		}
 
 		public static @Nullable EmojiId fromUtf(final String surrogates) {
-			return StandardEmojiIdRepository.instance.utfDictionary.get(surrogates);
+			return StandardEmojiIdDictionary.instance.utfDictionary.get(surrogates);
 		}
 	}
 

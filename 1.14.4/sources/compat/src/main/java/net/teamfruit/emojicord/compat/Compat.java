@@ -723,6 +723,10 @@ public class Compat {
 			this.textField = textField;
 		}
 
+		public TextFieldWidget getTextFieldWidgetObj() {
+			return this.textField;
+		}
+
 		public String getText() {
 			return this.textField.getText();
 		}

@@ -6,7 +6,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
-import org.lwjgl.opengl.GL11;
 
 import com.google.common.collect.Iterables;
 import com.mojang.brigadier.Message;
@@ -22,10 +21,7 @@ import net.teamfruit.emojicord.compat.Compat.CompatMinecraft;
 import net.teamfruit.emojicord.compat.Compat.CompatScreen;
 import net.teamfruit.emojicord.compat.Compat.CompatTextFieldWidget;
 import net.teamfruit.emojicord.compat.CompatBaseVersion;
-import net.teamfruit.emojicord.compat.CompatBaseVertex;
 import net.teamfruit.emojicord.compat.CompatVersion;
-import net.teamfruit.emojicord.compat.CompatVertex;
-import net.teamfruit.emojicord.compat.OpenGL;
 import net.teamfruit.emojicord.emoji.DiscordEmojiIdDictionary;
 import net.teamfruit.emojicord.emoji.StandardEmojiIdDictionary;
 
@@ -117,7 +113,7 @@ public class SuggestionChat implements IChatOverlay {
 			final int lastWordIndex = getLastWordIndex(s);
 			if ((skipCount||cursorPosition-lastWordIndex>=3)&&(this.suggestions==null||!this.applyingSuggestion)) {
 				final CompletableFuture<Iterable<String>> list = CompletableFuture.supplyAsync(() -> Iterables.concat(
-						StandardEmojiIdDictionary.StandardEmojiIdRepository.instance.nameDictionary.keySet(),
+						StandardEmojiIdDictionary.instance.nameDictionary.keySet(),
 						DiscordEmojiIdDictionary.instance.get().keySet()));
 
 				this.pendingSuggestions = list.thenApplyAsync(e -> suggest(e, new SuggestionsBuilder(s, lastWordIndex)));
@@ -165,38 +161,6 @@ public class SuggestionChat implements IChatOverlay {
 		return textwithsuffix.startsWith(text) ? textwithsuffix.substring(text.length()) : null;
 	}
 
-	public static void fill(int x1, int y1, int x2, int y2, final int color) {
-		if (x1<x2) {
-			final int i = x1;
-			x1 = x2;
-			x2 = i;
-		}
-
-		if (y1<y2) {
-			final int j = y1;
-			y1 = y2;
-			y2 = j;
-		}
-
-		final float f3 = (color>>24&255)/255.0F;
-		final float f = (color>>16&255)/255.0F;
-		final float f1 = (color>>8&255)/255.0F;
-		final float f2 = (color&255)/255.0F;
-		final CompatBaseVertex t = CompatVertex.getTessellator();
-		OpenGL.glEnable(GL11.GL_BLEND);
-		OpenGL.glDisable(GL11.GL_TEXTURE_2D);
-		OpenGL.glBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO);
-		OpenGL.glColor4f(f, f1, f2, f3);
-		t.begin(GL11.GL_QUADS);
-		t.pos(x1, y2, 0.0D);
-		t.pos(x2, y2, 0.0D);
-		t.pos(x2, y1, 0.0D);
-		t.pos(x1, y1, 0.0D);
-		t.draw();
-		OpenGL.glEnable(GL11.GL_TEXTURE_2D);
-		OpenGL.glDisable(GL11.GL_BLEND);
-	}
-
 	public static String getEmojiDisplayText(final String text) {
 		return text+" "+StringUtils.substringBetween(text, ":");
 	}
@@ -230,24 +194,24 @@ public class SuggestionChat implements IChatOverlay {
 			}
 
 			if (isScroll) {
-				fill(this.rectangle.getX(), this.rectangle.getY()-1, this.rectangle.getX()+this.rectangle.getWidth(), this.rectangle.getY(), 0xD0000000);
-				fill(this.rectangle.getX(), this.rectangle.getY()+this.rectangle.getHeight(), this.rectangle.getX()+this.rectangle.getWidth(), this.rectangle.getY()+this.rectangle.getHeight()+1, 0xD0000000);
+				IChatOverlay.fill(this.rectangle.getX(), this.rectangle.getY()-1, this.rectangle.getX()+this.rectangle.getWidth(), this.rectangle.getY(), 0xD0000000);
+				IChatOverlay.fill(this.rectangle.getX(), this.rectangle.getY()+this.rectangle.getHeight(), this.rectangle.getX()+this.rectangle.getWidth(), this.rectangle.getY()+this.rectangle.getHeight()+1, 0xD0000000);
 				if (isScrollTop)
 					for (int k = 0; k<this.rectangle.getWidth(); ++k)
 						if (k%2==0)
-							fill(this.rectangle.getX()+k, this.rectangle.getY()-1, this.rectangle.getX()+k+1, this.rectangle.getY(), -1);
+							IChatOverlay.fill(this.rectangle.getX()+k, this.rectangle.getY()-1, this.rectangle.getX()+k+1, this.rectangle.getY(), -1);
 
 				if (isScrollBottom)
 					for (int i1 = 0; i1<this.rectangle.getWidth(); ++i1)
 						if (i1%2==0)
-							fill(this.rectangle.getX()+i1, this.rectangle.getY()+this.rectangle.getHeight(), this.rectangle.getX()+i1+1, this.rectangle.getY()+this.rectangle.getHeight()+1, -1);
+							IChatOverlay.fill(this.rectangle.getX()+i1, this.rectangle.getY()+this.rectangle.getHeight(), this.rectangle.getX()+i1+1, this.rectangle.getY()+this.rectangle.getHeight()+1, -1);
 			}
 
 			boolean flag4 = false;
 
 			for (int l = 0; l<i; ++l) {
 				final Suggestion suggestion = this.suggestions.getList().get(l+this.scrollY);
-				fill(this.rectangle.getX(), this.rectangle.getY()+12*l, this.rectangle.getX()+this.rectangle.getWidth(), this.rectangle.getY()+12*l+12, 0xD0000000);
+				IChatOverlay.fill(this.rectangle.getX(), this.rectangle.getY()+12*l, this.rectangle.getX()+this.rectangle.getWidth(), this.rectangle.getY()+12*l+12, 0xD0000000);
 				if (SuggestionChat.this.mouseX>this.rectangle.getX()&&SuggestionChat.this.mouseX<this.rectangle.getX()+this.rectangle.getWidth()&&SuggestionChat.this.mouseY>this.rectangle.getY()+12*l&&SuggestionChat.this.mouseY<this.rectangle.getY()+12*l+12) {
 					if (isMouseMoved)
 						select(l+this.scrollY);

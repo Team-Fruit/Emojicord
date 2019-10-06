@@ -4,8 +4,9 @@ import java.util.List;
 
 public class Models {
 	public static class EmojiGateway {
-		public List<String> emojis;
 		public List<String> api;
+		public List<String> emojis;
+		public List<String> picker;
 	}
 
 	public static class EmojiStandard {
@@ -54,5 +55,14 @@ public class Models {
 
 	public static class EmojiDiscordIndexFolder {
 		public List<EmojiDiscordIndexList> lists;
+	}
+
+	public static class EmojiStandardPickerCategory {
+		public String name;
+		public List<String> emojis;
+	}
+
+	public static class EmojiStandardPicker {
+		public List<EmojiStandardPickerCategory> category;
 	}
 }

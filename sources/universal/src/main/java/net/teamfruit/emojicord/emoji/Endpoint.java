@@ -6,8 +6,10 @@ import net.teamfruit.emojicord.emoji.Models.EmojiGateway;
 import net.teamfruit.emojicord.emoji.Models.EmojiStandard;
 import net.teamfruit.emojicord.emoji.Models.EmojiStandardGroup;
 import net.teamfruit.emojicord.emoji.Models.EmojiStandardList;
+import net.teamfruit.emojicord.emoji.Models.EmojiStandardPicker;
+import net.teamfruit.emojicord.emoji.Models.EmojiStandardPickerCategory;
 import net.teamfruit.emojicord.emoji.StandardEmojiIdDictionary.StandardEmojiIdDictionaryBuilder;
-import net.teamfruit.emojicord.emoji.StandardEmojiIdDictionary.StandardEmojiIdRepository;
+import net.teamfruit.emojicord.emoji.StandardEmojiIdPicker.StandardEmojiIdPickerBuilder;
 import net.teamfruit.emojicord.util.DataUtils;
 
 public class Endpoint {
@@ -39,6 +41,18 @@ public class Endpoint {
 							builder.putAlias(string, id);
 					}
 		}
-		StandardEmojiIdRepository.instance = builder.build();
+		StandardEmojiIdDictionary.instance = builder.build();
+	}
+
+	public static void loadStandardPicker() {
+		final StandardEmojiIdPickerBuilder builder = new StandardEmojiIdPickerBuilder();
+		for (final String emojiUrls : EMOJI_API.picker) {
+			final EmojiStandardPicker emojiPicker = DataUtils.loadUrl(emojiUrls, EmojiStandardPicker.class,
+					"Standard Emoji Picker");
+			if (emojiPicker!=null)
+				for (final EmojiStandardPickerCategory category : emojiPicker.category)
+					builder.addGroup(category.name, category.emojis);
+		}
+		StandardEmojiIdPicker.instance = builder.build();
 	}
 }

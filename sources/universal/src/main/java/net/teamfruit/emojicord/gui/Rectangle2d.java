@@ -32,4 +32,20 @@ public class Rectangle2d {
 	public boolean contains(final int x, final int y) {
 		return x>=this.x&&x<=this.x+this.width&&y>=this.y&&y<=this.y+this.height;
 	}
+
+	public boolean contains(final Rectangle2d rect) {
+		final int x = rect.getX();
+		final int y = rect.getY();
+		final int x2 = x+rect.getWidth();
+		final int y2 = y+rect.getHeight();
+		return x>=this.x&&x2<=this.x+this.width&&y>=this.y&&y2<=this.y+this.height;
+	}
+
+	public boolean overlap(final Rectangle2d rect) {
+		final int x = rect.getX();
+		final int y = rect.getY();
+		final int x2 = x+rect.getWidth();
+		final int y2 = y+rect.getHeight();
+		return x2>=this.x&&x<=this.x+this.width&&y2>=this.y&&y<=this.y+this.height;
+	}
 }

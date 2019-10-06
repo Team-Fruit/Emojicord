@@ -7,6 +7,10 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
 
+import net.minecraftforge.client.event.GuiScreenEvent.KeyboardCharTypedEvent;
+import net.minecraftforge.event.TickEvent.ClientTickEvent;
+import net.minecraftforge.event.TickEvent.Phase;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.teamfruit.emojicord.compat.Compat.CompatChatScreen;
 import net.teamfruit.emojicord.compat.CompatEvents.CompatClientChatEvent;
 import net.teamfruit.emojicord.compat.CompatEvents.CompatConfigChangedEvent.CompatOnConfigChangedEvent;
@@ -76,10 +80,24 @@ public class EventHandler extends CompatHandler {
 				event.setCanceled(true);
 	}
 
+	@SubscribeEvent
+	public void onCharTyped(final KeyboardCharTypedEvent.Pre event) {
+		for (final IChatOverlay overlay : this.overlays)
+			if (overlay.onCharTyped(event.getCodePoint(), event.getModifiers()))
+				event.setCanceled(true);
+	}
+
 	@Override
 	public void onKeyPressed(final CompatGuiScreenEvent.CompatKeyboardKeyPressedEvent.CompatPre event) {
 		for (final IChatOverlay overlay : this.overlays)
 			if (overlay.onKeyPressed(event.getKeyCode()))
 				event.setCanceled(true);
+	}
+
+	@SubscribeEvent
+	public void onTick(final ClientTickEvent event) {
+		if (event.phase==Phase.START)
+			for (final IChatOverlay overlay : this.overlays)
+				overlay.onTick();
 	}
 }

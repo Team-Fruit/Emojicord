@@ -14,8 +14,6 @@ import org.apache.commons.lang3.math.NumberUtils;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
-import net.teamfruit.emojicord.emoji.StandardEmojiIdDictionary.StandardEmojiIdRepository;
-
 public class EmojiText {
 	public static final @Nonnull Function<Integer, String> placeHolderSupplier = e -> String.format("{%d}", e);
 	public static final @Nonnull Pattern placeHolderPattern = Pattern.compile("\\{(\\d+?)\\}");
@@ -234,14 +232,14 @@ public class EmojiText {
 					}
 				return null;
 			});
-			emojiText = EmojiTextBuilder.builder(StandardEmojiIdRepository.instance.shortAliasPattern, emojiText).apply(matcher -> {
+			emojiText = EmojiTextBuilder.builder(StandardEmojiIdDictionary.instance.shortAliasPattern, emojiText).apply(matcher -> {
 				final String g0 = matcher.group(0);
 				final EmojiId emojiId = EmojiId.StandardEmojiId.fromAlias(g0);
 				if (emojiId!=null)
 					return new EmojiTextElement(emojiId, g0, String.format(":%s:", emojiId.getCacheName()));
 				return null;
 			});
-			emojiText = EmojiTextBuilder.builder(StandardEmojiIdRepository.instance.utfPattern, emojiText).apply(matcher -> {
+			emojiText = EmojiTextBuilder.builder(StandardEmojiIdDictionary.instance.utfPattern, emojiText).apply(matcher -> {
 				final String g0 = matcher.group(0);
 				final EmojiId emojiId = EmojiId.StandardEmojiId.fromUtf(g0);
 				if (emojiId!=null) {
