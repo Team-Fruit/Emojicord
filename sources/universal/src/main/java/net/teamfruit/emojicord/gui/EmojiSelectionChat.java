@@ -9,11 +9,13 @@ import org.lwjgl.glfw.GLFW;
 import com.google.common.collect.Lists;
 
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.teamfruit.emojicord.EmojicordConfig;
 import net.teamfruit.emojicord.compat.Compat.CompatChatScreen;
 import net.teamfruit.emojicord.compat.Compat.CompatFontRenderer;
 import net.teamfruit.emojicord.compat.Compat.CompatMinecraft;
 import net.teamfruit.emojicord.compat.Compat.CompatScreen;
 import net.teamfruit.emojicord.compat.Compat.CompatTextFieldWidget;
+import net.teamfruit.emojicord.emoji.EmojiId;
 import net.teamfruit.emojicord.emoji.StandardEmojiIdPicker;
 import net.teamfruit.emojicord.emoji.StandardEmojiIdPicker.PickerGroup;
 import net.teamfruit.emojicord.emoji.StandardEmojiIdPicker.PickerItem;
@@ -97,6 +99,8 @@ public class EmojiSelectionChat implements IChatOverlay {
 		private final Rectangle2d rectInput;
 		private final Rectangle2d rectBottom;
 		private final Rectangle2d rectMain;
+		private final Rectangle2d rectColorButton;
+		private final Rectangle2d rectColor;
 		private TextFieldWidget searchField;
 		private final List<PickerGroup> baseCategories;
 		private List<PickerGroup> categories;
@@ -106,6 +110,9 @@ public class EmojiSelectionChat implements IChatOverlay {
 		private int selectedIndex = -1;
 		private PickerItem selecting;
 		private int selectingGroupButton = -1;
+		private boolean colorShown;
+		private int selectingColor = -1;
+		private int selectedColor = -1;
 
 		/*
 		public class Layout {
@@ -148,15 +155,19 @@ public class EmojiSelectionChat implements IChatOverlay {
 
 		private EmojiSelectionList(final int posX, final int posY, final int width, final int height, final List<PickerGroup> categories) {
 			this.rectangle = new Rectangle2d(posX-3-width, posY-4-height, width+1, height+1);
+			this.selectedColor = EmojicordConfig.PICKER.skinTone.get();
 
 			final int marginTop = 6;
 			final int paddingTop = 2;
 			final int bannerTopHeight = 12+(marginTop+paddingTop)*2;
 			final int bannerBottomHeight = 16;
+			final int colorButtonWidth = 12;
 			this.rectTop = new Rectangle2d(this.rectangle.getX(), this.rectangle.getY(), this.rectangle.getWidth(), bannerTopHeight);
-			this.rectInput = this.rectTop.inner(marginTop, marginTop, marginTop, marginTop);
+			this.rectInput = this.rectTop.inner(marginTop, marginTop, 4+2+colorButtonWidth, marginTop);
 			this.rectBottom = new Rectangle2d(this.rectangle.getX(), this.rectangle.getY()+this.rectangle.getHeight()-bannerBottomHeight, this.rectangle.getWidth(), bannerBottomHeight);
 			this.rectMain = new Rectangle2d(this.rectangle.getX(), this.rectTop.getY()+this.rectTop.getHeight(), this.rectangle.getWidth(), this.rectBottom.getY()-(this.rectTop.getY()+this.rectTop.getHeight()));
+			this.rectColorButton = new Rectangle2d(this.rectTop.getX()+this.rectTop.getWidth()-colorButtonWidth-4, this.rectInput.getY(), colorButtonWidth, this.rectInput.getHeight()).inner(0, 2, 0, 2);
+			this.rectColor = new Rectangle2d(this.rectColorButton.getX(), this.rectColorButton.getY(), this.rectColorButton.getWidth(), 14*6);
 
 			this.baseCategories = categories;
 			this.categories = categories;
@@ -208,7 +219,11 @@ public class EmojiSelectionChat implements IChatOverlay {
 						if (this.rectMain.overlap(rect)) {
 							if (this.selectedGroupIndex==groupIndex&&this.selectedIndex==index)
 								IChatOverlay.fill(rect, 0xFFEBEBEB);
-							EmojiSelectionChat.this.font.drawString(":"+item.name+":", rect.getX()+emojiMargin, rect.getY()+emojiMargin, 0xFFFFFFFF);
+							String tone = "";
+							if (this.selectedColor>0)
+								if (EmojiId.StandardEmojiId.fromAlias(item.name+":skin-tone-"+this.selectedColor)!=null)
+									tone = ":skin-tone-"+this.selectedColor+":";
+							EmojiSelectionChat.this.font.drawString(":"+item.name+":"+tone, rect.getX()+emojiMargin, rect.getY()+emojiMargin, 0xFFFFFFFF);
 							if (rect.contains(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY)) {
 								this.selecting = item;
 								if (!(this.selectedGroupIndex==groupIndex&&this.selectedIndex==index)) {
@@ -251,6 +266,22 @@ public class EmojiSelectionChat implements IChatOverlay {
 			IChatOverlay.fill(this.rectTop.getX(), this.rectTop.getY()+this.rectTop.getHeight(), this.rectTop.getX()+this.rectTop.getWidth(), this.rectTop.getY()+this.rectTop.getHeight()+1, 0xFFEBEBEB);
 			IChatOverlay.fill(this.rectBottom.getX(), this.rectBottom.getY()-1, this.rectBottom.getX()+this.rectBottom.getWidth(), this.rectBottom.getY(), 0xFFEBEBEB);
 
+			final int colorOffset = 1;
+			EmojiSelectionChat.this.font.drawString(":ok_hand:"+(this.selectedColor>0 ? ":skin-tone-"+this.selectedColor+":" : ""), this.rectColorButton.getX()+colorOffset, this.rectColorButton.getY()+colorOffset, 0xFFFFFFFF);
+			if (this.colorShown) {
+				IChatOverlay.fill(this.rectColor, 0xFFEFEFEF);
+
+				final int posY = this.rectColor.getY();
+				this.selectingColor = -1;
+				for (int index = 0; index<6; index++) {
+					final int py = posY+index*spanY;
+					final Rectangle2d rect = new Rectangle2d(this.rectColor.getX(), py, this.rectColor.getWidth(), spanY);
+					EmojiSelectionChat.this.font.drawString(":ok_hand:"+(index>0 ? ":skin-tone-"+index+":" : ""), rect.getX()+colorOffset, rect.getY()+colorOffset, 0xFFFFFFFF);
+					if (rect.contains(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY))
+						this.selectingColor = index;
+				}
+			}
+
 			{
 				int count = -1;
 				{
@@ -272,7 +303,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 				this.selectingGroupButton = -1;
 				for (final PickerGroup group : this.categories) {
 					final int px = posX+index*spanX;
-					final Rectangle2d rect = new Rectangle2d(px-emojiMargin, posY-emojiMargin, emojiSize+emojiMargin*2, emojiSize+emojiMargin*2);
+					final Rectangle2d rect = new Rectangle2d(px, posY, emojiSize, emojiSize).outer(emojiMargin, emojiMargin, emojiMargin, emojiMargin);
 					{
 						if (this.selectingGroupButton==index)
 							IChatOverlay.fill(rect, 0xFFEBEBEB);
@@ -298,10 +329,28 @@ public class EmojiSelectionChat implements IChatOverlay {
 				hide();
 				return true;
 			}
+			if (!this.colorShown) {
+				if (this.rectColorButton.contains(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY)) {
+					this.colorShown = true;
+					return true;
+				}
+			} else {
+				if (this.rectColor.contains(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY)) {
+					if (this.selectingColor>=0)
+						this.selectedColor = this.selectingColor;
+					EmojicordConfig.PICKER.skinTone.set(this.selectedColor);
+				}
+				this.colorShown = false;
+				return true;
+			}
 			if (this.searchField.mouseClicked(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY, button))
 				return true;
 			if (this.rectMain.contains(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY)&&this.selecting!=null) {
-				EmojiSelectionChat.this.inputField.getTextFieldWidgetObj().writeText(":"+this.selecting.name+": ");
+				String tone = "";
+				if (this.selectedColor>0)
+					if (EmojiId.StandardEmojiId.fromAlias(this.selecting.name+":skin-tone-"+this.selectedColor)!=null)
+						tone = ":skin-tone-"+this.selectedColor+":";
+				EmojiSelectionChat.this.inputField.getTextFieldWidgetObj().writeText(":"+this.selecting.name+":"+tone+" ");
 				hide();
 				return true;
 			}

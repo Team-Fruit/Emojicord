@@ -30,11 +30,11 @@ public class Rectangle2d {
 	}
 
 	public Rectangle2d inner(final int left, final int top, final int right, final int bottom) {
-		return new Rectangle2d(this.x+left, this.y+top, this.width-right*2, this.height-bottom*2);
+		return new Rectangle2d(this.x+left, this.y+top, this.width-(left+right), this.height-(top+bottom));
 	}
 
 	public Rectangle2d outer(final int left, final int top, final int right, final int bottom) {
-		return new Rectangle2d(this.x-left, this.y-top, this.width+right*2, this.height+bottom*2);
+		return new Rectangle2d(this.x-left, this.y-top, this.width+left+right, this.height+top+bottom);
 	}
 
 	public boolean contains(final int x, final int y) {

@@ -64,6 +64,10 @@ public class CompatConfigSpec {
 		};
 	}
 
+	public void save() {
+		this.spec.save();
+	}
+
 	public static class Builder {
 		private ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
 		private BuilderContext context = new BuilderContext();
@@ -259,6 +263,11 @@ public class CompatConfigSpec {
 		public T get() {
 			Preconditions.checkNotNull(this.value, "Cannot get config value without assigned Config object present");
 			return this.value.get();
+		}
+
+		public void set(final T value) {
+			Preconditions.checkNotNull(this.value, "Cannot set config value without assigned Config object present");
+			this.value.set(value);
 		}
 
 		public Builder next() {

@@ -6,6 +6,7 @@ public class EmojicordConfig {
 	private static final CompatConfigSpec.Builder BUILDER = new CompatConfigSpec.Builder();
 	public static final Render RENDER = new Render(BUILDER);
 	public static final Suggest SUGGEST = new Suggest(BUILDER);
+	public static final Picker PICKER = new Picker(BUILDER);
 	public static final CompatConfigSpec spec = BUILDER.build();
 
 	public static class Render {
@@ -35,6 +36,19 @@ public class EmojicordConfig {
 					.comment("Enter key to suggest")
 					.translation("config.emojicord.suggest.enter")
 					.define("EnterToSuggest", true);
+			builder.pop();
+		}
+	}
+
+	public static class Picker {
+		public final CompatConfigSpec.ConfigValue<Integer> skinTone;
+
+		public Picker(final CompatConfigSpec.Builder builder) {
+			builder.push("Picker");
+			this.skinTone = builder
+					.comment("Emoji Picker Skin Tone")
+					.translation("config.emojicord.picker.skintone")
+					.define("SkinTone", 0);
 			builder.pop();
 		}
 	}

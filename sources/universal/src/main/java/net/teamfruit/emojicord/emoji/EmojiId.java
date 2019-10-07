@@ -5,6 +5,7 @@ import java.util.Objects;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import net.minecraft.util.ResourceLocation;
@@ -127,7 +128,7 @@ public abstract class EmojiId {
 
 		@Override
 		public String getCacheName() {
-			return this.cache;
+			return StringUtils.replace(this.cache, ":", ".");
 		}
 
 		@Override
