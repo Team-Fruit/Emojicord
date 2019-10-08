@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.glfw.GLFW;
@@ -35,19 +36,41 @@ public class EmojiSelectionChat implements IChatOverlay {
 	private EmojiSelectionList selectionList;
 	private final Rectangle2d emojiButton;
 
+	private final List<String> faces;
+	private boolean onButton;
+	private String face = ":smile:";
+
 	public EmojiSelectionChat(final CompatChatScreen chatScreen) {
 		this.screen = chatScreen.cast();
 		this.chatScreen = chatScreen;
 		this.font = CompatMinecraft.getMinecraft().getFontRenderer();
 		this.inputField = chatScreen.getTextField();
 		this.emojiButton = new Rectangle2d(this.screen.getWidth()-13, this.screen.getHeight()-13, 10, 10);
+
+		this.faces = Lists.newArrayList();
+		{
+			final List<PickerGroup> standardCategories = StandardEmojiIdPicker.instance.categories;
+			final List<PickerItem> people = standardCategories.stream().filter(e -> "PEOPLE".equalsIgnoreCase(e.name)).limit(1).flatMap(e -> e.items.stream()).collect(Collectors.toList());
+			for (final PickerItem item : people) {
+				this.faces.add(item.name);
+				if (StringUtils.equals(":sleeping:", item.name))
+					break;
+			}
+		}
 	}
 
 	@Override
 	public boolean onDraw() {
 		if (this.selectionList!=null)
 			this.selectionList.onDraw();
-		this.font.drawString(":smile:", this.emojiButton.getX(), this.emojiButton.getY(), 0xFFFFFF);
+		else {
+			final boolean onButtonLast = this.onButton;
+			this.onButton = this.emojiButton.contains(this.mouseX, this.mouseY);
+			if (this.onButton&&!onButtonLast)
+				this.face = this.faces.get(RandomUtils.nextInt(0, this.faces.size()));
+		}
+
+		this.font.drawString(this.face, this.emojiButton.getX(), this.emojiButton.getY(), 0xFFFFFF);
 		return false;
 	}
 
@@ -127,10 +150,12 @@ public class EmojiSelectionChat implements IChatOverlay {
 		private final Rectangle2d rectMain;
 		private final Rectangle2d rectColorButton;
 		private final Rectangle2d rectColor;
-		private TextFieldWidget searchField;
+
 		private final List<PickerGroup> baseCategories;
 		private final List<Pair<String, PickerGroup>> buttonCategories;
 		private List<PickerGroup> categories;
+
+		private TextFieldWidget searchField;
 		private float scrollY;
 		private int scrollY0;
 		private int selectedGroupIndex = -1;
@@ -172,6 +197,8 @@ public class EmojiSelectionChat implements IChatOverlay {
 			//this.inputField.setText("");
 			//this.inputField.setTextFormatter(this::formatMessage);
 			//this.inputField.func_212954_a(this::func_212997_a);
+
+			onTextChanged();
 		}
 
 		public boolean onDraw() {
