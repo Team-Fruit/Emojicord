@@ -92,6 +92,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 		final int width = 8+14*10-4+8;
 		final int height = width;
 
+		//EmojiFrequently.instance.load(Locations.instance.getEmojicordDirectory());
 		final List<PickerGroup> standardCategories = StandardEmojiIdPicker.instance.categories;
 		final List<PickerGroup> frequently = Lists.newArrayList(EmojiFrequently.instance.getGroup());
 		final List<PickerGroup> discordCategories = DiscordEmojiIdDictionary.instance.pickerGroups;
@@ -212,9 +213,9 @@ public class EmojiSelectionChat implements IChatOverlay {
 								IChatOverlay.fill(rect, 0xFFEBEBEB);
 							String tone = "";
 							if (this.selectedColor>0)
-								if (EmojiId.StandardEmojiId.fromAlias(item.name+":skin-tone-"+this.selectedColor)!=null)
+								if (EmojiId.StandardEmojiId.fromAlias(StringUtils.strip(item.name, ":")+":skin-tone-"+this.selectedColor)!=null)
 									tone = ":skin-tone-"+this.selectedColor+":";
-							EmojiSelectionChat.this.font.drawString(":"+item.name+":"+tone, rect.getX()+emojiMargin, rect.getY()+emojiMargin, 0xFFFFFFFF);
+							EmojiSelectionChat.this.font.drawString(item.name+tone, rect.getX()+emojiMargin, rect.getY()+emojiMargin, 0xFFFFFFFF);
 							if (rect.contains(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY)) {
 								this.selecting = item;
 								if (!(this.selectedGroupIndex==groupIndex&&this.selectedIndex==index)) {
@@ -313,7 +314,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 
 			final float partialTicks = 0.066f;
 			this.searchField.render(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY, partialTicks);
-			EmojiSelectionChat.this.font.drawString(this.searchField.getText().isEmpty() ? "<:search:630988740025647114>" : "<:close:630988727555981333>", this.rectInputButton.getX()+1, this.rectInputButton.getY()+3, 0xFFFFFFFF);
+			EmojiSelectionChat.this.font.drawString(this.searchField.getText().isEmpty() ? "<:search:631021534705877012>" : "<:close:631021519295741973>", this.rectInputButton.getX()+1, this.rectInputButton.getY()+3, 0xFFFFFFFF);
 
 			return false;
 		}
@@ -347,16 +348,12 @@ public class EmojiSelectionChat implements IChatOverlay {
 			if (this.searchField.mouseClicked(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY, button))
 				return true;
 			if (this.rectMain.contains(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY)&&this.selecting!=null) {
-				String write = "";
-				if (this.selecting.id instanceof EmojiId.StandardEmojiId) {
-					String tone = "";
+				String tone = "";
+				if (this.selecting.id instanceof EmojiId.StandardEmojiId)
 					if (this.selectedColor>0)
-						if (EmojiId.StandardEmojiId.fromAlias(this.selecting.name+":skin-tone-"+this.selectedColor)!=null)
+						if (EmojiId.StandardEmojiId.fromAlias(StringUtils.strip(this.selecting.name, ":")+":skin-tone-"+this.selectedColor)!=null)
 							tone = ":skin-tone-"+this.selectedColor+":";
-					write = this.selecting.name+tone;
-				} else
-					write = this.selecting.name;
-				EmojiSelectionChat.this.inputField.getTextFieldWidgetObj().writeText(write+" ");
+				EmojiSelectionChat.this.inputField.getTextFieldWidgetObj().writeText(this.selecting.name+tone+" ");
 				hide();
 				return true;
 			}

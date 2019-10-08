@@ -50,8 +50,8 @@ public class EmojiFrequently {
 	}
 
 	public void load(final File dictDir) {
+		this.frequently.clear();
 		this.save = new File(dictDir, "history.json");
-		;
 		final EmojiHistoryModel model = DataUtils.loadFileIfExists(this.save, EmojiHistoryModel.class, "Emoji Frequently History");
 		if (model!=null&&model.history!=null)
 			Stream.of(model.history).flatMap(e -> PickerItem.fromText(EmojiText.createParsed(e)).stream()).forEach(this::use);
@@ -60,7 +60,7 @@ public class EmojiFrequently {
 	public void save() {
 		if (this.save!=null) {
 			final EmojiHistoryModel model = new EmojiHistoryModel();
-			model.history = this.frequently.stream().map(e -> e.text).toArray(e -> new String[e]);
+			model.history = this.frequently.stream().map(e -> e.name).toArray(e -> new String[e]);
 			DataUtils.saveFile(this.save, EmojiHistoryModel.class, model, "Emoji Frequently History");
 		}
 	}

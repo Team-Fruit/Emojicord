@@ -3,7 +3,10 @@ package net.teamfruit.emojicord;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nonnull;
 
 import com.google.common.collect.Lists;
 
@@ -25,6 +28,8 @@ import net.teamfruit.emojicord.gui.IChatOverlay;
 import net.teamfruit.emojicord.gui.SuggestionChat;
 
 public class EventHandler extends CompatHandler {
+	static final @Nonnull Pattern skintonePattern = Pattern.compile("\\:skin-tone-(\\d)\\:");
+
 	private final List<Function<CompatChatScreen, IChatOverlay>> overlayFactories = Lists.newArrayList(
 			SuggestionChat::new,
 			EmojiSelectionChat::new);
@@ -32,9 +37,11 @@ public class EventHandler extends CompatHandler {
 
 	@Override
 	public void onChat(final CompatClientChatEvent event) {
-		if (!event.getMessage().startsWith("/")) {
-			final EmojiText emojiText = EmojiText.createParsed(event.getMessage());
-			PickerItem.fromText(emojiText).forEach(EmojiFrequently.instance::use);
+		final String message = event.getMessage();
+		if (!message.startsWith("/")) {
+			final EmojiText emojiText = EmojiText.createEncoded(message);
+			final String untoned = skintonePattern.matcher(message).replaceAll("");
+			PickerItem.fromText(EmojiText.createParsed(untoned)).forEach(EmojiFrequently.instance::use);
 			if (EmojiFrequently.instance.hasChanged())
 				EmojiFrequently.instance.save();
 			event.setMessage(emojiText.getEncoded());

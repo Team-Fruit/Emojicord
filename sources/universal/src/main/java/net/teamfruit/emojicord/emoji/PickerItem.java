@@ -48,7 +48,7 @@ public class PickerItem {
 
 	public static List<PickerItem> fromText(final EmojiText emojiText) {
 		return emojiText.emojis.stream().filter(e -> e.id!=null&&e.raw!=null)
-				.map(e -> new PickerItem(e.encoded, e.raw, Lists.newArrayList(StringUtils.strip(e.raw, ":")), e.id))
+				.map(e -> new PickerItem(e.source, e.encoded, Lists.newArrayList(StringUtils.strip(e.source, ":")), e.id))
 				.filter(e -> e!=null).collect(Collectors.toList());
 	}
 }

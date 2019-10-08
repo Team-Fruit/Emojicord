@@ -97,11 +97,13 @@ public class EmojiText {
 		public final @Nullable EmojiId id;
 		public final String raw;
 		public final String encoded;
+		public final String source;
 
-		public EmojiTextElement(final @Nullable EmojiId id, final String raw, final String encoded) {
+		public EmojiTextElement(final @Nullable EmojiId id, final String raw, final String encoded, final String source) {
 			this.id = id;
 			this.raw = raw;
 			this.encoded = encoded;
+			this.source = source;
 		}
 	}
 
@@ -184,11 +186,11 @@ public class EmojiText {
 		public static EmojiText escape(EmojiText emojiText) {
 			emojiText = EmojiTextBuilder.builder(placeHolderPattern, emojiText).apply(matcher -> {
 				final String g0 = matcher.group(0);
-				return new EmojiTextElement(null, g0, g0);
+				return new EmojiTextElement(null, g0, g0, "");
 			});
 			emojiText = EmojiTextBuilder.builder(colorPattern, emojiText).apply(matcher -> {
 				final String g0 = matcher.group(0);
-				return new EmojiTextElement(null, g0, g0);
+				return new EmojiTextElement(null, g0, g0, "");
 			});
 			return emojiText;
 		}
@@ -196,12 +198,13 @@ public class EmojiText {
 		public static EmojiText parse(EmojiText emojiText) {
 			emojiText = EmojiTextBuilder.builder(pattern, emojiText).apply(matcher -> {
 				final String g0 = matcher.group(0);
+				final String g1 = matcher.group(1);
 				final String g2 = matcher.group(2);
 				if (!StringUtils.isEmpty(g2))
 					if (StringUtils.length(g2)>12)
-						return new EmojiTextElement(EmojiId.DiscordEmojiId.fromDecimalId(g2), g0, g0);
+						return new EmojiTextElement(EmojiId.DiscordEmojiId.fromDecimalId(g2), g0, g0, String.format(":%s:", g1));
 					else
-						return new EmojiTextElement(EmojiId.DiscordEmojiId.fromEncodedId(g2), g0, g0);
+						return new EmojiTextElement(EmojiId.DiscordEmojiId.fromEncodedId(g2), g0, g0, String.format(":%s:", g1));
 				return null;
 			}, matcher -> {
 				final String g0 = matcher.group(0);
@@ -209,12 +212,15 @@ public class EmojiText {
 				final String g4 = matcher.group(4);
 				if (!StringUtils.isEmpty(g3))
 					if (!StringUtils.isEmpty(g4)) {
-						EmojiId emojiId = EmojiId.StandardEmojiId.fromAlias(g3+":skin-tone-"+g4);
-						if (emojiId==null)
+						String source = String.format(":%s::skin-tone-%s:", g3, g4);
+						EmojiId emojiId = EmojiId.StandardEmojiId.fromAlias(String.format("%s:skin-tone-%s", g3, g4));
+						if (emojiId==null) {
+							source = g3;
 							emojiId = EmojiId.StandardEmojiId.fromAlias(g3);
-						return new EmojiTextElement(emojiId, g0, g0);
+						}
+						return new EmojiTextElement(emojiId, g0, g0, source);
 					} else
-						return new EmojiTextElement(EmojiId.StandardEmojiId.fromAlias(g3), g0, g0);
+						return new EmojiTextElement(EmojiId.StandardEmojiId.fromAlias(g3), g0, g0, String.format(":%s:", g3));
 				return null;
 			});
 			return emojiText;
@@ -228,7 +234,7 @@ public class EmojiText {
 					if (EmojiId.StandardEmojiId.fromAlias(g3)==null) {
 						final EmojiId emojiId = DiscordEmojiIdDictionary.instance.get(g3);
 						if (emojiId instanceof EmojiId.DiscordEmojiId)
-							return new EmojiTextElement(emojiId, g0, String.format("<:%s:%s>", StringUtils.substringBeforeLast(g3, "~"), ((EmojiId.DiscordEmojiId) emojiId).getEncodedId()));
+							return new EmojiTextElement(emojiId, g0, String.format("<:%s:%s>", StringUtils.substringBefore(g3, "~"), ((EmojiId.DiscordEmojiId) emojiId).getEncodedId()), String.format(":%s:", g3));
 					}
 				return null;
 			});
@@ -236,7 +242,7 @@ public class EmojiText {
 				final String g0 = matcher.group(0);
 				final EmojiId emojiId = EmojiId.StandardEmojiId.fromAlias(g0);
 				if (emojiId!=null)
-					return new EmojiTextElement(emojiId, g0, String.format(":%s:", emojiId.getCacheName()));
+					return new EmojiTextElement(emojiId, g0, String.format(":%s:", emojiId.getCacheName()), String.format(":%s:", emojiId.getCacheName()));
 				return null;
 			});
 			emojiText = EmojiTextBuilder.builder(StandardEmojiIdDictionary.instance.utfPattern, emojiText).apply(matcher -> {
@@ -244,7 +250,7 @@ public class EmojiText {
 				final EmojiId emojiId = EmojiId.StandardEmojiId.fromUtf(g0);
 				if (emojiId!=null) {
 					final String id = String.format(":%s:", emojiId.getCacheName().replace(":", "::"));
-					return new EmojiTextElement(emojiId, id, id);
+					return new EmojiTextElement(emojiId, id, id, id);
 				}
 				return null;
 			});
