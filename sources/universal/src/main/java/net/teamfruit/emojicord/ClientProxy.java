@@ -4,6 +4,7 @@ import javax.annotation.Nonnull;
 
 import net.teamfruit.emojicord.compat.Compat.CompatSide;
 import net.teamfruit.emojicord.emoji.DiscordEmojiIdDictionary;
+import net.teamfruit.emojicord.emoji.EmojiFrequently;
 import net.teamfruit.emojicord.emoji.Endpoint;
 
 public class ClientProxy extends CommonProxy {
@@ -19,6 +20,7 @@ public class ClientProxy extends CommonProxy {
 	public void init(final @Nonnull CompatFMLInitializationEvent event) {
 		super.init(event);
 
+		EmojiFrequently.instance.load(Locations.instance.getEmojicordDirectory());
 		DiscordEmojiIdDictionary.instance.loadAll(Locations.instance.getDictionaryDirectory());
 
 		if (Endpoint.loadGateway()) {

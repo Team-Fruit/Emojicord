@@ -17,7 +17,9 @@ import net.teamfruit.emojicord.compat.CompatEvents.CompatConfigChangedEvent.Comp
 import net.teamfruit.emojicord.compat.CompatEvents.CompatGuiScreenEvent;
 import net.teamfruit.emojicord.compat.CompatEvents.CompatHandler;
 import net.teamfruit.emojicord.compat.CompatEvents.CompatRenderGameOverlayEvent;
+import net.teamfruit.emojicord.emoji.EmojiFrequently;
 import net.teamfruit.emojicord.emoji.EmojiText;
+import net.teamfruit.emojicord.emoji.PickerItem;
 import net.teamfruit.emojicord.gui.EmojiSelectionChat;
 import net.teamfruit.emojicord.gui.IChatOverlay;
 import net.teamfruit.emojicord.gui.SuggestionChat;
@@ -31,7 +33,10 @@ public class EventHandler extends CompatHandler {
 	@Override
 	public void onChat(final CompatClientChatEvent event) {
 		if (!event.getMessage().startsWith("/")) {
-			final EmojiText emojiText = EmojiText.createEncoded(event.getMessage());
+			final EmojiText emojiText = EmojiText.createParsed(event.getMessage());
+			PickerItem.fromText(emojiText).forEach(EmojiFrequently.instance::use);
+			if (EmojiFrequently.instance.hasChanged())
+				EmojiFrequently.instance.save();
 			event.setMessage(emojiText.getEncoded());
 		}
 	}

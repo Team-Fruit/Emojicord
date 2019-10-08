@@ -61,53 +61,31 @@ public abstract class EmojiId {
 			super(EmojiId.this);
 		}
 
-		public String getUid() {
-			return getId()+"~"+countPrev();
+		public String getUniqueName(final String name) {
+			final int count = countPrev();
+			if (count>0)
+				return name+"~"+count;
+			return name;
 		}
 	}
 
 	public static class Node<T> {
 		public final T value;
-		public Node<T> next;
 		public Node<T> prev;
 
 		public Node(final T value) {
 			this.value = value;
 		}
 
-		public void linkNext(final Node<T> insert) {
-			if (insert!=null) {
-				insert.prev = this;
-				if (this.next!=null)
-					insert.next = this.next;
-			}
-			if (this.next!=null)
-				this.next.prev = insert;
-			this.next = insert;
-		}
-
 		public void linkPrev(final Node<T> insert) {
-			if (insert!=null) {
-				insert.next = this;
-				if (this.prev!=null)
-					insert.prev = this.prev;
-			}
-			if (this.prev!=null)
-				this.prev.next = insert;
 			this.prev = insert;
-		}
-
-		public int countNext() {
-			int count = 0;
-			for (Node<T> i = this.next; i.next!=null; i = i.next)
-				count++;
-			return count;
 		}
 
 		public int countPrev() {
 			int count = 0;
-			for (Node<T> i = this.prev; i.prev!=null; i = i.prev)
-				count++;
+			if (this.prev!=null)
+				for (Node<T> i = this.prev; i.prev!=null; i = i.prev)
+					count++;
 			return count;
 		}
 	}

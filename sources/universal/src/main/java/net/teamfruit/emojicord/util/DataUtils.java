@@ -100,6 +100,12 @@ public class DataUtils {
 		return null;
 	}
 
+	public static @Nullable <T> T loadFileIfExists(final File file, final Class<T> clazz, final @Nullable String description) {
+		if (file.exists())
+			return loadFile(file, clazz, description);
+		return null;
+	}
+
 	private static <T> boolean writeFile(final File file, final Class<T> clazz, final T object) throws Exception {
 		return writeStream(FileUtils.openOutputStream(file), clazz, object);
 	}

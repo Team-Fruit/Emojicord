@@ -31,12 +31,14 @@ import net.teamfruit.emojicord.util.DataUtils;
 public class DiscordEmojiIdDictionary {
 	public static final DiscordEmojiIdDictionary instance = new DiscordEmojiIdDictionary();
 
-	private final ListMultimap<String, EmojiId> dictionary = Multimaps.newListMultimap(Maps.newHashMap(),
+	public final ListMultimap<String, EmojiId> dictionary = Multimaps.newListMultimap(Maps.newHashMap(),
 			() -> Lists.newArrayList());
+	public final List<EmojiDiscordList> groups = Lists.newArrayList();
+	public final List<PickerGroup> pickerGroups = Lists.newArrayList();
 
 	public EmojiId get(final String name) {
 		final String str = StringUtils.substringBefore(name, "~"); // not substringBeforeLast
-		final Optional<EmojiId> result = this.dictionary.get(str).stream().filter(e -> e.node.getUid().equals(name)).findFirst();
+		final Optional<EmojiId> result = this.dictionary.get(str).stream().filter(e -> e.node.getUniqueName(str).equals(name)).findFirst();
 		return result.orElse(null);
 	}
 
@@ -48,7 +50,7 @@ public class DiscordEmojiIdDictionary {
 			if (!values.isEmpty())
 				dict.put(key, values.get(0));
 			values.stream().filter(e -> e.node.countPrev()>0).forEach(e -> {
-				dict.put(e.node.getUid(), e);
+				dict.put(e.node.getUniqueName(key), e);
 			});
 		}
 		return dict;
@@ -58,17 +60,19 @@ public class DiscordEmojiIdDictionary {
 		final List<EmojiId> list = this.dictionary.get(name);
 		if (!list.isEmpty()) {
 			final EmojiId last = list.get(list.size()-1);
-			last.node.linkNext(id.node);
+			id.node.linkPrev(last.node);
 		} else {
 			final EmojiId stdId = StandardEmojiIdDictionary.instance.nameDictionary.get(name);
 			if (stdId!=null)
-				stdId.node.linkNext(id.node);
+				id.node.linkPrev(stdId.node);
 		}
 		list.add(id);
 	}
 
 	public void clear() {
 		this.dictionary.clear();
+		this.groups.clear();
+		this.pickerGroups.clear();
 	}
 
 	public void loadAll(final File dictDir) {
@@ -81,18 +85,6 @@ public class DiscordEmojiIdDictionary {
 
 		public EmojiDictionaryLoader(final DiscordEmojiIdDictionary dictionary) {
 			this.dictionary = dictionary;
-		}
-
-		public void load(final File dictFile) {
-			final EmojiDiscordList emojiList = DataUtils.loadFile(dictFile, EmojiDiscordList.class,
-					"Discord Emoji Dictionary");
-			if (emojiList!=null)
-				for (final EmojiDiscordGroup emojiGroup : emojiList.groups)
-					for (final EmojiDiscord emoji : emojiGroup.emojis) {
-						final EmojiId id = EmojiId.DiscordEmojiId.fromDecimalId(emoji.id);
-						if (id!=null)
-							this.dictionary.register(emoji.name, id);
-					}
 		}
 
 		public void loadAll(final File dictDir) {
@@ -179,13 +171,24 @@ public class DiscordEmojiIdDictionary {
 						"Discord Emoji Dictionary Manifest File");
 			}
 
+			final List<PickerGroup> pickerGroups = Lists.newArrayList();
 			for (final EmojiDiscordList emojiList : lists)
-				for (final EmojiDiscordGroup emojiGroup : emojiList.groups)
+				for (final EmojiDiscordGroup emojiGroup : emojiList.groups) {
+					final List<PickerItem> pickerItems = Lists.newArrayList();
 					for (final EmojiDiscord emoji : emojiGroup.emojis) {
 						final EmojiId id = EmojiId.DiscordEmojiId.fromDecimalId(emoji.id);
-						if (id!=null)
+						if (id!=null) {
 							this.dictionary.register(emoji.name, id);
+							final String uid = id.node.getUniqueName(emoji.name);
+							pickerItems.add(new PickerItem(":"+uid+":", ":"+uid+":", Lists.newArrayList(uid), id));
+						}
 					}
+					if (!pickerItems.isEmpty())
+						pickerGroups.add(new PickerGroup(emojiGroup.name, pickerItems));
+				}
+
+			this.dictionary.groups.addAll(lists);
+			this.dictionary.pickerGroups.addAll(pickerGroups);
 		}
 	}
 }
