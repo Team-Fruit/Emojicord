@@ -84,7 +84,7 @@ public abstract class EmojiId {
 		public int countPrev() {
 			int count = 0;
 			if (this.prev!=null)
-				for (Node<T> i = this.prev; i.prev!=null; i = i.prev)
+				for (Node<T> i = this; i.prev!=null; i = i.prev)
 					count++;
 			return count;
 		}

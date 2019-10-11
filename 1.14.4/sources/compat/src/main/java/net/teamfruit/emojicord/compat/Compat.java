@@ -129,6 +129,10 @@ public class Compat {
 		public File getGameDir() {
 			return FMLPaths.GAMEDIR.get().toFile();
 		}
+
+		public boolean isGameFocused() {
+			return this.mc.isGameFocused();
+		}
 	}
 
 	public static class CompatFontRenderer {

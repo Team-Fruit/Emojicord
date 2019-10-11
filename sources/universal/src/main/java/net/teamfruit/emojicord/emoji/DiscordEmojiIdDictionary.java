@@ -1,15 +1,10 @@
 package net.teamfruit.emojicord.emoji;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -19,12 +14,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimaps;
 
-import net.teamfruit.emojicord.Log;
 import net.teamfruit.emojicord.emoji.Models.EmojiDiscord;
 import net.teamfruit.emojicord.emoji.Models.EmojiDiscordGroup;
-import net.teamfruit.emojicord.emoji.Models.EmojiDiscordIndexFolder;
-import net.teamfruit.emojicord.emoji.Models.EmojiDiscordIndexGroup;
-import net.teamfruit.emojicord.emoji.Models.EmojiDiscordIndexList;
 import net.teamfruit.emojicord.emoji.Models.EmojiDiscordList;
 import net.teamfruit.emojicord.util.DataUtils;
 
@@ -35,6 +26,8 @@ public class DiscordEmojiIdDictionary {
 			() -> Lists.newArrayList());
 	public final List<EmojiDiscordList> groups = Lists.newArrayList();
 	public final List<PickerGroup> pickerGroups = Lists.newArrayList();
+
+	private File dictDir;
 
 	public EmojiId get(final String name) {
 		final String str = StringUtils.substringBefore(name, "~"); // not substringBeforeLast
@@ -75,9 +68,15 @@ public class DiscordEmojiIdDictionary {
 		this.pickerGroups.clear();
 	}
 
-	public void loadAll(final File dictDir) {
-		clear();
-		new EmojiDictionaryLoader(this).loadAll(dictDir);
+	public void init(final File dictDir) {
+		this.dictDir = dictDir;
+	}
+
+	public void loadAll() {
+		if (this.dictDir!=null) {
+			clear();
+			new EmojiDictionaryLoader(this).loadAll(this.dictDir);
+		}
 	}
 
 	public static class EmojiDictionaryLoader {
@@ -89,7 +88,7 @@ public class DiscordEmojiIdDictionary {
 
 		public void loadAll(final File dictDir) {
 			final File groupsDir = new File(dictDir, "mappings");
-			final File manifestFile = new File(dictDir, "indexes.json");
+			//final File manifestFile = new File(dictDir, "indexes.json");
 
 			groupsDir.mkdirs();
 
@@ -101,6 +100,7 @@ public class DiscordEmojiIdDictionary {
 					lists.add(emojiList);
 			}
 
+			/*
 			final EmojiDiscordIndexFolder listIndex = DataUtils.loadFile(manifestFile, EmojiDiscordIndexFolder.class, null);
 			Set<Set<String>> listIndexSample = null;
 			if (listIndex!=null)
@@ -170,6 +170,7 @@ public class DiscordEmojiIdDictionary {
 				DataUtils.saveFile(manifestFile, EmojiDiscordIndexFolder.class, ifolder,
 						"Discord Emoji Dictionary Manifest File");
 			}
+			*/
 
 			final List<PickerGroup> pickerGroups = Lists.newArrayList();
 			for (final EmojiDiscordList emojiList : lists)

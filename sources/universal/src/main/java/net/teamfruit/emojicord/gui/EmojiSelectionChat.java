@@ -150,6 +150,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 		private final Rectangle2d rectMain;
 		private final Rectangle2d rectColorButton;
 		private final Rectangle2d rectColor;
+		private final Rectangle2d rectSettingButton;
 
 		private final List<PickerGroup> baseCategories;
 		private final List<Pair<String, PickerGroup>> buttonCategories;
@@ -175,16 +176,17 @@ public class EmojiSelectionChat implements IChatOverlay {
 			final int bannerTopHeight = 12+(marginTop+paddingTop)*2;
 			final int bannerBottomHeight = 16;
 			final int colorButtonWidth = 12;
+			final int settingButtonWidth = 12;
 			final int searchButtonWidth = 12;
 			this.rectTop = new Rectangle2d(this.rectangle.getX(), this.rectangle.getY(), this.rectangle.getWidth(), bannerTopHeight);
-			this.rectInput = this.rectTop.inner(marginTop, marginTop, 4+2+colorButtonWidth, marginTop);
+			this.rectInput = this.rectTop.inner(marginTop, marginTop, 4+2+colorButtonWidth+settingButtonWidth, marginTop);
 			this.rectInputField = this.rectInput.inner(paddingTop+2, paddingTop+2, searchButtonWidth, 0);
 			this.rectInputButton = new Rectangle2d(this.rectInput.getX()+this.rectInput.getWidth()-searchButtonWidth, this.rectInput.getY(), searchButtonWidth, this.rectInput.getHeight());
 			this.rectBottom = new Rectangle2d(this.rectangle.getX(), this.rectangle.getY()+this.rectangle.getHeight()-bannerBottomHeight, this.rectangle.getWidth(), bannerBottomHeight);
 			this.rectMain = new Rectangle2d(this.rectangle.getX(), this.rectTop.getY()+this.rectTop.getHeight(), this.rectangle.getWidth(), this.rectBottom.getY()-(this.rectTop.getY()+this.rectTop.getHeight()));
-			this.rectColorButton = new Rectangle2d(this.rectTop.getX()+this.rectTop.getWidth()-colorButtonWidth-4, this.rectInput.getY(), colorButtonWidth, this.rectInput.getHeight()).inner(0, 2, 0, 2);
+			this.rectSettingButton = new Rectangle2d(this.rectTop.getX()+this.rectTop.getWidth()-colorButtonWidth-4, this.rectInput.getY(), colorButtonWidth, this.rectInput.getHeight()).inner(0, 2, 0, 2);
+			this.rectColorButton = new Rectangle2d(this.rectSettingButton.getX()-colorButtonWidth, this.rectInput.getY(), colorButtonWidth, this.rectInput.getHeight()).inner(0, 2, 0, 2);
 			this.rectColor = new Rectangle2d(this.rectColorButton.getX(), this.rectColorButton.getY(), this.rectColorButton.getWidth(), 14*6);
-
 			this.baseCategories = categories;
 			this.buttonCategories = buttonCategories;
 			this.categories = categories;
@@ -304,6 +306,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 						this.selectingColor = index;
 				}
 			}
+			EmojiSelectionChat.this.font.drawString(":gear:", this.rectSettingButton.getX()+colorOffset, this.rectSettingButton.getY()+colorOffset, 0xFFFFFFFF);
 
 			{
 				PickerGroup currentGroup = null;
@@ -349,6 +352,11 @@ public class EmojiSelectionChat implements IChatOverlay {
 		public boolean onMouseClicked(final int button) {
 			if (!this.rectangle.contains(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY)) {
 				hide();
+				return true;
+			}
+			if (this.rectSettingButton.contains(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY)) {
+				if (EmojiSettings.showSettings!=null)
+					EmojiSettings.showSettings.run();
 				return true;
 			}
 			if (!this.colorShown) {
@@ -404,7 +412,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 				}
 				return true;
 			}
-			return false;
+			return true;
 		}
 
 		public boolean onMouseScroll(final double scrollDelta) {

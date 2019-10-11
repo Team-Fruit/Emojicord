@@ -198,6 +198,7 @@ public class EmojiObject {
 				.expireAfterAccess(EMOJI_LIFETIME_SEC, TimeUnit.SECONDS)
 				.removalListener(
 						(final RemovalNotification<EmojiId, EmojiObject> notification) -> {
+							//Log.log.info("deleted");
 							final EmojiObject nvalue = notification.getValue();
 							if (nvalue!=null)
 								nvalue.delete();

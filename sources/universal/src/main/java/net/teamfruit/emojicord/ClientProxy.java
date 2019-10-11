@@ -8,6 +8,8 @@ import net.teamfruit.emojicord.emoji.EmojiFrequently;
 import net.teamfruit.emojicord.emoji.Endpoint;
 
 public class ClientProxy extends CommonProxy {
+	public static EventHandler eventHandler;
+
 	@Override
 	public void preInit(final @Nonnull CompatFMLPreInitializationEvent event) {
 		super.preInit(event);
@@ -21,14 +23,17 @@ public class ClientProxy extends CommonProxy {
 		super.init(event);
 
 		EmojiFrequently.instance.load(Locations.instance.getEmojicordDirectory());
-		DiscordEmojiIdDictionary.instance.loadAll(Locations.instance.getDictionaryDirectory());
+		DiscordEmojiIdDictionary.instance.init(Locations.instance.getDictionaryDirectory());
+		DiscordEmojiIdDictionary.instance.loadAll();
 
 		if (Endpoint.loadGateway()) {
 			Endpoint.loadStandardEmojis();
 			Endpoint.loadStandardPicker();
 		}
 
-		new EventHandler().registerHandler();
+		eventHandler = new EventHandler();
+		eventHandler.registerHandler();
+		eventHandler.registerDictionaryWatcher(Locations.instance.getDictionaryDirectory());
 
 		//MC.fontRenderer = new EmojiFontRenderer(MC);
 	}
