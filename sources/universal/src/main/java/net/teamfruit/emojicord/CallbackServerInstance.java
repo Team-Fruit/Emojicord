@@ -11,8 +11,7 @@ import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.net.ssl.SSLServerSocketFactory;
-
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.HttpConnectionFactory;
@@ -46,15 +45,19 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import net.teamfruit.emojicord.util.DataUtils;
 
-public class CallbackServerInstance {
+public class CallbackServerInstance implements AutoCloseable {
 	public static class WebCallbackModel {
 		public String key;
 		public String token;
 	}
 
-	public static void main(final String[] args) throws Exception {
-		final ExecutorService listenerExecutor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setDaemon(false).setNameFormat(Reference.MODID+"-web-listener-%d").build());
-		final ExecutorService workerExecutor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setDaemon(true).setNameFormat(Reference.MODID+"-web-worker-%d").build());
+	private final ExecutorService listenerExecutor;
+	private final ExecutorService workerExecutor;
+	private ServerSocket serversocket;
+
+	public CallbackServerInstance(final int port) throws IOException {
+		this.listenerExecutor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setDaemon(false).setNameFormat(Reference.MODID+"-web-listener-%d").build());
+		this.workerExecutor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setDaemon(true).setNameFormat(Reference.MODID+"-web-worker-%d").build());
 
 		// Set up the HTTP protocol processor
 		final HttpProcessor httpproc = HttpProcessorBuilder.create()
@@ -71,7 +74,64 @@ public class CallbackServerInstance {
 		// Set up the HTTP service
 		final HttpService httpService = new HttpService(httpproc, reqistry);
 
-		listenerExecutor.submit(new RequestListenerThread(httpService, null, workerExecutor));
+		final HttpConnectionFactory<DefaultBHttpServerConnection> connFactory = DefaultBHttpServerConnectionFactory.INSTANCE;
+		this.serversocket = new ServerSocket(port, 0, InetAddress.getByName(null));
+
+		this.listenerExecutor.submit(() -> {
+			Log.log.info("Emojicord Web Listener on port "+this.serversocket.getLocalPort());
+			while (!Thread.interrupted())
+				try {
+					// Set up HTTP connection
+					final Socket socket = this.serversocket.accept();
+					final HttpServerConnection conn = connFactory.createConnection(socket);
+
+					// Start worker thread
+					Log.log.info("Incoming connection from "+socket.getInetAddress());
+					this.workerExecutor.submit(() -> {
+						final HttpContext context = new BasicHttpContext(null);
+						try {
+							while (!Thread.interrupted()&&conn.isOpen())
+								httpService.handleRequest(conn, context);
+						} catch (final ConnectionClosedException ex) {
+							Log.log.info("Client closed connection");
+						} catch (final IOException ex) {
+							Log.log.error("IO error: "+ex.getMessage());
+						} catch (final HttpException ex) {
+							Log.log.error("Unrecoverable HTTP protocol violation: "+ex.getMessage());
+						} finally {
+							try {
+								conn.shutdown();
+							} catch (final IOException ignore) {
+							}
+						}
+					});
+				} catch (final InterruptedIOException ex) {
+					break;
+				} catch (final IOException e) {
+					Log.log.error("IO error initialising connection thread: ", e);
+					break;
+				}
+		});
+	}
+
+	public CallbackServerInstance() throws IOException {
+		this(0);
+	}
+
+	public int getPort() {
+		return this.serversocket.getLocalPort();
+	}
+
+	@Override
+	public void close() {
+		this.listenerExecutor.shutdownNow();
+		this.workerExecutor.shutdownNow();
+		IOUtils.closeQuietly(this.serversocket);
+	}
+
+	@SuppressWarnings("resource")
+	public static void main(final String[] args) throws IOException {
+		new CallbackServerInstance();
 	}
 
 	private static class HttpCallbackHandler implements HttpRequestHandler {
@@ -86,6 +146,7 @@ public class CallbackServerInstance {
 			response.addHeader(new BasicHeader("Access-Control-Max-Age", "86400"));
 			response.addHeader(new BasicHeader(HttpHeaders.ACCEPT, "application/json"));
 			response.addHeader(new BasicHeader(HttpHeaders.ACCEPT_CHARSET, "utf-8"));
+			//response.addHeader(new BasicHeader(HttpHeaders.CONNECTION, "close"));
 
 			final String method = request.getRequestLine().getMethod().toUpperCase(Locale.ENGLISH);
 			if (method.equals("OPTIONS")) {
@@ -137,77 +198,6 @@ public class CallbackServerInstance {
 			response.setStatusCode(HttpStatus.SC_OK);
 			response.setEntity(new StringEntity("OK", ContentType.create("text/plain", StandardCharsets.UTF_8)));
 			Log.log.info(String.format("key: %s, token: %s", callback.key, callback.token));
-		}
-	}
-
-	private static class RequestListenerThread implements Runnable {
-		private final HttpConnectionFactory<DefaultBHttpServerConnection> connFactory;
-		private final ServerSocket serversocket;
-		private final HttpService httpService;
-		private final ExecutorService executerService;
-
-		public RequestListenerThread(
-				final HttpService httpService,
-				final SSLServerSocketFactory sf,
-				final ExecutorService executorService
-		) throws IOException {
-			this.connFactory = DefaultBHttpServerConnectionFactory.INSTANCE;
-			this.serversocket = sf!=null
-					? sf.createServerSocket(0, 0, InetAddress.getByName(null))
-					: new ServerSocket(0, 0, InetAddress.getByName(null));
-			this.httpService = httpService;
-			this.executerService = executorService;
-		}
-
-		@Override
-		public void run() {
-			Log.log.info("Emojicord Web Listener on port "+this.serversocket.getLocalPort());
-			while (!Thread.interrupted())
-				try {
-					// Set up HTTP connection
-					final Socket socket = this.serversocket.accept();
-					final HttpServerConnection conn = this.connFactory.createConnection(socket);
-
-					// Start worker thread
-					Log.log.info("Incoming connection from "+socket.getInetAddress());
-					this.executerService.submit(new WorkerThread(this.httpService, conn));
-				} catch (final InterruptedIOException ex) {
-					break;
-				} catch (final IOException e) {
-					Log.log.error("IO error initialising connection thread: ", e);
-					break;
-				}
-		}
-	}
-
-	private static class WorkerThread implements Runnable {
-		private final HttpService httpservice;
-		private final HttpServerConnection conn;
-
-		public WorkerThread(final HttpService httpservice, final HttpServerConnection conn) {
-			super();
-			this.httpservice = httpservice;
-			this.conn = conn;
-		}
-
-		@Override
-		public void run() {
-			final HttpContext context = new BasicHttpContext(null);
-			try {
-				while (!Thread.interrupted()&&this.conn.isOpen())
-					this.httpservice.handleRequest(this.conn, context);
-			} catch (final ConnectionClosedException ex) {
-				Log.log.error("Client closed connection");
-			} catch (final IOException ex) {
-				Log.log.error("IO error: "+ex.getMessage());
-			} catch (final HttpException ex) {
-				Log.log.error("Unrecoverable HTTP protocol violation: "+ex.getMessage());
-			} finally {
-				try {
-					this.conn.shutdown();
-				} catch (final IOException ignore) {
-				}
-			}
 		}
 	}
 }
