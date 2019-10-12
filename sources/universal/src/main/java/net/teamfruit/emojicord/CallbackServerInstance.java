@@ -8,6 +8,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.net.ssl.SSLServerSocketFactory;
 
@@ -40,6 +42,8 @@ import org.apache.http.protocol.ResponseServer;
 import org.apache.http.protocol.UriHttpRequestHandlerMapper;
 import org.apache.http.util.EntityUtils;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
 import net.teamfruit.emojicord.util.DataUtils;
 
 public class CallbackServerInstance {
@@ -49,10 +53,13 @@ public class CallbackServerInstance {
 	}
 
 	public static void main(final String[] args) throws Exception {
+		final ExecutorService listenerExecutor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setDaemon(false).setNameFormat(Reference.MODID+"-web-listener-%d").build());
+		final ExecutorService workerExecutor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setDaemon(true).setNameFormat(Reference.MODID+"-web-worker-%d").build());
+
 		// Set up the HTTP protocol processor
 		final HttpProcessor httpproc = HttpProcessorBuilder.create()
 				.add(new ResponseDate())
-				.add(new ResponseServer("Emojicord/1.1"))
+				.add(new ResponseServer(Reference.NAME+"/1.1"))
 				.add(new ResponseContent())
 				.add(new ResponseConnControl())
 				.build();
@@ -64,9 +71,7 @@ public class CallbackServerInstance {
 		// Set up the HTTP service
 		final HttpService httpService = new HttpService(httpproc, reqistry);
 
-		final Thread t = new RequestListenerThread(httpService, null);
-		t.setDaemon(false);
-		t.start();
+		listenerExecutor.submit(new RequestListenerThread(httpService, null, workerExecutor));
 	}
 
 	private static class HttpCallbackHandler implements HttpRequestHandler {
@@ -135,20 +140,23 @@ public class CallbackServerInstance {
 		}
 	}
 
-	private static class RequestListenerThread extends Thread {
+	private static class RequestListenerThread implements Runnable {
 		private final HttpConnectionFactory<DefaultBHttpServerConnection> connFactory;
 		private final ServerSocket serversocket;
 		private final HttpService httpService;
+		private final ExecutorService executerService;
 
 		public RequestListenerThread(
 				final HttpService httpService,
-				final SSLServerSocketFactory sf
+				final SSLServerSocketFactory sf,
+				final ExecutorService executorService
 		) throws IOException {
 			this.connFactory = DefaultBHttpServerConnectionFactory.INSTANCE;
 			this.serversocket = sf!=null
 					? sf.createServerSocket(0, 0, InetAddress.getByName(null))
 					: new ServerSocket(0, 0, InetAddress.getByName(null));
 			this.httpService = httpService;
+			this.executerService = executorService;
 		}
 
 		@Override
@@ -161,10 +169,8 @@ public class CallbackServerInstance {
 					final HttpServerConnection conn = this.connFactory.createConnection(socket);
 
 					// Start worker thread
-					final Thread t = new WorkerThread(this.httpService, conn);
-					t.setDaemon(true);
-					t.start();
-					Log.log.info("Incoming connection from "+socket.getInetAddress()+", thread "+t.getName());
+					Log.log.info("Incoming connection from "+socket.getInetAddress());
+					this.executerService.submit(new WorkerThread(this.httpService, conn));
 				} catch (final InterruptedIOException ex) {
 					break;
 				} catch (final IOException e) {
@@ -174,7 +180,7 @@ public class CallbackServerInstance {
 		}
 	}
 
-	private static class WorkerThread extends Thread {
+	private static class WorkerThread implements Runnable {
 		private final HttpService httpservice;
 		private final HttpServerConnection conn;
 
@@ -203,6 +209,5 @@ public class CallbackServerInstance {
 				}
 			}
 		}
-
 	}
 }
