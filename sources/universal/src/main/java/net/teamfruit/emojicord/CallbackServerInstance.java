@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Function;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -49,13 +50,20 @@ public class CallbackServerInstance implements AutoCloseable {
 	public static class WebCallbackModel {
 		public String key;
 		public String token;
+
+		public boolean validate() {
+			return StringUtils.isNotEmpty(this.key)&&StringUtils.isNotEmpty(this.token);
+		}
 	}
 
+	private Function<WebCallbackModel, Boolean> consumer;
 	private final ExecutorService listenerExecutor;
 	private final ExecutorService workerExecutor;
 	private ServerSocket serversocket;
 
-	public CallbackServerInstance(final int port) throws IOException {
+	public CallbackServerInstance(final Function<WebCallbackModel, Boolean> consumer, final int port) throws IOException {
+		this.consumer = consumer;
+
 		this.listenerExecutor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setDaemon(false).setNameFormat(Reference.MODID+"-web-listener-%d").build());
 		this.workerExecutor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setDaemon(true).setNameFormat(Reference.MODID+"-web-worker-%d").build());
 
@@ -79,43 +87,48 @@ public class CallbackServerInstance implements AutoCloseable {
 
 		this.listenerExecutor.submit(() -> {
 			Log.log.info("Emojicord Web Listener on port "+this.serversocket.getLocalPort());
-			while (!Thread.interrupted())
-				try {
-					// Set up HTTP connection
-					final Socket socket = this.serversocket.accept();
-					final HttpServerConnection conn = connFactory.createConnection(socket);
+			try {
+				while (!Thread.interrupted())
+					try {
+						// Set up HTTP connection
+						final Socket socket = this.serversocket.accept();
+						final HttpServerConnection conn = connFactory.createConnection(socket);
 
-					// Start worker thread
-					Log.log.info("Incoming connection from "+socket.getInetAddress());
-					this.workerExecutor.submit(() -> {
-						final HttpContext context = new BasicHttpContext(null);
-						try {
-							while (!Thread.interrupted()&&conn.isOpen())
-								httpService.handleRequest(conn, context);
-						} catch (final ConnectionClosedException ex) {
-							Log.log.info("Client closed connection");
-						} catch (final IOException ex) {
-							Log.log.error("IO error: "+ex.getMessage());
-						} catch (final HttpException ex) {
-							Log.log.error("Unrecoverable HTTP protocol violation: "+ex.getMessage());
-						} finally {
+						// Start worker thread
+						Log.log.info("Incoming connection from "+socket.getInetAddress());
+						this.workerExecutor.submit(() -> {
+							final HttpContext context = new BasicHttpContext(null);
 							try {
-								conn.shutdown();
-							} catch (final IOException ignore) {
+								while (!Thread.interrupted()&&conn.isOpen())
+									httpService.handleRequest(conn, context);
+							} catch (final ConnectionClosedException ex) {
+								Log.log.info("Client closed connection");
+							} catch (final IOException ex) {
+								Log.log.error("IO error: "+ex.getMessage());
+							} catch (final HttpException ex) {
+								Log.log.error("Unrecoverable HTTP protocol violation: "+ex.getMessage());
+							} finally {
+								try {
+									conn.shutdown();
+								} catch (final IOException ignore) {
+								}
 							}
-						}
-					});
-				} catch (final InterruptedIOException ex) {
-					break;
-				} catch (final IOException e) {
-					Log.log.error("IO error initialising connection thread: ", e);
-					break;
-				}
+						});
+					} catch (final InterruptedIOException ex) {
+						break;
+					} catch (final IOException e) {
+						Log.log.error("IO error initialising connection thread: ", e);
+						break;
+					}
+			} finally {
+				IOUtils.closeQuietly(this.serversocket);
+			}
+			Log.log.info("Emojicord Web Listener closed");
 		});
 	}
 
-	public CallbackServerInstance() throws IOException {
-		this(0);
+	public CallbackServerInstance(final Function<WebCallbackModel, Boolean> consumer) throws IOException {
+		this(consumer, 0);
 	}
 
 	public int getPort() {
@@ -126,15 +139,14 @@ public class CallbackServerInstance implements AutoCloseable {
 	public void close() {
 		this.listenerExecutor.shutdownNow();
 		this.workerExecutor.shutdownNow();
-		IOUtils.closeQuietly(this.serversocket);
 	}
 
 	@SuppressWarnings("resource")
 	public static void main(final String[] args) throws IOException {
-		new CallbackServerInstance();
+		new CallbackServerInstance(e -> true);
 	}
 
-	private static class HttpCallbackHandler implements HttpRequestHandler {
+	private class HttpCallbackHandler implements HttpRequestHandler {
 		@Override
 		public void handle(
 				final HttpRequest request, final HttpResponse response,
@@ -151,7 +163,7 @@ public class CallbackServerInstance implements AutoCloseable {
 			final String method = request.getRequestLine().getMethod().toUpperCase(Locale.ENGLISH);
 			if (method.equals("OPTIONS")) {
 				response.setStatusCode(HttpStatus.SC_NO_CONTENT);
-				Log.log.info("OPTIONS");
+				Log.log.debug("OPTIONS");
 				return;
 			}
 
@@ -183,21 +195,29 @@ public class CallbackServerInstance implements AutoCloseable {
 			final HttpEntity entity = eRequest.getEntity();
 			//if (eRequest.expectContinue()) {}
 			final byte[] data = EntityUtils.toByteArray(entity);
-			Log.log.info(StringUtils.toEncodedString(data, StandardCharsets.UTF_8));
+			Log.log.debug(StringUtils.toEncodedString(data, StandardCharsets.UTF_8));
 			final WebCallbackModel callback = DataUtils.loadStream(
 					new ByteArrayInputStream(data),
 					WebCallbackModel.class, "Parsing Web Callback");
 
-			if (callback==null||StringUtils.isEmpty(callback.key)||StringUtils.isEmpty(callback.token)) {
+			if (callback==null||!callback.validate()) {
 				response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
 				response.setEntity(new StringEntity("NG\nInvalid Json", ContentType.create("text/plain", StandardCharsets.UTF_8)));
 				Log.log.warn("Invalid Request: Invalid Json");
 				return;
 			}
 
+			Log.log.debug(String.format("Recieved: key: %s, token: %s", callback.key, callback.token));
+
+			if (!CallbackServerInstance.this.consumer.apply(callback)) {
+				response.setStatusCode(HttpStatus.SC_UNAUTHORIZED);
+				response.setEntity(new StringEntity("NG\nInvalid Key", ContentType.create("text/plain", StandardCharsets.UTF_8)));
+				Log.log.warn("Invalid Request: Invalid Key");
+				return;
+			}
+
 			response.setStatusCode(HttpStatus.SC_OK);
 			response.setEntity(new StringEntity("OK", ContentType.create("text/plain", StandardCharsets.UTF_8)));
-			Log.log.info(String.format("key: %s, token: %s", callback.key, callback.token));
 		}
 	}
 }

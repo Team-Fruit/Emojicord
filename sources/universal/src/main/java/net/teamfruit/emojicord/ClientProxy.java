@@ -25,6 +25,7 @@ public class ClientProxy extends CommonProxy {
 		EmojiFrequently.instance.load(Locations.instance.getEmojicordDirectory());
 		DiscordEmojiIdDictionary.instance.init(Locations.instance.getDictionaryDirectory());
 		DiscordEmojiIdDictionary.instance.loadAll();
+		EmojicordWeb.instance.init(Locations.instance.getEmojicordDirectory());
 
 		if (Endpoint.loadGateway()) {
 			Endpoint.loadStandardEmojis();

@@ -1,7 +1,7 @@
 package net.teamfruit.emojicord.gui;
 
 import net.teamfruit.emojicord.ClientProxy;
-import net.teamfruit.emojicord.Locations;
+import net.teamfruit.emojicord.EmojicordWeb;
 import net.teamfruit.emojicord.OSUtils;
 import net.teamfruit.emojicord.Reference;
 import net.teamfruit.emojicord.compat.Compat.CompatChatScreen;
@@ -11,7 +11,6 @@ import net.teamfruit.emojicord.compat.Compat.CompatScreen;
 import net.teamfruit.emojicord.compat.Compat.CompatTextFieldWidget;
 import net.teamfruit.emojicord.compat.OpenGL;
 import net.teamfruit.emojicord.emoji.DiscordEmojiIdDictionary;
-import net.teamfruit.emojicord.emoji.Endpoint;
 import net.teamfruit.emojicord.emoji.Models.EmojiDiscordList;
 
 public class EmojiSettings implements IChatOverlay {
@@ -39,9 +38,9 @@ public class EmojiSettings implements IChatOverlay {
 
 		void onApplying();
 
-		String getDescription();
+		String[] getDescription();
 
-		String getClosingDescription();
+		String[] getClosingDescription();
 
 		default void onOK() {
 		}
@@ -200,7 +199,11 @@ public class EmojiSettings implements IChatOverlay {
 			} else if (!EmojiSettings.this.addGui.isClosing()) {
 				{
 					final Rectangle2d rectInner = this.rectMain.inner(2, 2, 2, 2);
-					EmojiSettings.this.font.drawString(EmojiSettings.this.addGui.getDescription(), rectInner.getX()+2, rectInner.getY()+2, 0xFF777777);
+					float posY = 0;
+					for (final String desc : EmojiSettings.this.addGui.getDescription()) {
+						EmojiSettings.this.font.drawString(desc, rectInner.getX()+2, rectInner.getY()+2+posY, 0xFF777777);
+						posY += 12;
+					}
 				}
 
 				{
@@ -215,7 +218,11 @@ public class EmojiSettings implements IChatOverlay {
 			} else {
 				{
 					final Rectangle2d rectInner = this.rectMain.inner(2, 2, 2, 2);
-					EmojiSettings.this.font.drawString(EmojiSettings.this.addGui.getClosingDescription(), rectInner.getX()+2, rectInner.getY()+2, 0xFF777777);
+					float posY = 0;
+					for (final String desc : EmojiSettings.this.addGui.getDescription()) {
+						EmojiSettings.this.font.drawString(desc, rectInner.getX()+2, rectInner.getY()+2+posY, 0xFF777777);
+						posY += 12;
+					}
 				}
 
 				{
@@ -296,10 +303,7 @@ public class EmojiSettings implements IChatOverlay {
 			private boolean changed;
 
 			public WebAdding() {
-				ClientProxy.eventHandler.hasDictionaryDirectoryChanged();
-
-				if (Endpoint.EMOJI_API!=null&&Endpoint.EMOJI_API.api!=null)
-					Endpoint.EMOJI_API.api.stream().findFirst().ifPresent(OSUtils.getOSType()::openURI);
+				EmojicordWeb.instance.open();
 			}
 
 			@Override
@@ -309,6 +313,8 @@ public class EmojiSettings implements IChatOverlay {
 
 			@Override
 			public boolean isApplyPreferred() {
+				if (!this.changed)
+					this.changed = EmojicordWeb.instance.pollCallbacked();
 				return this.changed;
 			}
 
@@ -316,24 +322,33 @@ public class EmojiSettings implements IChatOverlay {
 			public void onApplying() {
 				this.closing = true;
 				if (!this.changed)
-					; // Web API Check
+					this.changed = EmojicordWeb.instance.download();
 				if (this.changed)
 					onOK();
 			}
 
 			@Override
-			public String getDescription() {
-				return "Emojicord Web\nconfirm web process and click save";
+			public String[] getDescription() {
+				return new String[] {
+						"Emojicord Web",
+						"confirm web process and click save",
+				};
 			}
 
 			@Override
-			public String getClosingDescription() {
-				return "web process not done, are you sure to close?";
+			public String[] getClosingDescription() {
+				return new String[] {
+						"Emojicord Web",
+						"Web process not done,",
+						"Are you sure to close?",
+				};
 			}
 
 			@Override
 			public void onOK() {
 				this.closing = false;
+				//EmojicordWeb.instance.download();
+				EmojicordWeb.instance.close();
 				DiscordEmojiIdDictionary.instance.loadAll();
 				EmojiSettings.this.addGui = null;
 			}
@@ -351,7 +366,7 @@ public class EmojiSettings implements IChatOverlay {
 			public ManualAdding() {
 				ClientProxy.eventHandler.hasDictionaryDirectoryChanged();
 
-				OSUtils.getOSType().openFile(Locations.instance.getDictionaryDirectory());
+				OSUtils.getOSType().openFile(DiscordEmojiIdDictionary.instance.getDictionaryDirectory());
 			}
 
 			@Override
@@ -374,13 +389,19 @@ public class EmojiSettings implements IChatOverlay {
 			}
 
 			@Override
-			public String getDescription() {
-				return "Manually\nput the json and click save button.";
+			public String[] getDescription() {
+				return new String[] {
+						"Manually",
+						"put the json and click save button.",
+				};
 			}
 
 			@Override
-			public String getClosingDescription() {
-				return "no changes, are you sure to close?";
+			public String[] getClosingDescription() {
+				return new String[] {
+						"Manually",
+						"no changes, are you sure to close?",
+				};
 			}
 
 			@Override

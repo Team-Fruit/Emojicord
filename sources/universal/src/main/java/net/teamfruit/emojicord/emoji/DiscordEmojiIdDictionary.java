@@ -72,6 +72,10 @@ public class DiscordEmojiIdDictionary {
 		this.dictDir = dictDir;
 	}
 
+	public File getDictionaryDirectory() {
+		return this.dictDir;
+	}
+
 	public void loadAll() {
 		if (this.dictDir!=null) {
 			clear();
@@ -87,7 +91,8 @@ public class DiscordEmojiIdDictionary {
 		}
 
 		public void loadAll(final File dictDir) {
-			final File groupsDir = new File(dictDir, "mappings");
+			final File groupsDir = dictDir;
+			//final File groupsDir = new File(dictDir, "mappings");
 			//final File manifestFile = new File(dictDir, "indexes.json");
 
 			groupsDir.mkdirs();
@@ -119,7 +124,7 @@ public class DiscordEmojiIdDictionary {
 							return -1;
 						return ib-ia;
 					});
-
+			
 					for (final EmojiDiscordList list : lists) {
 						final List<EmojiDiscordGroup> groupIndex = list.groups;
 						final Map<String, Integer> groupMap = IntStream.range(0, groupIndex.size())
@@ -137,13 +142,13 @@ public class DiscordEmojiIdDictionary {
 							return ib-ia;
 						});
 					}
-
+			
 					listIndexSample = listIndex.lists.stream().map(
 							e -> e.groups.stream().map(f -> f.id).collect(Collectors.toSet())).collect(Collectors.toSet());
 				} catch (final NullPointerException e) {
 					Log.log.error("Manifest File is corrupted. ignored : ", e);
 				}
-
+			
 			boolean updated = false;
 			if (listIndexSample==null)
 				updated = true;
@@ -174,19 +179,22 @@ public class DiscordEmojiIdDictionary {
 
 			final List<PickerGroup> pickerGroups = Lists.newArrayList();
 			for (final EmojiDiscordList emojiList : lists)
-				for (final EmojiDiscordGroup emojiGroup : emojiList.groups) {
-					final List<PickerItem> pickerItems = Lists.newArrayList();
-					for (final EmojiDiscord emoji : emojiGroup.emojis) {
-						final EmojiId id = EmojiId.DiscordEmojiId.fromDecimalId(emoji.id);
-						if (id!=null) {
-							this.dictionary.register(emoji.name, id);
-							final String uid = id.node.getUniqueName(emoji.name);
-							pickerItems.add(new PickerItem(":"+uid+":", ":"+uid+":", Lists.newArrayList(uid), id));
+				if (emojiList!=null&&emojiList.groups!=null)
+					for (final EmojiDiscordGroup emojiGroup : emojiList.groups)
+						if (emojiGroup!=null&&emojiGroup.emojis!=null) {
+							final List<PickerItem> pickerItems = Lists.newArrayList();
+							for (final EmojiDiscord emoji : emojiGroup.emojis)
+								if (emoji!=null) {
+									final EmojiId id = EmojiId.DiscordEmojiId.fromDecimalId(emoji.id);
+									if (id!=null) {
+										this.dictionary.register(emoji.name, id);
+										final String uid = id.node.getUniqueName(emoji.name);
+										pickerItems.add(new PickerItem(":"+uid+":", ":"+uid+":", Lists.newArrayList(uid), id));
+									}
+								}
+							if (!pickerItems.isEmpty())
+								pickerGroups.add(new PickerGroup(emojiGroup.name, pickerItems));
 						}
-					}
-					if (!pickerItems.isEmpty())
-						pickerGroups.add(new PickerGroup(emojiGroup.name, pickerItems));
-				}
 
 			this.dictionary.groups.addAll(lists);
 			this.dictionary.pickerGroups.addAll(pickerGroups);
