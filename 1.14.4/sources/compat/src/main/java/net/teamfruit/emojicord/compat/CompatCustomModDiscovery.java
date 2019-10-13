@@ -97,7 +97,13 @@ public class CompatCustomModDiscovery extends AbstractJarFileLocator implements 
 		//} });
 
 		final LoadingModList to = FMLLoader.getLoadingModList();
-		final BackgroundScanHandler backgroundScanHandler = new BackgroundScanHandler();
+		BackgroundScanHandler backgroundScanHandler = null;
+		try {
+			backgroundScanHandler = BackgroundScanHandler.class.getConstructor(Map.class).newInstance(modFiles);
+		} catch (final ReflectiveOperationException e) {
+		}
+		if (backgroundScanHandler==null)
+			backgroundScanHandler = LamdbaExceptionUtils.uncheck(BackgroundScanHandler.class::newInstance);
 		backgroundScanHandler.setLoadingModList(to);
 
 		final Map<String, ModFileInfo> fileById = LamdbaExceptionUtils.uncheck(() -> {
