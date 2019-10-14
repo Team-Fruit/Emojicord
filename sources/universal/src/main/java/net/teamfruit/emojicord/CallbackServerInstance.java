@@ -10,11 +10,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Function;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.ConnectionClosedException;
+import org.apache.http.Header;
 import org.apache.http.HttpConnectionFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -44,27 +46,25 @@ import org.apache.http.util.EntityUtils;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
+import net.teamfruit.emojicord.emoji.Models.EmojiDiscordList;
 import net.teamfruit.emojicord.util.DataUtils;
 
 public class CallbackServerInstance implements AutoCloseable {
-	public static class WebCallbackModel {
-		public String key;
-		public String token;
-
-		public boolean validate() {
-			return StringUtils.isNotEmpty(this.key)&&StringUtils.isNotEmpty(this.token);
-		}
-	}
-
-	private Function<WebCallbackModel, Boolean> consumer;
+	private Consumer<EmojiDiscordList> consumer;
+	private Predicate<String> keyChecker;
 	private final ExecutorService listenerExecutor;
 	private final ExecutorService workerExecutor;
 	private ServerSocket serversocket;
 
-	public CallbackServerInstance(final Function<WebCallbackModel, Boolean> consumer, final int port) throws IOException {
-		this.consumer = consumer;
+	public CallbackServerInstance(final Consumer<EmojiDiscordList> consumer, final Predicate<String> keyChecker) throws IOException {
+		this(consumer, keyChecker, 0);
+	}
 
-		this.listenerExecutor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setDaemon(false).setNameFormat(Reference.MODID+"-web-listener-%d").build());
+	public CallbackServerInstance(final Consumer<EmojiDiscordList> consumer, final Predicate<String> keyChecker, final int port) throws IOException {
+		this.consumer = consumer;
+		this.keyChecker = keyChecker;
+
+		this.listenerExecutor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setDaemon(true).setNameFormat(Reference.MODID+"-web-listener-%d").build());
 		this.workerExecutor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setDaemon(true).setNameFormat(Reference.MODID+"-web-worker-%d").build());
 
 		// Set up the HTTP protocol processor
@@ -127,10 +127,6 @@ public class CallbackServerInstance implements AutoCloseable {
 		});
 	}
 
-	public CallbackServerInstance(final Function<WebCallbackModel, Boolean> consumer) throws IOException {
-		this(consumer, 0);
-	}
-
 	public int getPort() {
 		return this.serversocket.getLocalPort();
 	}
@@ -143,7 +139,8 @@ public class CallbackServerInstance implements AutoCloseable {
 
 	@SuppressWarnings("resource")
 	public static void main(final String[] args) throws IOException {
-		new CallbackServerInstance(e -> true);
+		new CallbackServerInstance(e -> {
+		}, e -> true);
 	}
 
 	private class HttpCallbackHandler implements HttpRequestHandler {
@@ -154,7 +151,7 @@ public class CallbackServerInstance implements AutoCloseable {
 		) throws HttpException, IOException {
 			response.addHeader(new BasicHeader("Access-Control-Allow-Origin", "https://emojicord.teamfruit.net"));
 			response.addHeader(new BasicHeader("Access-Control-Allow-Methods", "POST, OPTIONS"));
-			response.addHeader(new BasicHeader("Access-Control-Allow-Headers", "Content-Type"));
+			response.addHeader(new BasicHeader("Access-Control-Allow-Headers", "Authorization, Content-Type"));
 			response.addHeader(new BasicHeader("Access-Control-Max-Age", "86400"));
 			response.addHeader(new BasicHeader(HttpHeaders.ACCEPT, "application/json"));
 			response.addHeader(new BasicHeader(HttpHeaders.ACCEPT_CHARSET, "utf-8"));
@@ -177,6 +174,23 @@ public class CallbackServerInstance implements AutoCloseable {
 				return;
 			}
 
+			boolean authorized = false;
+			final Header authorization = request.getFirstHeader(HttpHeaders.AUTHORIZATION);
+			if (authorization!=null) {
+				final String[] split = StringUtils.split(authorization.getValue(), " ");
+				if (split!=null&&split.length==2&&StringUtils.equals(split[0], "token")) {
+					Log.log.debug(String.format("Key Check: %s", split[1]));
+					authorized = CallbackServerInstance.this.keyChecker.test(split[1]);
+				}
+			}
+
+			if (!authorized) {
+				response.setStatusCode(HttpStatus.SC_UNAUTHORIZED);
+				response.setEntity(new StringEntity("NG\nInvalid Key", ContentType.create("text/plain", StandardCharsets.UTF_8)));
+				Log.log.warn("Invalid Request: Invalid Key");
+				return;
+			}
+
 			if (!method.equals("POST")) {
 				response.setStatusCode(HttpStatus.SC_METHOD_NOT_ALLOWED);
 				response.setEntity(new StringEntity("NG\nMethod Not Allowed", ContentType.create("text/plain", StandardCharsets.UTF_8)));
@@ -196,28 +210,20 @@ public class CallbackServerInstance implements AutoCloseable {
 			//if (eRequest.expectContinue()) {}
 			final byte[] data = EntityUtils.toByteArray(entity);
 			Log.log.debug(StringUtils.toEncodedString(data, StandardCharsets.UTF_8));
-			final WebCallbackModel callback = DataUtils.loadStream(
+			final EmojiDiscordList callback = DataUtils.loadStream(
 					new ByteArrayInputStream(data),
-					WebCallbackModel.class, "Parsing Web Callback");
+					EmojiDiscordList.class, "Parsing Web Callback");
 
-			if (callback==null||!callback.validate()) {
+			if (callback==null||StringUtils.isEmpty(callback.id)||StringUtils.isEmpty(callback.name)) {
 				response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
 				response.setEntity(new StringEntity("NG\nInvalid Json", ContentType.create("text/plain", StandardCharsets.UTF_8)));
 				Log.log.warn("Invalid Request: Invalid Json");
 				return;
 			}
 
-			Log.log.debug(String.format("Recieved: key: %s, token: %s", callback.key, callback.token));
-
-			if (!CallbackServerInstance.this.consumer.apply(callback)) {
-				response.setStatusCode(HttpStatus.SC_UNAUTHORIZED);
-				response.setEntity(new StringEntity("NG\nInvalid Key", ContentType.create("text/plain", StandardCharsets.UTF_8)));
-				Log.log.warn("Invalid Request: Invalid Key");
-				return;
-			}
-
 			response.setStatusCode(HttpStatus.SC_OK);
 			response.setEntity(new StringEntity("OK", ContentType.create("text/plain", StandardCharsets.UTF_8)));
+			CallbackServerInstance.this.consumer.accept(callback);
 		}
 	}
 }

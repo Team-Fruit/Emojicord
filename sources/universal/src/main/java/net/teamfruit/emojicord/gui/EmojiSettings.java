@@ -38,9 +38,11 @@ public class EmojiSettings implements IChatOverlay {
 
 		void onApplying();
 
-		String[] getDescription();
+		String getDescription();
 
-		String[] getClosingDescription();
+		String getClosingDescription();
+
+		String getApplyPreferredDescription();
 
 		default void onOK() {
 		}
@@ -178,14 +180,14 @@ public class EmojiSettings implements IChatOverlay {
 				}
 				{
 					IChatOverlay.fill(this.rectButton1, this.rectButton1.contains(EmojiSettings.this.mouseX, EmojiSettings.this.mouseY) ? 0xFF3CA374 : 0xFF43B581);
-					final String text = "Add via Emojicord Web";
+					final String text = ":globe_with_meridians: Add via Emojicord Web";
 					EmojiSettings.this.font.drawString(text, this.rectButton1.getX()+this.rectButton1.getWidth()/2
 							-EmojiSettings.this.font.getStringWidth(text)/2, this.rectButton1.getY()+5, 0xFFFFFFFF);
 				}
 
 				{
 					IChatOverlay.fill(this.rectButton2, this.rectButton2.contains(EmojiSettings.this.mouseX, EmojiSettings.this.mouseY) ? 0xFF677BC4 : 0xFF7289DA);
-					final String text = "Manage Manually";
+					final String text = ":open_file_folder: Manage Manually";
 					EmojiSettings.this.font.drawString(text, this.rectButton2.getX()+this.rectButton2.getWidth()/2
 							-EmojiSettings.this.font.getStringWidth(text)/2, this.rectButton2.getY()+2, 0xFFFFFFFF);
 				}
@@ -197,29 +199,68 @@ public class EmojiSettings implements IChatOverlay {
 							-EmojiSettings.this.font.getStringWidth(text)/2, this.rectButton3.getY()+2, 0xFFFFFFFF);
 				}
 			} else if (!EmojiSettings.this.addGui.isClosing()) {
-				{
-					final Rectangle2d rectInner = this.rectMain.inner(2, 2, 2, 2);
-					float posY = 0;
-					for (final String desc : EmojiSettings.this.addGui.getDescription()) {
-						EmojiSettings.this.font.drawString(desc, rectInner.getX()+2, rectInner.getY()+2+posY, 0xFF777777);
-						posY += 12;
+				if (!EmojiSettings.this.addGui.isApplyPreferred()) {
+					{
+						OpenGL.glPushMatrix();
+						OpenGL.glTranslatef(this.rectMain.getX()+this.rectMain.getWidth()/2-10*5/2, this.rectMain.getY(), 0);
+						OpenGL.glScalef(5, 5, 1);
+						EmojiSettings.this.font.drawString("<:info:633136157626204181>", 0, 0, 0xFFFFFFFF);
+						OpenGL.glPopMatrix();
 					}
-				}
 
-				{
-					if (EmojiSettings.this.addGui.isApplyPreferred())
+					{
+						final Rectangle2d rectInner = this.rectMain.inner(2, 10*5+2, 2, 2);
+						float posY = 0;
+						for (final String desc : EmojiSettings.this.font.wrapFormattedStringToWidth(EmojiSettings.this.addGui.getDescription(), rectInner.getWidth()-2).split("\n")) {
+							EmojiSettings.this.font.drawString(desc, rectInner.getX()+2, rectInner.getY()+2+posY, 0xFF777777);
+							posY += 12;
+						}
+					}
+
+					{
+						IChatOverlay.fill(this.rectButton3, this.rectButton3.contains(EmojiSettings.this.mouseX, EmojiSettings.this.mouseY) ? 0xFFD84040 : 0xFFF04747);
+						final String text = "Cancel";
+						EmojiSettings.this.font.drawString(text, this.rectButton3.getX()+this.rectButton3.getWidth()/2
+								-EmojiSettings.this.font.getStringWidth(text)/2, this.rectButton3.getY()+2, 0xFFFFFFFF);
+					}
+				} else {
+					{
+						OpenGL.glPushMatrix();
+						OpenGL.glTranslatef(this.rectMain.getX()+this.rectMain.getWidth()/2-10*5/2, this.rectMain.getY(), 0);
+						OpenGL.glScalef(5, 5, 1);
+						EmojiSettings.this.font.drawString("<:check:633136145122983957>", 0, 0, 0xFFFFFFFF);
+						OpenGL.glPopMatrix();
+					}
+
+					{
+						final Rectangle2d rectInner = this.rectMain.inner(2, 10*5+2, 2, 2);
+						float posY = 0;
+						for (final String desc : EmojiSettings.this.font.wrapFormattedStringToWidth(EmojiSettings.this.addGui.getApplyPreferredDescription(), rectInner.getWidth()-2).split("\n")) {
+							EmojiSettings.this.font.drawString(desc, rectInner.getX()+2, rectInner.getY()+2+posY, 0xFF777777);
+							posY += 12;
+						}
+					}
+
+					{
 						IChatOverlay.fill(this.rectButton3, this.rectButton3.contains(EmojiSettings.this.mouseX, EmojiSettings.this.mouseY) ? 0xFF3CA374 : 0xFF43B581);
-					else
-						IChatOverlay.fill(this.rectButton3, this.rectButton3.contains(EmojiSettings.this.mouseX, EmojiSettings.this.mouseY) ? 0xFF62666D : 0xFF72767D);
-					final String text = "Save";
-					EmojiSettings.this.font.drawString(text, this.rectButton3.getX()+this.rectButton3.getWidth()/2
-							-EmojiSettings.this.font.getStringWidth(text)/2, this.rectButton3.getY()+2, 0xFFFFFFFF);
+						final String text = "Done";
+						EmojiSettings.this.font.drawString(text, this.rectButton3.getX()+this.rectButton3.getWidth()/2
+								-EmojiSettings.this.font.getStringWidth(text)/2, this.rectButton3.getY()+2, 0xFFFFFFFF);
+					}
 				}
 			} else {
 				{
-					final Rectangle2d rectInner = this.rectMain.inner(2, 2, 2, 2);
+					OpenGL.glPushMatrix();
+					OpenGL.glTranslatef(this.rectMain.getX()+this.rectMain.getWidth()/2-10*5/2, this.rectMain.getY(), 0);
+					OpenGL.glScalef(5, 5, 1);
+					EmojiSettings.this.font.drawString("<:warning:633136170250928151>", 0, 0, 0xFFFFFFFF);
+					OpenGL.glPopMatrix();
+				}
+
+				{
+					final Rectangle2d rectInner = this.rectMain.inner(2, 10*5+2, 2, 2);
 					float posY = 0;
-					for (final String desc : EmojiSettings.this.addGui.getDescription()) {
+					for (final String desc : EmojiSettings.this.font.wrapFormattedStringToWidth(EmojiSettings.this.addGui.getClosingDescription(), rectInner.getWidth()-2).split("\n")) {
 						EmojiSettings.this.font.drawString(desc, rectInner.getX()+2, rectInner.getY()+2+posY, 0xFF777777);
 						posY += 12;
 					}
@@ -321,33 +362,34 @@ public class EmojiSettings implements IChatOverlay {
 			@Override
 			public void onApplying() {
 				this.closing = true;
-				if (!this.changed)
-					this.changed = EmojicordWeb.instance.download();
 				if (this.changed)
 					onOK();
 			}
 
 			@Override
-			public String[] getDescription() {
-				return new String[] {
-						"Emojicord Web",
-						"confirm web process and click save",
-				};
+			public String getDescription() {
+				return "Emojicord Web"
+						+"\nA page was opened on your browser."
+						+"\nPlease proceed on the web.";
 			}
 
 			@Override
-			public String[] getClosingDescription() {
-				return new String[] {
-						"Emojicord Web",
-						"Web process not done,",
-						"Are you sure to close?",
-				};
+			public String getClosingDescription() {
+				return "Emojicord Web"
+						+"\nWeb process not done."
+						+"\nAre you sure you want to cancel?";
+			}
+
+			@Override
+			public String getApplyPreferredDescription() {
+				return "Emojicord Web"
+						+"\nCongratulations!"
+						+"\nNew Emojis are Now Available!";
 			}
 
 			@Override
 			public void onOK() {
 				this.closing = false;
-				//EmojicordWeb.instance.download();
 				EmojicordWeb.instance.close();
 				DiscordEmojiIdDictionary.instance.loadAll();
 				EmojiSettings.this.addGui = null;
@@ -389,19 +431,22 @@ public class EmojiSettings implements IChatOverlay {
 			}
 
 			@Override
-			public String[] getDescription() {
-				return new String[] {
-						"Manually",
-						"put the json and click save button.",
-				};
+			public String getDescription() {
+				return "Manually Management"
+						+"\nPut or Delete a Json";
 			}
 
 			@Override
-			public String[] getClosingDescription() {
-				return new String[] {
-						"Manually",
-						"no changes, are you sure to close?",
-				};
+			public String getClosingDescription() {
+				return "Manually Management"
+						+"\nNo changes found, Are you sure you want to close?";
+			}
+
+			@Override
+			public String getApplyPreferredDescription() {
+				return "Manually Management"
+						+"\nCongratulations"
+						+"\nYour Changes are Saved!";
 			}
 
 			@Override

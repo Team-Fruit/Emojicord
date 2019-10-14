@@ -355,8 +355,10 @@ public class EmojiSelectionChat implements IChatOverlay {
 				return true;
 			}
 			if (this.rectSettingButton.contains(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY)) {
-				if (EmojiSettings.showSettings!=null)
+				if (EmojiSettings.showSettings!=null) {
+					hide();
 					EmojiSettings.showSettings.run();
+				}
 				return true;
 			}
 			if (!this.colorShown) {

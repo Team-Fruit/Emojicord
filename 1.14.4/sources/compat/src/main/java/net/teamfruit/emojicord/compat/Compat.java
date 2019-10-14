@@ -154,6 +154,10 @@ public class Compat {
 			return drawString(msg, x, y, color, true);
 		}
 
+		public String wrapFormattedStringToWidth(final String msg, final int width) {
+			return this.font.wrapFormattedStringToWidth(msg, width);
+		}
+
 		public int getStringWidth(final @Nullable String s) {
 			return this.font.getStringWidth(s);
 		}

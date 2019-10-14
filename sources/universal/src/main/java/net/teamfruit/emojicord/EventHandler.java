@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import net.minecraftforge.client.event.GuiScreenEvent.KeyboardCharTypedEvent;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
@@ -63,7 +64,7 @@ public class EventHandler extends CompatHandler {
 			Log.log.warn("Could not watch the dictionary directory: ", e);
 		}
 		if (this.watcher!=null) {
-			final ExecutorService executor = Executors.newSingleThreadExecutor();
+			final ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setDaemon(true).setNameFormat(Reference.MODID+"-directory-watch-%d").build());
 			executor.submit(() -> {
 				while (true)
 					try {
