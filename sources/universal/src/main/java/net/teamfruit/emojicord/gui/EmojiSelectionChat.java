@@ -7,13 +7,11 @@ import java.util.stream.IntStream;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.lwjgl.glfw.GLFW;
 
 import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 
-import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.teamfruit.emojicord.EmojicordConfig;
 import net.teamfruit.emojicord.compat.Compat.CompatChatScreen;
 import net.teamfruit.emojicord.compat.Compat.CompatFontRenderer;
@@ -84,6 +82,11 @@ public class EmojiSelectionChat implements IChatOverlay {
 	}
 
 	@Override
+	public boolean onMouseReleased(final int button) {
+		return this.selectionList!=null&&this.selectionList.onMouseReleased(button);
+	}
+
+	@Override
 	public boolean onMouseScroll(final double scrollDelta) {
 		return this.selectionList!=null&&this.selectionList.onMouseScroll(scrollDelta);
 	}
@@ -140,7 +143,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 		this.selectionList = null;
 	}
 
-	private class EmojiSelectionList {
+	private class EmojiSelectionList implements IChatOverlay {
 		private final Rectangle2d rectangle;
 		private final Rectangle2d rectTop;
 		private final Rectangle2d rectInput;
@@ -156,7 +159,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 		private final List<Pair<String, PickerGroup>> buttonCategories;
 		private List<PickerGroup> categories;
 
-		private TextFieldWidget searchField;
+		private CompatTextFieldWidget searchField;
 		private float scrollY;
 		private int scrollY0;
 		private int selectedGroupIndex = -1;
@@ -166,6 +169,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 		private boolean colorShown;
 		private int selectingColor = -1;
 		private int selectedColor = -1;
+		private boolean mouseDown;
 
 		private EmojiSelectionList(final int posX, final int posY, final int width, final int height, final List<PickerGroup> categories, final List<Pair<String, PickerGroup>> buttonCategories) {
 			this.rectangle = new Rectangle2d(posX-3-width, posY-4-height, width+1, height+1);
@@ -192,7 +196,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 			this.categories = categories;
 
 			select(0, 0);
-			this.searchField = new TextFieldWidget(EmojiSelectionChat.this.font.getFontRendererObj(), this.rectInputField.getX(), this.rectInputField.getY(), this.rectInputField.getWidth(), this.rectInputField.getHeight(), "");
+			this.searchField = new CompatTextFieldWidget(EmojiSelectionChat.this.font, this.rectInputField.getX(), this.rectInputField.getY(), this.rectInputField.getWidth(), this.rectInputField.getHeight(), "Search Field");
 			this.searchField.setMaxStringLength(256);
 			this.searchField.setEnableBackgroundDrawing(false);
 			this.searchField.changeFocus(true);
@@ -203,6 +207,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 			onTextChanged();
 		}
 
+		@Override
 		public boolean onDraw() {
 			IChatOverlay.fill(this.rectangle, 0xFFFFFFFF);
 
@@ -276,7 +281,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 							rectScroll.getWidth(),
 							scrollbarHeight), 0xFFABABAB);
 					if (rectScroll0.contains(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY))
-						if (GLFW.glfwGetMouseButton(CompatMinecraft.getMinecraft().getMinecraftObj().mainWindow.getHandle(), GLFW.GLFW_MOUSE_BUTTON_1)==GLFW.GLFW_PRESS)
+						if (this.mouseDown)
 							this.scrollY0 = (int) -MathHelper.lerp(0, height-this.rectMain.getHeight(), ((float) EmojiSelectionChat.this.mouseY-rectScroll.getY())/rectScroll.getHeight());
 				}
 			}
@@ -349,7 +354,11 @@ public class EmojiSelectionChat implements IChatOverlay {
 			return false;
 		}
 
+		@Override
 		public boolean onMouseClicked(final int button) {
+			if (button==0)
+				this.mouseDown = true;
+
 			if (!this.rectangle.contains(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY)) {
 				hide();
 				return true;
@@ -378,7 +387,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 			if (this.rectInputButton.contains(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY)) {
 				if (!this.searchField.getText().isEmpty())
 					this.searchField.setText("");
-				this.searchField.setFocused2(true);
+				this.searchField.setFocused(true);
 				onTextChanged();
 				return true;
 			}
@@ -417,6 +426,14 @@ public class EmojiSelectionChat implements IChatOverlay {
 			return true;
 		}
 
+		@Override
+		public boolean onMouseReleased(final int button) {
+			if (button==0)
+				this.mouseDown = true;
+			return true;
+		}
+
+		@Override
 		public boolean onMouseScroll(final double scrollDelta) {
 			if (this.rectMain.contains(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY)) {
 				this.scrollY0 += scrollDelta*10;
@@ -439,6 +456,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 			}
 		}
 
+		@Override
 		public boolean onCharTyped(final char typed, final int keycode) {
 			if (this.searchField.charTyped(typed, keycode)) {
 				onTextChanged();
@@ -447,6 +465,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 			return false;
 		}
 
+		@Override
 		public boolean onKeyPressed(final int keycode) {
 			if (this.searchField.keyPressed(keycode, EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY)) {
 				onTextChanged();
@@ -455,6 +474,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 			return false;
 		}
 
+		@Override
 		public void onTick() {
 			this.searchField.tick();
 		}

@@ -24,14 +24,12 @@ import javax.annotation.Nonnull;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
-import net.minecraftforge.client.event.GuiScreenEvent.KeyboardCharTypedEvent;
-import net.minecraftforge.event.TickEvent.ClientTickEvent;
-import net.minecraftforge.event.TickEvent.Phase;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.teamfruit.emojicord.compat.Compat.CompatChatScreen;
 import net.teamfruit.emojicord.compat.CompatEvents.CompatClientChatEvent;
+import net.teamfruit.emojicord.compat.CompatEvents.CompatClientTickEvent;
 import net.teamfruit.emojicord.compat.CompatEvents.CompatConfigChangedEvent.CompatOnConfigChangedEvent;
 import net.teamfruit.emojicord.compat.CompatEvents.CompatGuiScreenEvent;
+import net.teamfruit.emojicord.compat.CompatEvents.CompatGuiScreenEvent.CompatMouseReleasedEvent.CompatPre;
 import net.teamfruit.emojicord.compat.CompatEvents.CompatHandler;
 import net.teamfruit.emojicord.compat.CompatEvents.CompatRenderGameOverlayEvent;
 import net.teamfruit.emojicord.emoji.EmojiFrequently;
@@ -104,6 +102,13 @@ public class EventHandler extends CompatHandler {
 	}
 
 	@Override
+	public void onTick(final CompatClientTickEvent event) {
+		if (event.getPhase()==CompatClientTickEvent.CompatPhase.START)
+			for (final IChatOverlay overlay : this.overlays)
+				overlay.onTick();
+	}
+
+	@Override
 	public void onDraw(final CompatRenderGameOverlayEvent.CompatPost event) {
 	}
 
@@ -144,6 +149,15 @@ public class EventHandler extends CompatHandler {
 	}
 
 	@Override
+	public void onMouseReleased(final CompatPre event) {
+		for (final IChatOverlay overlay : this.overlays)
+			if (overlay.onMouseReleased(event.getButton())) {
+				event.setCanceled(true);
+				break;
+			}
+	}
+
+	@Override
 	public void onMouseScroll(final CompatGuiScreenEvent.CompatMouseScrollEvent.CompatPre event) {
 		for (final IChatOverlay overlay : this.overlays)
 			if (overlay.onMouseScroll(event.getScrollDelta())) {
@@ -152,8 +166,8 @@ public class EventHandler extends CompatHandler {
 			}
 	}
 
-	@SubscribeEvent
-	public void onCharTyped(final KeyboardCharTypedEvent.Pre event) {
+	@Override
+	public void onCharTyped(final CompatGuiScreenEvent.CompatKeyboardCharTypedEvent.CompatPre event) {
 		for (final IChatOverlay overlay : this.overlays)
 			if (overlay.onCharTyped(event.getCodePoint(), event.getModifiers())) {
 				event.setCanceled(true);
@@ -168,12 +182,5 @@ public class EventHandler extends CompatHandler {
 				event.setCanceled(true);
 				break;
 			}
-	}
-
-	@SubscribeEvent
-	public void onTick(final ClientTickEvent event) {
-		if (event.phase==Phase.START)
-			for (final IChatOverlay overlay : this.overlays)
-				overlay.onTick();
 	}
 }

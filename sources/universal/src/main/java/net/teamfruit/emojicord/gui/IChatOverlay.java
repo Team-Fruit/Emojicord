@@ -15,6 +15,10 @@ public interface IChatOverlay {
 		return false;
 	}
 
+	default boolean onMouseReleased(final int button) {
+		return false;
+	}
+
 	default boolean onMouseScroll(final double scrollDelta) {
 		return false;
 	}

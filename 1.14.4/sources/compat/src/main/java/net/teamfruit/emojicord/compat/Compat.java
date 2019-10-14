@@ -731,6 +731,10 @@ public class Compat {
 			this.textField = textField;
 		}
 
+		public CompatTextFieldWidget(final CompatFontRenderer font, final int x, final int y, final int width, final int height, final String title) {
+			this(new TextFieldWidget(font.getFontRendererObj(), x, y, width, height, title));
+		}
+
 		public TextFieldWidget getTextFieldWidgetObj() {
 			return this.textField;
 		}
@@ -761,6 +765,42 @@ public class Compat {
 
 		public void setSelectionPos(final int i) {
 			this.textField.setSelectionPos(i);
+		}
+
+		public void setMaxStringLength(final int length) {
+			this.textField.setMaxStringLength(length);
+		}
+
+		public void setEnableBackgroundDrawing(final boolean enabled) {
+			this.textField.setEnableBackgroundDrawing(enabled);
+		}
+
+		public void changeFocus(final boolean active) {
+			this.textField.changeFocus(active);
+		}
+
+		public void setFocused(final boolean focused) {
+			this.textField.setFocused2(focused);
+		}
+
+		public boolean mouseClicked(final int mouseX, final int mouseY, final int button) {
+			return this.textField.mouseClicked(mouseX, mouseY, button);
+		}
+
+		public boolean charTyped(final char typed, final int keycode) {
+			return this.textField.charTyped(typed, keycode);
+		}
+
+		public boolean keyPressed(final int keycode, final int mouseX, final int mouseY) {
+			return this.textField.keyPressed(keycode, mouseX, mouseY);
+		}
+
+		public void render(final int mouseX, final int mouseY, final float partialTicks) {
+			this.textField.render(mouseX, mouseY, partialTicks);
+		}
+
+		public void tick() {
+			this.textField.tick();
 		}
 	}
 
