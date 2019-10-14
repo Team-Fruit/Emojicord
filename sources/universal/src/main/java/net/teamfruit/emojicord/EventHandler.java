@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
@@ -21,7 +22,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 import net.teamfruit.emojicord.compat.Compat.CompatChatScreen;
@@ -43,7 +43,7 @@ import net.teamfruit.emojicord.gui.SuggestionChat;
 public class EventHandler extends CompatHandler {
 	static final @Nonnull Pattern skintonePattern = Pattern.compile("\\:skin-tone-(\\d)\\:");
 
-	private final List<Function<CompatChatScreen, IChatOverlay>> overlayFactories = Lists.newArrayList(
+	private final List<Function<CompatChatScreen, IChatOverlay>> overlayFactories = Arrays.asList(
 			EmojiSettings::new,
 			EmojiSelectionChat::new,
 			SuggestionChat::new);

@@ -1,8 +1,10 @@
 package net.teamfruit.emojicord.gui;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -10,7 +12,6 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Streams;
 
 import net.teamfruit.emojicord.EmojicordConfig;
 import net.teamfruit.emojicord.compat.Compat.CompatChatScreen;
@@ -122,9 +123,9 @@ public class EmojiSelectionChat implements IChatOverlay {
 		final List<PickerGroup> standardCategories = StandardEmojiIdPicker.instance.categories;
 		final List<PickerGroup> frequently = Lists.newArrayList(EmojiFrequently.instance.getGroup());
 		final List<PickerGroup> discordCategories = DiscordEmojiIdDictionary.instance.pickerGroups;
-		final List<PickerGroup> categories = Streams.concat(frequently.stream(), discordCategories.stream(), standardCategories.stream()).collect(Collectors.toList());
+		final List<PickerGroup> categories = Stream.of(frequently.stream(), discordCategories.stream(), standardCategories.stream()).flatMap(stream -> stream).collect(Collectors.toList());
 		final List<Pair<String, PickerGroup>> buttonCategories = ((Supplier<List<Pair<String, PickerGroup>>>) () -> {
-			return Lists.newArrayList(
+			return Arrays.asList(
 					Pair.of("<:frequently:630652521911943191>", frequently.stream().findFirst().orElse(null)),
 					Pair.of("<:custom:630652548331864085>", discordCategories.stream().findFirst().orElse(null)),
 					Pair.of("<:people:630652609807515658>", standardCategories.stream().filter(e -> "PEOPLE".equalsIgnoreCase(e.name)).findFirst().orElse(null)),
@@ -300,7 +301,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 				final int posY = this.rectColor.getY();
 				this.selectingColor = -1;
 
-				final int[] colorIndex = Streams.concat(IntStream.of(this.selectedColor), IntStream.rangeClosed(0, 5).filter(e -> e!=this.selectedColor)).toArray();
+				final int[] colorIndex = Stream.of(IntStream.of(this.selectedColor), IntStream.rangeClosed(0, 5).filter(e -> e!=this.selectedColor)).flatMapToInt(stream -> stream).toArray();
 
 				for (int pindex = 0; pindex<6; pindex++) {
 					final int py = posY+pindex*spanY;
@@ -429,7 +430,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 		@Override
 		public boolean onMouseReleased(final int button) {
 			if (button==0)
-				this.mouseDown = true;
+				this.mouseDown = false;
 			return true;
 		}
 

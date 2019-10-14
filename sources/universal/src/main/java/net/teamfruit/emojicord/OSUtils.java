@@ -15,22 +15,17 @@ import org.apache.commons.io.IOUtils;
 
 import com.google.common.base.Charsets;
 
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-
 public enum OSUtils {
 	LINUX,
 	SOLARIS,
 	WINDOWS {
 		@Override
-		@OnlyIn(Dist.CLIENT)
 		protected String[] getOpenCommandLine(final URL url) {
 			return new String[] { "rundll32", "url.dll,FileProtocolHandler", url.toString() };
 		}
 	},
 	OSX {
 		@Override
-		@OnlyIn(Dist.CLIENT)
 		protected String[] getOpenCommandLine(final URL url) {
 			return new String[] { "open", url.toString() };
 		}

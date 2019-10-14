@@ -135,6 +135,7 @@ public class CallbackServerInstance implements AutoCloseable {
 	public void close() {
 		this.listenerExecutor.shutdownNow();
 		this.workerExecutor.shutdownNow();
+		IOUtils.closeQuietly(this.serversocket);
 	}
 
 	@SuppressWarnings("resource")

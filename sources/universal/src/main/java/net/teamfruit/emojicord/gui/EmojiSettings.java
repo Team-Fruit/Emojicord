@@ -390,7 +390,7 @@ public class EmojiSettings implements IChatOverlay {
 			@Override
 			public void onOK() {
 				this.closing = false;
-				EmojicordWeb.instance.close();
+				//EmojicordWeb.instance.close();
 				DiscordEmojiIdDictionary.instance.loadAll();
 				EmojiSettings.this.addGui = null;
 			}
