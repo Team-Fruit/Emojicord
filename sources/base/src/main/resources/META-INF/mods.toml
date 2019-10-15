@@ -1,17 +1,17 @@
 modLoader="javafml"
 loaderVersion="[13,)"
-#updateJSONURL=""
+updateJSONURL="https://raw.githubusercontent.com/Team-Fruit/Emojicord/update/update.json"
 issueTrackerURL="https://github.com/Team-Fruit/Emojicord/issues?q=is%3Aissue"
-displayURL="https://www.curseforge.com/minecraft/mc-mods/emojicord"
+displayURL="https://emojicord.teamfruit.net/download/"
 logoFile="logo.png"
-credits="Crafted by TeamFruit, Thanks for Discord Emojis."
+credits="2019 TeamFruit"
 authors="TeamFruit"
 
 [[mods]]
 modId="emojicord"
 version="${file.jarVersion}"
 displayName="Emojicord"
-displayURL="https://www.teamfruit.net/"
+displayURL="https://emojicord.teamfruit.net/"
 logoFile="logo.png"
 authors="Kamesuta"
 description='''

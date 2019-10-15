@@ -11,8 +11,8 @@
 			"credits": "2019 TeamFruit",
 			"logoFile": "logo.png",
 			"screenshots": [],
-			"updateUrl": "https://github.com/Team-Fruit/Emojicord/releases",
-			"url": "https://github.com/Team-Fruit/Emojicord/releases",
+			"updateUrl": "https://emojicord.teamfruit.net/download/",
+			"url": "https://emojicord.teamfruit.net/",
 			"useDependencyInformation": false
 		}
 	]
