@@ -14,11 +14,14 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
 
 import net.teamfruit.emojicord.EmojicordConfig;
+import net.teamfruit.emojicord.OSUtils;
+import net.teamfruit.emojicord.Reference;
 import net.teamfruit.emojicord.compat.Compat.CompatChatScreen;
 import net.teamfruit.emojicord.compat.Compat.CompatFontRenderer;
 import net.teamfruit.emojicord.compat.Compat.CompatMinecraft;
 import net.teamfruit.emojicord.compat.Compat.CompatScreen;
 import net.teamfruit.emojicord.compat.Compat.CompatTextFieldWidget;
+import net.teamfruit.emojicord.compat.Compat.CompatVersionChecker;
 import net.teamfruit.emojicord.emoji.DiscordEmojiIdDictionary;
 import net.teamfruit.emojicord.emoji.EmojiFrequently;
 import net.teamfruit.emojicord.emoji.EmojiId;
@@ -155,6 +158,9 @@ public class EmojiSelectionChat implements IChatOverlay {
 		private final Rectangle2d rectColorButton;
 		private final Rectangle2d rectColor;
 		private final Rectangle2d rectSettingButton;
+		private final Rectangle2d rectUpdate;
+
+		private CompatVersionChecker.CompatCheckResult update;
 
 		private final List<PickerGroup> baseCategories;
 		private final List<Pair<String, PickerGroup>> buttonCategories;
@@ -192,6 +198,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 			this.rectSettingButton = new Rectangle2d(this.rectTop.getX()+this.rectTop.getWidth()-colorButtonWidth-4, this.rectInput.getY(), colorButtonWidth, this.rectInput.getHeight()).inner(0, 2, 0, 2);
 			this.rectColorButton = new Rectangle2d(this.rectSettingButton.getX()-colorButtonWidth, this.rectInput.getY(), colorButtonWidth, this.rectInput.getHeight()).inner(0, 2, 0, 2);
 			this.rectColor = new Rectangle2d(this.rectColorButton.getX(), this.rectColorButton.getY(), this.rectColorButton.getWidth(), 14*6);
+			this.rectUpdate = new Rectangle2d(this.rectangle.getX(), this.rectangle.getY()-15, this.rectangle.getWidth(), 15);
 			this.baseCategories = categories;
 			this.buttonCategories = buttonCategories;
 			this.categories = categories;
@@ -206,6 +213,8 @@ public class EmojiSelectionChat implements IChatOverlay {
 			//this.inputField.func_212954_a(this::func_212997_a);
 
 			onTextChanged();
+
+			this.update = CompatVersionChecker.getResult(Reference.MODID);
 		}
 
 		@Override
@@ -352,6 +361,12 @@ public class EmojiSelectionChat implements IChatOverlay {
 			this.searchField.render(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY, partialTicks);
 			EmojiSelectionChat.this.font.drawString(this.searchField.getText().isEmpty() ? "<:search:631021534705877012>" : "<:close:631021519295741973>", this.rectInputButton.getX()+1, this.rectInputButton.getY()+3, 0xFFFFFFFF);
 
+			if (this.update!=null&&this.update.status==CompatVersionChecker.CompatStatus.OUTDATED) {
+				IChatOverlay.fill(this.rectUpdate, 0xFF36393F);
+				final String text1 = ":arrows_counterclockwise: Version "+this.update.target+" Available!";
+				EmojiSelectionChat.this.font.drawString(text1, this.rectUpdate.getX()+2, this.rectUpdate.getY()+3, 0xFFFFFFFF);
+			}
+
 			return false;
 		}
 
@@ -359,6 +374,12 @@ public class EmojiSelectionChat implements IChatOverlay {
 		public boolean onMouseClicked(final int button) {
 			if (button==0)
 				this.mouseDown = true;
+
+			if (this.update!=null&&this.update.status==CompatVersionChecker.CompatStatus.OUTDATED)
+				if (this.rectUpdate.contains(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY)) {
+					OSUtils.getOSType().openURI(Reference.UPDATE_URL);
+					return true;
+				}
 
 			if (!this.rectangle.contains(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY)) {
 				hide();

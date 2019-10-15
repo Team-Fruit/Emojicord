@@ -9,6 +9,7 @@ import net.teamfruit.emojicord.compat.Compat.CompatFontRenderer;
 import net.teamfruit.emojicord.compat.Compat.CompatMinecraft;
 import net.teamfruit.emojicord.compat.Compat.CompatScreen;
 import net.teamfruit.emojicord.compat.Compat.CompatTextFieldWidget;
+import net.teamfruit.emojicord.compat.Compat.CompatVersionChecker;
 import net.teamfruit.emojicord.compat.OpenGL;
 import net.teamfruit.emojicord.emoji.DiscordEmojiIdDictionary;
 import net.teamfruit.emojicord.emoji.Models.EmojiDiscordList;
@@ -124,7 +125,10 @@ public class EmojiSettings implements IChatOverlay {
 		private final Rectangle2d rectButton2;
 		private final Rectangle2d rectButton3;
 		private final Rectangle2d rectMain;
+		private final Rectangle2d rectUpdate;
+
 		private boolean focused = true;
+		private CompatVersionChecker.CompatCheckResult update;
 
 		public EmojiSettingMenu(final int posX, final int posY, final int width, final int height) {
 			this.rectangle = new Rectangle2d(posX-width/2, posY-height/2, width, height);
@@ -140,6 +144,8 @@ public class EmojiSettings implements IChatOverlay {
 			this.rectButton2 = rectButton2Rect.inner(3, 1, 3, 1);
 			this.rectButton3 = rectButton3Rect.inner(3, 1, 3, 1);
 			this.rectMain = new Rectangle2d(this.rectangle.getX(), this.rectTop.getY()+this.rectTop.getHeight(), this.rectangle.getWidth(), this.rectBottom.getY()-(this.rectTop.getY()+this.rectTop.getHeight()));
+			this.rectUpdate = new Rectangle2d(this.rectName.getX(), this.rectName.getY(), this.rectName.getWidth()-5, this.rectName.getHeight()-5);
+			this.update = CompatVersionChecker.getResult(Reference.MODID);
 		}
 
 		public boolean onDraw() {
@@ -154,14 +160,32 @@ public class EmojiSettings implements IChatOverlay {
 				EmojiSettings.this.font.drawString("<:emojicord:631339297886175295>", 0, 0, 0xFFFFFFFF);
 				OpenGL.glPopMatrix();
 			}
-			{
-				OpenGL.glPushMatrix();
-				OpenGL.glTranslatef(this.rectName.getX(), this.rectName.getY(), 0);
-				OpenGL.glScalef(1.5f, 1.5f, 1);
-				EmojiSettings.this.font.drawString(Reference.NAME, 0, 0, 0xFFFFFFFF);
-				OpenGL.glPopMatrix();
+
+			if (this.update!=null&&this.update.status==CompatVersionChecker.CompatStatus.OUTDATED) {
+				{
+					final String name = Reference.NAME;
+					EmojiSettings.this.font.drawString(name, this.rectName.getX(), this.rectName.getY()-15, 0xFFFFFFFF);
+					EmojiSettings.this.font.drawString("by TeamFruit", this.rectName.getX()+5+EmojiSettings.this.font.getStringWidth(name), this.rectName.getY()-15, 0xFF777777);
+				}
+				{
+					final boolean b = this.rectUpdate.contains(EmojiSettings.this.mouseX, EmojiSettings.this.mouseY);
+					final double t = (Math.sin(System.currentTimeMillis()/200d)+1)/2;
+					IChatOverlay.fill(this.rectUpdate, 0xFAA61A|(b ? 0xFF : (int) MathHelper.lerp(0x77, 0xFF, (float) t))<<24);
+					final String text1 = ":arrows_counterclockwise: Version "+this.update.target+" Available!";
+					EmojiSettings.this.font.drawString(text1, this.rectUpdate.getX()+this.rectUpdate.getWidth()/2-EmojiSettings.this.font.getStringWidth(text1)/2, this.rectUpdate.getY()+7, 0xFFFFFFFF);
+					final String text2 = "Click to Get New Version!";
+					EmojiSettings.this.font.drawString(text2, this.rectUpdate.getX()+this.rectUpdate.getWidth()/2-EmojiSettings.this.font.getStringWidth(text2)/2, this.rectUpdate.getY()+18, 0xFFFFFFFF);
+				}
+			} else {
+				{
+					OpenGL.glPushMatrix();
+					OpenGL.glTranslatef(this.rectName.getX(), this.rectName.getY(), 0);
+					OpenGL.glScalef(1.5f, 1.5f, 1);
+					EmojiSettings.this.font.drawString(Reference.NAME, 0, 0, 0xFFFFFFFF);
+					OpenGL.glPopMatrix();
+				}
+				EmojiSettings.this.font.drawString("by TeamFruit", this.rectName.getX()+10, this.rectName.getY()+15, 0xFF777777);
 			}
-			EmojiSettings.this.font.drawString("by TeamFruit", this.rectName.getX()+10, this.rectName.getY()+15, 0xFF777777);
 
 			if (EmojiSettings.this.addGui==null) {
 				{
@@ -302,6 +326,12 @@ public class EmojiSettings implements IChatOverlay {
 					}
 				}
 			} else {
+				if (this.update!=null&&this.update.status==CompatVersionChecker.CompatStatus.OUTDATED)
+					if (this.rectUpdate.contains(EmojiSettings.this.mouseX, EmojiSettings.this.mouseY)) {
+						OSUtils.getOSType().openURI(Reference.UPDATE_URL);
+						return true;
+					}
+
 				if (this.rectButton3.contains(EmojiSettings.this.mouseX, EmojiSettings.this.mouseY)||!this.rectangle.contains(EmojiSettings.this.mouseX, EmojiSettings.this.mouseY)) {
 					hide();
 					return true;
@@ -432,19 +462,19 @@ public class EmojiSettings implements IChatOverlay {
 
 			@Override
 			public String getDescription() {
-				return "Manually Management"
+				return "Manual Management"
 						+"\nPut or Delete a Json";
 			}
 
 			@Override
 			public String getClosingDescription() {
-				return "Manually Management"
+				return "Manual Management"
 						+"\nNo changes found, Are you sure you want to close?";
 			}
 
 			@Override
 			public String getApplyPreferredDescription() {
-				return "Manually Management"
+				return "Manual Management"
 						+"\nCongratulations"
 						+"\nYour Changes are Saved!";
 			}

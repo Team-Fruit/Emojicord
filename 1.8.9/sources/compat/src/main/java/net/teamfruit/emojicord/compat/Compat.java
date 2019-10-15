@@ -4,9 +4,12 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -70,6 +73,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeVersion;
+import net.minecraftforge.common.ForgeVersion.CheckResult;
 import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.common.config.Configuration;
@@ -79,6 +84,8 @@ import net.minecraftforge.fml.client.IModGuiFactory;
 import net.minecraftforge.fml.client.config.GuiConfig;
 import net.minecraftforge.fml.client.config.IConfigElement;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
@@ -1203,6 +1210,75 @@ public class Compat {
 		}
 
 		public void onRender(final TextureManager textureManager, final boolean hasShadow, final float x, final float y, final CompatBufferBuilder vbuilder, final float red, final float green, final float blue, final float alpha) {
+		}
+	}
+
+	public static class CompatVersionChecker {
+		public static void startVersionCheck(final String modId, final String modVersion, final String updateURL) {
+		}
+
+		public static CompatCheckResult getResult(final String modId) {
+			final ModContainer container = Loader.instance().getIndexedModList().get(modId);
+			return CompatCheckResult.from(ForgeVersion.getResult(container));
+		}
+
+		public static class CompatCheckResult {
+			@Nonnull
+			public final CompatStatus status;
+			@Nullable
+			public final String target;
+			@Nullable
+			public final Map<String, String> changes;
+			@Nullable
+			public final String url;
+
+			public CompatCheckResult(@Nonnull final CompatStatus status, @Nullable final String target, @Nullable final Map<String, String> changes, @Nullable final String url) {
+				this.status = status;
+				this.target = target;
+				this.changes = changes==null ? Collections.<String, String> emptyMap() : Collections.unmodifiableMap(changes);
+				this.url = url;
+			}
+
+			public static CompatCheckResult from(final CheckResult result) {
+				Map<String, String> compatChanges = null;
+				if (result.changes!=null)
+					compatChanges = result.changes.entrySet().stream().collect(Collectors.toMap(e -> e.getKey().toString(), e -> e.getValue()));
+				return new CompatCheckResult(CompatStatus.getStatus(result.status),
+						result.target!=null ? result.target.toString() : null,
+						compatChanges,
+						result.url);
+			}
+		}
+
+		public static enum CompatStatus {
+			PENDING,
+			FAILED,
+			UP_TO_DATE,
+			OUTDATED,
+			AHEAD,
+			BETA,
+			BETA_OUTDATED,
+			;
+
+			public static CompatStatus getStatus(final ForgeVersion.Status status) {
+				switch (status) {
+					default:
+					case PENDING:
+						return CompatStatus.PENDING;
+					case FAILED:
+						return CompatStatus.FAILED;
+					case UP_TO_DATE:
+						return CompatStatus.UP_TO_DATE;
+					case OUTDATED:
+						return CompatStatus.OUTDATED;
+					case AHEAD:
+						return CompatStatus.AHEAD;
+					case BETA:
+						return CompatStatus.BETA;
+					case BETA_OUTDATED:
+						return CompatStatus.BETA_OUTDATED;
+				}
+			}
 		}
 	}
 }

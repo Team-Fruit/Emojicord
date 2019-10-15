@@ -3,6 +3,7 @@ package net.teamfruit.emojicord;
 import javax.annotation.Nonnull;
 
 import net.teamfruit.emojicord.compat.Compat.CompatSide;
+import net.teamfruit.emojicord.compat.Compat.CompatVersionChecker;
 import net.teamfruit.emojicord.emoji.DiscordEmojiIdDictionary;
 import net.teamfruit.emojicord.emoji.EmojiFrequently;
 import net.teamfruit.emojicord.emoji.Endpoint;
@@ -16,6 +17,8 @@ public class ClientProxy extends CommonProxy {
 
 		EmojicordConfig.spec.registerConfigDefine(CompatSide.CLIENT);
 		EmojicordConfig.spec.registerConfigHandler(CompatSide.CLIENT, event.getSuggestedConfigurationFile());
+
+		CompatVersionChecker.startVersionCheck(Reference.MODID, Reference.VERSION, Reference.NAME);
 	}
 
 	@Override
