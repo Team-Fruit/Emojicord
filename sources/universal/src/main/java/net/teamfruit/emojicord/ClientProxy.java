@@ -18,7 +18,7 @@ public class ClientProxy extends CommonProxy {
 		EmojicordConfig.spec.registerConfigDefine(CompatSide.CLIENT);
 		EmojicordConfig.spec.registerConfigHandler(CompatSide.CLIENT, event.getSuggestedConfigurationFile());
 
-		CompatVersionChecker.startVersionCheck(Reference.MODID, Reference.VERSION, Reference.NAME);
+		CompatVersionChecker.startVersionCheck(Reference.MODID, Reference.VERSION, Reference.UPDATE_JSON);
 	}
 
 	@Override
