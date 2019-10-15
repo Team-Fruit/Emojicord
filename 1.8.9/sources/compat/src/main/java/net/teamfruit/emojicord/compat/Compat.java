@@ -134,6 +134,10 @@ public class Compat {
 		public File getGameDir() {
 			return this.mc.mcDataDir;
 		}
+
+		public boolean isGameFocused() {
+			return this.mc.inGameHasFocus;
+		}
 	}
 
 	public static class CompatFontRenderer {
@@ -153,6 +157,10 @@ public class Compat {
 
 		public int drawStringWithShadow(final String msg, final float x, final float y, final int color) {
 			return drawString(msg, x, y, color, true);
+		}
+
+		public String wrapFormattedStringToWidth(final String msg, final int width) {
+			return this.font.wrapFormattedStringToWidth(msg, width);
 		}
 
 		public int getStringWidth(final @Nullable String s) {
@@ -753,6 +761,14 @@ public class Compat {
 			this.font = CompatMinecraft.getMinecraft().getFontRenderer();
 		}
 
+		public CompatTextFieldWidget(final CompatFontRenderer font, final int x, final int y, final int width, final int height, final String title) {
+			this(new GuiTextField(-1, font.getFontRendererObj(), x, y, width, height));
+		}
+
+		public GuiTextField getTextFieldWidgetObj() {
+			return this.textField;
+		}
+
 		public String getText() {
 			return this.textField.getText();
 		}
@@ -786,6 +802,44 @@ public class Compat {
 
 		public void setSelectionPos(final int i) {
 			this.textField.setSelectionPos(i);
+		}
+
+		public void setMaxStringLength(final int length) {
+			this.textField.setMaxStringLength(length);
+		}
+
+		public void setEnableBackgroundDrawing(final boolean enabled) {
+			this.textField.setEnableBackgroundDrawing(enabled);
+		}
+
+		public void changeFocus(final boolean active) {
+			this.textField.setFocused(active);
+		}
+
+		public void setFocused(final boolean focused) {
+			this.textField.setFocused(focused);
+		}
+
+		public boolean mouseClicked(final int mouseX, final int mouseY, final int button) {
+			this.textField.mouseClicked(mouseX, mouseY, button);
+			return this.textField.xPosition<=mouseX&&mouseX<=this.textField.xPosition+this.textField.width
+					&&this.textField.yPosition<=mouseY&&mouseY<=this.textField.yPosition+this.textField.height;
+		}
+
+		public boolean charTyped(final char typed, final int keycode) {
+			return this.textField.textboxKeyTyped(typed, keycode);
+		}
+
+		public boolean keyPressed(final int keycode, final int mouseX, final int mouseY) {
+			return true; //this.textField.textboxKeyTyped(keycode, mouseX, mouseY);
+		}
+
+		public void render(final int mouseX, final int mouseY, final float partialTicks) {
+			this.textField.drawTextBox();
+		}
+
+		public void tick() {
+			this.textField.updateCursorCounter();
 		}
 
 		@CoreInvoke

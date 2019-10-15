@@ -426,11 +426,6 @@ public class CompatEvents {
 		}
 
 		public static class CompatKeyboardCharTypedEvent extends CompatGuiScreenEvent<KeyboardInputEvent> {
-			public static final int MOD_SHIFT = 14;
-			public static final int MOD_CONTROL = 14;
-			public static final int MOD_ALT = 0x4;
-			public static final int MOD_SUPER = 0x8;
-
 			private final char codePoint;
 			private final int modifiers;
 
