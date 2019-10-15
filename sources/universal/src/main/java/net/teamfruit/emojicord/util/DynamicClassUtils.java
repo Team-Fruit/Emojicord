@@ -1,5 +1,6 @@
 package net.teamfruit.emojicord.util;
 
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.objectweb.asm.ClassWriter;
@@ -29,7 +30,7 @@ public class DynamicClassUtils {
 	public Class<?> createConstructorWrappedClass(final Class<?> classBase, final Class<?> classRaw, final Class<?> classWrapped) {
 		final ClassNode node = new ClassNode(Opcodes.ASM5);
 
-		final String name = Reference.MODID.toUpperCase()+"_ASM_"+this.counter.getAndIncrement()+"_"+classBase.getSimpleName();
+		final String name = Reference.MODID.toUpperCase(Locale.ROOT)+"_ASM_"+this.counter.getAndIncrement()+"_"+classBase.getSimpleName();
 
 		node.version = Opcodes.V1_8;
 		node.access = Opcodes.ACC_PUBLIC;

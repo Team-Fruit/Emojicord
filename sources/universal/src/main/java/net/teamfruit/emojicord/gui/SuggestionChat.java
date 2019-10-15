@@ -111,17 +111,18 @@ public class SuggestionChat implements IChatOverlay {
 		if (stringreader.canRead()) {
 			final int cursorPosition = this.inputField.getCursorPosition();
 			final int lastWordIndex = getLastWordIndex(s);
-			if ((skipCount||cursorPosition-lastWordIndex>=3)&&(this.suggestions==null||!this.applyingSuggestion)) {
-				final CompletableFuture<Iterable<String>> list = CompletableFuture.supplyAsync(() -> Iterables.concat(
-						StandardEmojiIdDictionary.instance.nameDictionary.keySet(),
-						DiscordEmojiIdDictionary.instance.get().keySet()));
+			if (lastWordIndex<s.length() ? s.charAt(lastWordIndex)==':' : s.length()>0&&s.charAt(0)==':')
+				if ((skipCount||cursorPosition-lastWordIndex>=3)&&(this.suggestions==null||!this.applyingSuggestion)) {
+					final CompletableFuture<Iterable<String>> list = CompletableFuture.supplyAsync(() -> Iterables.concat(
+							StandardEmojiIdDictionary.instance.nameDictionary.keySet(),
+							DiscordEmojiIdDictionary.instance.get().keySet()));
 
-				this.pendingSuggestions = list.thenApplyAsync(e -> suggest(e, new SuggestionsBuilder(s, lastWordIndex)));
-				this.pendingSuggestions.thenRun(() -> {
-					if (this.pendingSuggestions.isDone())
-						updateUsageInfo();
-				});
-			}
+					this.pendingSuggestions = list.thenApplyAsync(e -> suggest(e, new SuggestionsBuilder(s, lastWordIndex)));
+					this.pendingSuggestions.thenRun(() -> {
+						if (this.pendingSuggestions.isDone())
+							updateUsageInfo();
+					});
+				}
 		}
 	}
 

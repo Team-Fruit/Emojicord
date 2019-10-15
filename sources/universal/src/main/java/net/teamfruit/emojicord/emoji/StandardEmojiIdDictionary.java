@@ -12,6 +12,7 @@ import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 public class StandardEmojiIdDictionary {
 	public static StandardEmojiIdDictionary instance = new StandardEmojiIdDictionaryBuilder().build();
@@ -31,6 +32,10 @@ public class StandardEmojiIdDictionary {
 	}
 
 	public static class StandardEmojiIdDictionaryBuilder {
+		// Blacklist
+		private static final Set<String> shortAliasBlacklist = Sets.newHashSet("+1", "-1");
+		private static final Set<String> utfBlacklist = Sets.newHashSet("\u2604");
+
 		private final Map<String, EmojiId> nameDictionary = Maps.newHashMap();
 		private final Map<String, EmojiId> aliasDictionary = Maps.newHashMap();
 		private final Map<String, EmojiId> utfDictionary = Maps.newHashMap();
@@ -42,7 +47,7 @@ public class StandardEmojiIdDictionary {
 				}).collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
 		private final Supplier<Set<String>> shortAlias = Suppliers.memoize(() -> this.aliasDictionary.keySet().stream()
 				.filter(str -> {
-					return !shortAliasFilterNot.matcher(str).matches()&&shortAliasFilter.matcher(str).matches();
+					return !shortAliasFilterNot.matcher(str).matches()&&shortAliasFilter.matcher(str).matches()&&!shortAliasBlacklist.contains(str);
 				}).collect(Collectors.toSet()));
 		private final Supplier<Pattern> shortAliasPattern = Suppliers.memoize(() -> {
 			final List<String> emoticons = Lists.newArrayList(this.shortAlias.get());
@@ -61,10 +66,10 @@ public class StandardEmojiIdDictionary {
 			final String emojiFilter = emoticons.stream().map(Pattern::quote).collect(Collectors.joining("|"));
 			return Pattern.compile(String.format("(?<=^| )(?:%s)(?= |$)", emojiFilter));
 		});
-		private static final Pattern utfFilter = Pattern.compile(".+[\uD83C\uDFFB-\uD83C\uDFFF]$");
+		private static final Pattern utfFilterNot = Pattern.compile(".+[\uD83C\uDFFB-\uD83C\uDFFF]$");
 		private final Supplier<Set<String>> utf = Suppliers.memoize(() -> this.utfDictionary.keySet().stream()
 				.filter(str -> {
-					return !utfFilter.matcher(str).matches();
+					return !utfFilterNot.matcher(str).matches()&&!utfBlacklist.contains(str);
 				}).collect(Collectors.toSet()));
 		private final Supplier<Pattern> utfPattern = Suppliers.memoize(() -> {
 			final String emojiFilter = this.utf.get().stream().map(Pattern::quote).collect(Collectors.joining("|"));

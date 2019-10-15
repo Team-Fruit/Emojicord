@@ -92,11 +92,11 @@ public class EventHandler extends CompatHandler {
 	public void onChat(final CompatClientChatEvent event) {
 		final String message = event.getMessage();
 		if (!message.startsWith("/")) {
-			final EmojiText emojiText = EmojiText.createEncoded(message);
 			final String untoned = skintonePattern.matcher(message).replaceAll("");
 			PickerItem.fromText(EmojiText.createParsed(untoned)).forEach(EmojiFrequently.instance::use);
 			if (EmojiFrequently.instance.hasChanged())
 				EmojiFrequently.instance.save();
+			final EmojiText emojiText = EmojiText.createEncoded(message);
 			event.setMessage(emojiText.getEncoded());
 		}
 	}
