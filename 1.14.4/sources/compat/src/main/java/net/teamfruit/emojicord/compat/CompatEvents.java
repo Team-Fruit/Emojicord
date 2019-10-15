@@ -319,11 +319,6 @@ public class CompatEvents {
 		}
 
 		public static class CompatKeyboardCharTypedEvent extends CompatGuiScreenEvent<GuiScreenEvent.KeyboardCharTypedEvent> {
-			public static final int MOD_SHIFT = 0x1;
-			public static final int MOD_CONTROL = 0x2;
-			public static final int MOD_ALT = 0x4;
-			public static final int MOD_SUPER = 0x8;
-
 			public CompatKeyboardCharTypedEvent(final GuiScreenEvent.KeyboardCharTypedEvent event) {
 				super(event);
 			}
