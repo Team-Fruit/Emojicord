@@ -10,13 +10,14 @@ import javax.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 
 import net.teamfruit.emojicord.emoji.DiscordEmojiIdDictionary;
+import net.teamfruit.emojicord.emoji.Endpoint;
 import net.teamfruit.emojicord.emoji.Models.EmojiDiscordList;
+import net.teamfruit.emojicord.emoji.Models.EmojiGateway;
 import net.teamfruit.emojicord.util.DataUtils;
 
 public class EmojicordWeb {
 	public static final @Nonnull EmojicordWeb instance = new EmojicordWeb();
 
-	private File tokenDir;
 	private int port = 0;
 	private CallbackServerInstance server;
 	private final String key = UUID.randomUUID().toString();
@@ -24,26 +25,6 @@ public class EmojicordWeb {
 
 	public static class EmojicordWebTokenModel {
 		public String token;
-	}
-
-	public void init(final File emojicordDir) {
-		this.tokenDir = new File(emojicordDir, "token.json");
-	}
-
-	public boolean setToken(final String token) {
-		if (this.tokenDir!=null) {
-			final EmojicordWebTokenModel model = new EmojicordWebTokenModel();
-			model.token = token;
-			return DataUtils.saveFile(this.tokenDir, EmojicordWebTokenModel.class, model, "Emojicord Web Token");
-		}
-		return false;
-	}
-
-	public String getToken() {
-		final EmojicordWebTokenModel model = DataUtils.loadFileIfExists(this.tokenDir, EmojicordWebTokenModel.class, "Emojicord Web Token");
-		if (model!=null)
-			return model.token;
-		return null;
 	}
 
 	public boolean open() {
@@ -64,7 +45,9 @@ public class EmojicordWeb {
 			}
 		if (this.server!=null) {
 			pollCallbacked();
-			OSUtils.getOSType().openURI(String.format("https://emojicord.teamfruit.net/connect/?key=%s&port=%s", this.key, this.port));
+			final EmojiGateway.EmojiGatewayApi api = Endpoint.EMOJI_API.api;
+			if (api!=null)
+				OSUtils.getOSType().openURI(String.format("%s?key=%s&port=%s", api.importings, this.key, this.port));
 			return true;
 		} else {
 			Log.log.warn("Failed to Initialize Web");

@@ -5,11 +5,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 import javax.annotation.Nullable;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -61,11 +63,11 @@ public class DataUtils {
 		return null;
 	}
 
-	private static <T> boolean writeStream(final OutputStream stream, final Class<T> clazz, final T object)
+	private static <T> boolean writeWriter(final Writer stream, final Class<T> clazz, final T object)
 			throws Exception {
 		JsonWriter writer = null;
 		try {
-			writer = new JsonWriter(new OutputStreamWriter(stream, Charsets.UTF_8));
+			writer = new JsonWriter(stream);
 			writer.setIndent("  ");
 			gson.toJson(object, clazz, writer);
 			return true;
@@ -73,6 +75,19 @@ public class DataUtils {
 			IOUtils.closeQuietly(writer);
 			IOUtils.closeQuietly(stream);
 		}
+	}
+
+	private static <T> boolean writeStream(final OutputStream stream, final Class<T> clazz, final T object)
+			throws Exception {
+		return writeWriter(new OutputStreamWriter(stream, Charsets.UTF_8), clazz, object);
+	}
+
+	private static @Nullable <T> String writeString(final Class<T> clazz, final T object)
+			throws Exception {
+		final StringBuilderWriter sbw = new StringBuilderWriter();
+		if (writeWriter(sbw, clazz, object))
+			return sbw.toString();
+		return null;
 	}
 
 	public static <T> boolean saveStream(
@@ -85,6 +100,18 @@ public class DataUtils {
 			reportWrite(e, description);
 		}
 		return false;
+	}
+
+	public static @Nullable <T> String saveString(
+			final Class<T> clazz, final T object,
+			final @Nullable String description
+	) {
+		try {
+			return writeString(clazz, object);
+		} catch (final Exception e) {
+			reportWrite(e, description);
+		}
+		return null;
 	}
 
 	private static <T> T readFile(final File file, final Class<T> clazz) throws Exception {

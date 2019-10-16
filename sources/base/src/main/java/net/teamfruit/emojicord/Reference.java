@@ -8,11 +8,14 @@ public class Reference {
 	public static final @Nonnull String VERSION = "${version}";
 	public static final @Nonnull String FORGE = "${forgeversion}";
 	public static final @Nonnull String MINECRAFT = "${mcversion}";
+
 	public static final @Nonnull String PROXY_SERVER = "net.teamfruit.emojicord.CommonProxy";
 	public static final @Nonnull String PROXY_CLIENT = "net.teamfruit.emojicord.ClientProxy";
 	public static final @Nonnull String GUI_FACTORY = "net.teamfruit.emojicord.gui.config.ConfigGuiFactory";
 	public static final @Nonnull String TRANSFORMER = "net.teamfruit.emojicord.asm.EmojicordTransformer";
 	public static final @Nonnull String CUSTOM_MOD_DISCOVERY = "net.teamfruit.emojicord.compat.CompatCustomModDiscovery";
+
+	public static final @Nonnull String EMOJI_GATEWAY = "https://raw.githubusercontent.com/Team-Fruit/Emojicord/api/api.json";
 	public static final @Nonnull String UPDATE_JSON = "https://raw.githubusercontent.com/Team-Fruit/Emojicord/update/update.json";
 	public static final @Nonnull String UPDATE_URL = "https://emojicord.teamfruit.net/download/";
 }

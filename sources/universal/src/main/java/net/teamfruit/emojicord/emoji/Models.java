@@ -2,11 +2,18 @@ package net.teamfruit.emojicord.emoji;
 
 import java.util.List;
 
+import com.google.common.collect.Lists;
+
 public class Models {
 	public static class EmojiGateway {
-		public List<String> api;
-		public List<String> emojis;
-		public List<String> picker;
+		public EmojiGatewayApi api = new EmojiGatewayApi();
+		public List<String> emojis = Lists.newArrayList();
+		public List<String> picker = Lists.newArrayList();
+
+		public static class EmojiGatewayApi {
+			public String importings;
+			public String analytics;
+		}
 	}
 
 	public static class EmojiStandard {

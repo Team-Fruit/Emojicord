@@ -1,7 +1,6 @@
 package net.teamfruit.emojicord.emoji;
 
-import java.util.List;
-
+import net.teamfruit.emojicord.Reference;
 import net.teamfruit.emojicord.emoji.Models.EmojiGateway;
 import net.teamfruit.emojicord.emoji.Models.EmojiStandard;
 import net.teamfruit.emojicord.emoji.Models.EmojiStandardGroup;
@@ -13,12 +12,10 @@ import net.teamfruit.emojicord.emoji.StandardEmojiIdPicker.StandardEmojiIdPicker
 import net.teamfruit.emojicord.util.DataUtils;
 
 public class Endpoint {
-	public static final String EMOJI_GATEWAY = "https://raw.githubusercontent.com/Team-Fruit/Emojicord/api/api.json";
-	public static EmojiGateway EMOJI_API;
-	public static List<String> EMOJI_WEB_ENDPOINT;
+	public static EmojiGateway EMOJI_API = new EmojiGateway();
 
 	public static boolean loadGateway() {
-		final EmojiGateway data = DataUtils.loadUrl(EMOJI_GATEWAY, EmojiGateway.class, "Emojicord API");
+		final EmojiGateway data = DataUtils.loadUrl(Reference.EMOJI_GATEWAY, EmojiGateway.class, "Emojicord API");
 		if (data!=null) {
 			EMOJI_API = data;
 			return true;
