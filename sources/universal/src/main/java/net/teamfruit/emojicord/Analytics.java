@@ -57,9 +57,9 @@ public class Analytics {
 
 		request.version.minecraft = CompatMinecraftVersion.getMinecraftVersion();
 		request.version.forge = CompatMinecraftVersion.getForgeVersion();
-		request.version.mod.minecraft = Reference.MINECRAFT;
-		request.version.mod.forge = Reference.FORGE;
-		request.version.mod.mod = Reference.VERSION;
+		request.version.mod.minecraft = VersionReference.MINECRAFT;
+		request.version.mod.forge = VersionReference.FORGE;
+		request.version.mod.mod = VersionReference.VERSION;
 
 		request.environment.lang = minecraft.getSettings().getLanguage();
 		request.environment.locale = Locale.getDefault().toString();
