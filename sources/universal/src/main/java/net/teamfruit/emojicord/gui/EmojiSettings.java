@@ -1,6 +1,7 @@
 package net.teamfruit.emojicord.gui;
 
 import net.teamfruit.emojicord.ClientProxy;
+import net.teamfruit.emojicord.EmojicordConfig;
 import net.teamfruit.emojicord.EmojicordWeb;
 import net.teamfruit.emojicord.OSUtils;
 import net.teamfruit.emojicord.Reference;
@@ -128,7 +129,7 @@ public class EmojiSettings implements IChatOverlay {
 		private final Rectangle2d rectUpdate;
 
 		private boolean focused = true;
-		private CompatVersionChecker.CompatCheckResult update;
+		private final CompatVersionChecker.CompatCheckResult update;
 
 		public EmojiSettingMenu(final int posX, final int posY, final int width, final int height) {
 			this.rectangle = new Rectangle2d(posX-width/2, posY-height/2, width, height);
@@ -145,7 +146,11 @@ public class EmojiSettings implements IChatOverlay {
 			this.rectButton3 = rectButton3Rect.inner(3, 1, 3, 1);
 			this.rectMain = new Rectangle2d(this.rectangle.getX(), this.rectTop.getY()+this.rectTop.getHeight(), this.rectangle.getWidth(), this.rectBottom.getY()-(this.rectTop.getY()+this.rectTop.getHeight()));
 			this.rectUpdate = new Rectangle2d(this.rectName.getX(), this.rectName.getY(), this.rectName.getWidth()-5, this.rectName.getHeight()-5);
-			this.update = CompatVersionChecker.getResult(Reference.MODID);
+
+			if (EmojicordConfig.UPDATE.showUpdate.get())
+				this.update = CompatVersionChecker.getResult(Reference.MODID);
+			else
+				this.update = null;
 		}
 
 		public boolean onDraw() {

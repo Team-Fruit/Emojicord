@@ -70,11 +70,13 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Session;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeVersion;
 import net.minecraftforge.common.ForgeVersion.CheckResult;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.common.config.Configuration;
@@ -145,6 +147,10 @@ public class Compat {
 		public boolean isGameFocused() {
 			return this.mc.inGameHasFocus;
 		}
+
+		public CompatSession getSession() {
+			return new CompatSession(this.mc.getSession());
+		}
 	}
 
 	public static class CompatFontRenderer {
@@ -196,6 +202,10 @@ public class Compat {
 
 		public int getAnisotropicFiltering() {
 			return 0;
+		}
+
+		public String getLanguage() {
+			return this.settings.language;
 		}
 	}
 
@@ -849,6 +859,10 @@ public class Compat {
 			this.textField.updateCursorCounter();
 		}
 
+		public void writeText(final String string) {
+			this.textField.writeText(string);
+		}
+
 		@CoreInvoke
 		public static void renderSuggestion(final FontRenderer font, final boolean flag, final String suggestion, final int posX, final int posY) {
 			if (!flag&&suggestion!=null)
@@ -1279,6 +1293,36 @@ public class Compat {
 						return CompatStatus.BETA_OUTDATED;
 				}
 			}
+		}
+	}
+
+	public static class CompatSession {
+		private final Session session;
+
+		public CompatSession(final Session session) {
+			this.session = session;
+		}
+
+		public String getPlayerID() {
+			return this.session.getPlayerID();
+		}
+
+		public String getUsername() {
+			return this.session.getUsername();
+		}
+
+		public String getToken() {
+			return this.session.getToken();
+		}
+	}
+
+	public static class CompatMinecraftVersion {
+		public static String getMinecraftVersion() {
+			return MinecraftForge.MC_VERSION;
+		}
+
+		public static String getForgeVersion() {
+			return ForgeVersion.getVersion();
 		}
 	}
 }

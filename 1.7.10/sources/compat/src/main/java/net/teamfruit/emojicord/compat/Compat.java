@@ -862,6 +862,10 @@ public class Compat {
 			this.textField.updateCursorCounter();
 		}
 
+		public void writeText(final String string) {
+			this.textField.writeText(string);
+		}
+
 		@CoreInvoke
 		public static void renderSuggestion(final FontRenderer font, final boolean flag, final String suggestion, final int posX, final int posY) {
 			if (!flag&&suggestion!=null)

@@ -7,6 +7,7 @@ public class EmojicordConfig {
 	public static final Render RENDER = new Render(BUILDER);
 	public static final Suggest SUGGEST = new Suggest(BUILDER);
 	public static final Picker PICKER = new Picker(BUILDER);
+	public static final Update UPDATE = new Update(BUILDER);
 	public static final CompatConfigSpec spec = BUILDER.build();
 
 	public static class Render {
@@ -49,6 +50,19 @@ public class EmojicordConfig {
 					.comment("Emoji Picker Skin Tone")
 					.translation("config.emojicord.picker.skintone")
 					.define("SkinTone", 0);
+			builder.pop();
+		}
+	}
+
+	public static class Update {
+		public final CompatConfigSpec.ConfigValue<Boolean> showUpdate;
+
+		public Update(final CompatConfigSpec.Builder builder) {
+			builder.push("Update");
+			this.showUpdate = builder
+					.comment("Show Update Notification")
+					.translation("config.emojicord.update.notification")
+					.define("Notification", true);
 			builder.pop();
 		}
 	}

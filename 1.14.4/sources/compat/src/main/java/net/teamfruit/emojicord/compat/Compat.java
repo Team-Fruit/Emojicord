@@ -820,6 +820,10 @@ public class Compat {
 		public void tick() {
 			this.textField.tick();
 		}
+
+		public void writeText(final String string) {
+			this.textField.writeText(string);
+		}
 	}
 
 	public static class CompatGuiConfig extends Screen {

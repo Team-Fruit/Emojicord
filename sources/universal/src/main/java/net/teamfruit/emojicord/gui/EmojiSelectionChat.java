@@ -160,7 +160,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 		private final Rectangle2d rectSettingButton;
 		private final Rectangle2d rectUpdate;
 
-		private CompatVersionChecker.CompatCheckResult update;
+		private final CompatVersionChecker.CompatCheckResult update;
 
 		private final List<PickerGroup> baseCategories;
 		private final List<Pair<String, PickerGroup>> buttonCategories;
@@ -214,7 +214,10 @@ public class EmojiSelectionChat implements IChatOverlay {
 
 			onTextChanged();
 
-			this.update = CompatVersionChecker.getResult(Reference.MODID);
+			if (EmojicordConfig.UPDATE.showUpdate.get())
+				this.update = CompatVersionChecker.getResult(Reference.MODID);
+			else
+				this.update = null;
 		}
 
 		@Override
@@ -402,6 +405,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 					if (this.selectingColor>=0)
 						this.selectedColor = this.selectingColor;
 					EmojicordConfig.PICKER.skinTone.set(this.selectedColor);
+					EmojicordConfig.spec.save();
 				}
 				this.colorShown = false;
 				return true;
@@ -421,7 +425,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 					if (this.selectedColor>0)
 						if (EmojiId.StandardEmojiId.fromAlias(StringUtils.strip(this.selecting.name, ":")+":skin-tone-"+this.selectedColor)!=null)
 							tone = ":skin-tone-"+this.selectedColor+":";
-				EmojiSelectionChat.this.inputField.getTextFieldWidgetObj().writeText(this.selecting.name+tone+" ");
+				EmojiSelectionChat.this.inputField.writeText(this.selecting.name+tone+" ");
 				hide();
 				return true;
 			}

@@ -19,6 +19,7 @@ import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.eventhandler.Cancelable;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 import net.teamfruit.emojicord.CoreEvent;
 import net.teamfruit.emojicord.CoreInvoke;
 import net.teamfruit.emojicord.compat.Compat.CompatScreen;
@@ -37,6 +38,14 @@ public class CompatEvents {
 
 		@CoreEvent
 		public abstract void onChat(final @Nonnull CompatClientChatEvent event);
+
+		@SubscribeEvent
+		public void onTick(final @Nonnull ClientTickEvent event) {
+			onTick(new CompatClientTickEvent(event));
+		}
+
+		@CoreEvent
+		public abstract void onTick(final @Nonnull CompatClientTickEvent event);
 
 		@SubscribeEvent
 		public void onDraw(final @Nonnull RenderGameOverlayEvent.Post event) {
@@ -72,15 +81,19 @@ public class CompatEvents {
 
 		@SubscribeEvent
 		public void onMouseClicked(final @Nonnull GuiScreenEvent.MouseInputEvent.Pre event) {
-			if (Mouse.getEventButtonState()) {
-				final int button = Mouse.getEventButton();
-				if (button>=0)
+			final int button = Mouse.getEventButton();
+			if (button>=0)
+				if (Mouse.getEventButtonState())
 					onMouseClicked(new CompatGuiScreenEvent.CompatMouseClickedEvent.CompatPre(event, button));
-			}
+				else
+					onMouseReleased(new CompatGuiScreenEvent.CompatMouseReleasedEvent.CompatPre(event, button));
 		}
 
 		@CoreEvent
 		public abstract void onMouseClicked(final @Nonnull CompatGuiScreenEvent.CompatMouseClickedEvent.CompatPre event);
+
+		@CoreEvent
+		public abstract void onMouseReleased(final @Nonnull CompatGuiScreenEvent.CompatMouseReleasedEvent.CompatPre event);
 
 		@SubscribeEvent
 		public void onMouseScroll(final @Nonnull GuiScreenEvent.MouseInputEvent.Pre event) {
@@ -116,6 +129,9 @@ public class CompatEvents {
 
 		@CoreEvent
 		public abstract void onKeyPressed(final @Nonnull CompatGuiScreenEvent.CompatKeyboardKeyPressedEvent.CompatPre event);
+
+		@CoreEvent
+		public abstract void onCharTyped(final @Nonnull CompatGuiScreenEvent.CompatKeyboardCharTypedEvent.CompatPre event);
 
 		@SubscribeEvent
 		public void onConfigChanged(final @Nonnull ConfigChangedEvent.OnConfigChangedEvent event) {
@@ -183,6 +199,32 @@ public class CompatEvents {
 
 		public void setMessage(final String message) {
 			this.event.setMessage(message);
+		}
+	}
+
+	public static class CompatClientTickEvent extends CompatEvent<ClientTickEvent> {
+		public CompatClientTickEvent(final ClientTickEvent event) {
+			super(event);
+		}
+
+		public CompatPhase getPhase() {
+			return CompatPhase.getPhase(this.event.phase);
+		}
+
+		public static enum CompatPhase {
+			START,
+			END;
+			;
+
+			public static CompatPhase getPhase(final ClientTickEvent.Phase phase) {
+				switch (phase) {
+					case START:
+						return CompatPhase.START;
+					default:
+					case END:
+						return CompatPhase.END;
+				}
+			}
 		}
 	}
 
@@ -300,6 +342,25 @@ public class CompatEvents {
 			}
 		}
 
+		public static class CompatMouseReleasedEvent extends CompatGuiScreenEvent<GuiScreenEvent.MouseInputEvent> {
+			private final int button;
+
+			public CompatMouseReleasedEvent(final GuiScreenEvent.MouseInputEvent event, final int button) {
+				super(event);
+				this.button = button;
+			}
+
+			public int getButton() {
+				return this.button;
+			}
+
+			public static class CompatPre extends CompatMouseReleasedEvent {
+				public CompatPre(final GuiScreenEvent.MouseInputEvent.Pre event, final int button) {
+					super(event, button);
+				}
+			}
+		}
+
 		public static class CompatMouseScrollEvent extends CompatGuiScreenEvent<GuiScreenEvent.MouseInputEvent> {
 			private final double scrollDelta;
 
@@ -315,6 +376,31 @@ public class CompatEvents {
 			public static class CompatPre extends CompatMouseScrollEvent {
 				public CompatPre(final GuiScreenEvent.MouseInputEvent.Pre event, final double scrollDelta) {
 					super(event, scrollDelta);
+				}
+			}
+		}
+
+		public static class CompatKeyboardCharTypedEvent extends CompatGuiScreenEvent<GuiScreenEvent.KeyboardInputEvent> {
+			private final char codePoint;
+			private final int modifiers;
+
+			public CompatKeyboardCharTypedEvent(final GuiScreenEvent.KeyboardInputEvent event, final char codePoint, final int modifiers) {
+				super(event);
+				this.codePoint = codePoint;
+				this.modifiers = modifiers;
+			}
+
+			public char getCodePoint() {
+				return this.codePoint;
+			}
+
+			public int getModifiers() {
+				return this.modifiers;
+			}
+
+			public static class CompatPre extends CompatKeyboardCharTypedEvent {
+				public CompatPre(final GuiScreenEvent.KeyboardInputEvent.Pre event, final char codePoint, final int modifiers) {
+					super(event, codePoint, modifiers);
 				}
 			}
 		}
