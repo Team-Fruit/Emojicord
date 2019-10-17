@@ -62,6 +62,7 @@ import net.minecraft.resources.IResourceManager;
 import net.minecraft.tileentity.SignTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Session;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -85,6 +86,8 @@ import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.forgespi.language.IModInfo;
+import net.minecraftforge.versions.forge.ForgeVersion;
+import net.minecraftforge.versions.mcp.MCPVersion;
 
 public class Compat {
 	public static class CompatMinecraft {
@@ -140,6 +143,10 @@ public class Compat {
 		public boolean isGameFocused() {
 			return this.mc.isGameFocused();
 		}
+
+		public CompatSession getSession() {
+			return new CompatSession(this.mc.getSession());
+		}
 	}
 
 	public static class CompatFontRenderer {
@@ -191,6 +198,10 @@ public class Compat {
 
 		public int getAnisotropicFiltering() {
 			return 0;
+		}
+
+		public String getLanguage() {
+			return this.settings.language;
 		}
 	}
 
@@ -1262,6 +1273,36 @@ public class Compat {
 						return CompatStatus.BETA_OUTDATED;
 				}
 			}
+		}
+	}
+
+	public static class CompatSession {
+		private final Session session;
+
+		public CompatSession(final Session session) {
+			this.session = session;
+		}
+
+		public String getPlayerID() {
+			return this.session.getPlayerID();
+		}
+
+		public String getUsername() {
+			return this.session.getUsername();
+		}
+
+		public String getToken() {
+			return this.session.getToken();
+		}
+	}
+
+	public static class CompatMinecraftVersion {
+		public static String getMinecraftVersion() {
+			return MCPVersion.getMCVersion();
+		}
+
+		public static String getForgeVersion() {
+			return ForgeVersion.getVersion();
 		}
 	}
 }

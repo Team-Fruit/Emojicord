@@ -1,11 +1,13 @@
 package net.teamfruit.emojicord.emoji;
 
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -25,8 +27,13 @@ public class EmojiContext {
 		this.emojis = emojis;
 	}
 
+	public static enum EmojiContextAttribute {
+		CHAT_TEXTFIELD,
+		CHAT_MESSAGE,
+	}
+
 	public static class EmojiContextLoader {
-		public static EmojiContext getEmojiFormattedString(final String text) {
+		public static EmojiContext getEmojiFormattedString(final String text, final EnumSet<EmojiContextAttribute> attributes) {
 			if (!StringUtils.isEmpty(text)) {
 				final EmojiText emojiText = EmojiText.createParsed(text);
 				final EmojiContext context = emojiText.getEmojiContext();
@@ -44,17 +51,17 @@ public class EmojiContext {
 		private EmojiContextCache() {
 		}
 
-		private final LoadingCache<String, EmojiContext> EMOJI_TEXT_MAP = CacheBuilder.newBuilder()
+		private final LoadingCache<Pair<String, EnumSet<EmojiContextAttribute>>, EmojiContext> EMOJI_TEXT_MAP = CacheBuilder.newBuilder()
 				.expireAfterAccess(LIFETIME_SEC, TimeUnit.SECONDS)
-				.build(new CacheLoader<String, EmojiContext>() {
+				.build(new CacheLoader<Pair<String, EnumSet<EmojiContextAttribute>>, EmojiContext>() {
 					@Override
-					public EmojiContext load(final String key) throws Exception {
-						return EmojiContextLoader.getEmojiFormattedString(key);
+					public EmojiContext load(final Pair<String, EnumSet<EmojiContextAttribute>> entry) throws Exception {
+						return EmojiContextLoader.getEmojiFormattedString(entry.getLeft(), entry.getRight());
 					}
 				});
 
-		public @Nonnull EmojiContext getContext(final String text) {
-			return this.EMOJI_TEXT_MAP.getUnchecked(text);
+		public @Nonnull EmojiContext getContext(final String text, final EnumSet<EmojiContextAttribute> attributes) {
+			return this.EMOJI_TEXT_MAP.getUnchecked(Pair.of(text, attributes));
 		}
 	}
 }

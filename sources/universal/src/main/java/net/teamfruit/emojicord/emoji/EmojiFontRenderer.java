@@ -1,5 +1,7 @@
 package net.teamfruit.emojicord.emoji;
 
+import java.util.EnumSet;
+
 import javax.annotation.Nullable;
 
 import org.lwjgl.opengl.GL11;
@@ -14,6 +16,7 @@ import net.teamfruit.emojicord.compat.Compat.CompatTexturedGlyph;
 import net.teamfruit.emojicord.compat.CompatBaseVertex;
 import net.teamfruit.emojicord.compat.CompatVertex;
 import net.teamfruit.emojicord.compat.OpenGL;
+import net.teamfruit.emojicord.emoji.EmojiContext.EmojiContextAttribute;
 import net.teamfruit.emojicord.emoji.EmojiText.EmojiTextElement;
 
 @CoreInvoke
@@ -31,7 +34,10 @@ public class EmojiFontRenderer {
 	@CoreInvoke
 	public static String updateEmojiContext(final String text) {
 		if (EmojicordConfig.spec.isAvailable()&&EmojicordConfig.RENDER.renderEnabled.get()) {
-			CurrentContext = EmojiContext.EmojiContextCache.instance.getContext(text);
+			final EnumSet<EmojiContextAttribute> attributes = EnumSet.noneOf(EmojiContextAttribute.class);
+			if (isTextFieldRendering)
+				attributes.add(EmojiContextAttribute.CHAT_TEXTFIELD);
+			CurrentContext = EmojiContext.EmojiContextCache.instance.getContext(text, attributes);
 			return CurrentContext.text;
 		}
 		CurrentContext = null;
