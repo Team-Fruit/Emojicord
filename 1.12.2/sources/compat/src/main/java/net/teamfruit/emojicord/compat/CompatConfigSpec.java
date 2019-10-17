@@ -67,6 +67,10 @@ public class CompatConfigSpec {
 			};
 	}
 
+	public void save() {
+		this.config.config.save();
+	}
+
 	public static class Builder {
 		private BuilderContext context = new BuilderContext();
 		private List<String> currentPath = new ArrayList<>();
