@@ -90,6 +90,8 @@ sourceSets {
 		s.compat.runtimeClasspath += s.base.output
 		s.compat.compileClasspath += s.bootstrap.output
 		s.compat.runtimeClasspath += s.bootstrap.output
+		s.universal.compileClasspath += s.bootstrap.output
+		s.universal.runtimeClasspath += s.bootstrap.output
 		s.universal.compileClasspath += s.base.output
 		s.universal.runtimeClasspath += s.base.output
 		s.universal.compileClasspath += s.compat.output
@@ -266,9 +268,7 @@ minecraft {
 		else
 			runDir = run_location.replace('{modid}', project.modid).replace('{mcversion}', project.version_minecraft)
 
-		replaceIn 'Reference.java'
-		replace '${modid}', project.modid
-		replace '${modname}', project.modname
+		replaceIn 'VersionReference.java'
 		replace '${version}', mod_version
 		replace '${mcversion}', project.version_minecraft
 		replace '${forgeversion}', project.version_forge
