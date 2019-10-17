@@ -321,7 +321,7 @@ dependencies {
 	shade fileTree(dir: '../libs/shade', include: '*.jar')
 
 	if (project.name==mod_commonname) {
-		compile 'net.teamfruit:fmllegacydependency:1.1.0'
+		compile 'net.teamfruit:fmllegacydependency:1.1.1'
 		if (project.isProperty('extra_fmlcore'))
 			shade 'net.teamfruit:coremodlegacydependency:1.1.1'
 	}
@@ -396,6 +396,8 @@ ext.commonManifest = {
 
 	// Prevent from CurseForge duplicate error
 	attributes 'ModVersion': mod_version_full
+	attributes 'ForgeVersion': project.version_forge
+	attributes 'MinecraftVersion': project.version_minecraft
 }
 
 // Output Jar Universal

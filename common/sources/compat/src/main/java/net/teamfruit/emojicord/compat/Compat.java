@@ -4,9 +4,12 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -24,11 +27,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.gui.ChatLine;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.GuiNewChat;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.network.NetHandlerPlayClient;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.SimpleTexture;
@@ -36,7 +39,6 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.client.renderer.tileentity.TileEntitySignRenderer;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.settings.GameSettings;
@@ -60,6 +62,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Session;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -73,6 +76,9 @@ import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.IModel;
+import net.minecraftforge.common.ForgeVersion;
+import net.minecraftforge.common.ForgeVersion.CheckResult;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.common.config.Configuration;
@@ -82,9 +88,12 @@ import net.minecraftforge.fml.client.IModGuiFactory;
 import net.minecraftforge.fml.client.config.GuiConfig;
 import net.minecraftforge.fml.client.config.IConfigElement;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
+import net.teamfruit.emojicord.CoreInvoke;
 
 public class Compat {
 	public static class CompatMinecraft {
@@ -136,6 +145,14 @@ public class Compat {
 		public File getGameDir() {
 			return this.mc.mcDataDir;
 		}
+
+		public boolean isGameFocused() {
+			return this.mc.inGameHasFocus;
+		}
+
+		public CompatSession getSession() {
+			return new CompatSession(this.mc.getSession());
+		}
 	}
 
 	public static class CompatFontRenderer {
@@ -155,6 +172,10 @@ public class Compat {
 
 		public int drawStringWithShadow(final String msg, final float x, final float y, final int color) {
 			return drawString(msg, x, y, color, true);
+		}
+
+		public String wrapFormattedStringToWidth(final String msg, final int width) {
+			return this.font.wrapFormattedStringToWidth(msg, width);
 		}
 
 		public int getStringWidth(final @Nullable String s) {
@@ -183,6 +204,10 @@ public class Compat {
 
 		public int getAnisotropicFiltering() {
 			return 0;
+		}
+
+		public String getLanguage() {
+			return this.settings.language;
 		}
 	}
 
@@ -696,7 +721,7 @@ public class Compat {
 	}
 
 	public static class CompatScreen {
-		private GuiScreen screen;
+		private final GuiScreen screen;
 
 		public CompatScreen(final GuiScreen screen) {
 			this.screen = screen;
@@ -708,6 +733,139 @@ public class Compat {
 
 		public GuiScreen getScreenObj() {
 			return this.screen;
+		}
+
+		public int getWidth() {
+			return this.screen.width;
+		}
+
+		public int getHeight() {
+			return this.screen.height;
+		}
+
+		public static boolean hasShiftDown() {
+			return GuiScreen.isShiftKeyDown();
+		}
+	}
+
+	public static class CompatChatScreen {
+		private final GuiChat chatScreen;
+
+		public CompatChatScreen(final GuiChat chatScreen) {
+			this.chatScreen = chatScreen;
+		}
+
+		public CompatTextFieldWidget getTextField() {
+			return new CompatTextFieldWidget(this.chatScreen.inputField);
+		}
+
+		public @Nonnull CompatScreen cast() {
+			return new CompatScreen(this.chatScreen);
+		}
+
+		public static @Nullable CompatChatScreen cast(final CompatScreen screen) {
+			if (screen.screen instanceof GuiChat)
+				return new CompatChatScreen((GuiChat) screen.screen);
+			return null;
+		}
+	}
+
+	public static class CompatTextFieldWidget {
+		private final GuiTextField textField;
+		private final CompatFontRenderer font;
+
+		public CompatTextFieldWidget(final GuiTextField inputField) {
+			this.textField = inputField;
+			this.font = CompatMinecraft.getMinecraft().getFontRenderer();
+		}
+
+		public CompatTextFieldWidget(final CompatFontRenderer font, final int x, final int y, final int width, final int height, final String title) {
+			this(new GuiTextField(-1, font.getFontRendererObj(), x, y, width, height));
+		}
+
+		public GuiTextField getTextFieldWidgetObj() {
+			return this.textField;
+		}
+
+		public String getText() {
+			return this.textField.getText();
+		}
+
+		public void setText(final String apply) {
+			this.textField.setText(apply);
+		}
+
+		public int getInsertPos(final int start) {
+			final String text = this.textField.getText();
+			if (start>text.length())
+				return this.textField.x;
+			return this.textField.x+this.font.getStringWidth(text.substring(0, start));
+		}
+
+		public void setSuggestion(final String string) {
+			try {
+				this.textField.getClass().getField("suggestion").set(this.textField, string);
+			} catch (final ReflectiveOperationException e) {
+				throw new RuntimeException("Could not set suggestion: ", e);
+			}
+		}
+
+		public int getCursorPosition() {
+			return this.textField.getCursorPosition();
+		}
+
+		public void setCursorPosition(final int i) {
+			this.textField.setCursorPosition(i);
+		}
+
+		public void setSelectionPos(final int i) {
+			this.textField.setSelectionPos(i);
+		}
+
+		public void setMaxStringLength(final int length) {
+			this.textField.setMaxStringLength(length);
+		}
+
+		public void setEnableBackgroundDrawing(final boolean enabled) {
+			this.textField.setEnableBackgroundDrawing(enabled);
+		}
+
+		public void changeFocus(final boolean active) {
+			this.textField.setFocused(active);
+		}
+
+		public void setFocused(final boolean focused) {
+			this.textField.setFocused(focused);
+		}
+
+		public boolean mouseClicked(final int mouseX, final int mouseY, final int button) {
+			return this.textField.mouseClicked(mouseX, mouseY, button);
+		}
+
+		public boolean charTyped(final char typed, final int keycode) {
+			return this.textField.textboxKeyTyped(typed, keycode);
+		}
+
+		public boolean keyPressed(final int keycode, final int mouseX, final int mouseY) {
+			return true; //this.textField.textboxKeyTyped(keycode, mouseX, mouseY);
+		}
+
+		public void render(final int mouseX, final int mouseY, final float partialTicks) {
+			this.textField.drawTextBox();
+		}
+
+		public void tick() {
+			this.textField.updateCursorCounter();
+		}
+
+		public void writeText(final String string) {
+			this.textField.writeText(string);
+		}
+
+		@CoreInvoke
+		public static void renderSuggestion(final FontRenderer font, final boolean flag, final String suggestion, final int posX, final int posY) {
+			if (!flag&&suggestion!=null)
+				font.drawStringWithShadow(suggestion, posX-1, posY, 0xFF808080);
 		}
 	}
 
@@ -942,6 +1100,7 @@ public class Compat {
 			return I18n.format(format, args);
 		}
 
+		@SuppressWarnings("deprecation")
 		public static String translateToLocal(final String text) {
 			return net.minecraft.util.text.translation.I18n.translateToLocal(text);
 		}
@@ -960,89 +1119,6 @@ public class Compat {
 
 		public CompatBakedModel(@Nonnull final IBakedModel bakedModel) {
 			this.bakedModel = bakedModel;
-		}
-	}
-
-	public static class CompatVertex {
-		private static class CompatBaseVertexImpl implements CompatBaseVertex {
-			public static final @Nonnull Tessellator t = Tessellator.getInstance();
-			public static final @Nonnull BufferBuilder w = t.getBuffer();
-
-			public CompatBaseVertexImpl() {
-			}
-
-			@Override
-			public void draw() {
-				endVertex();
-				t.draw();
-			}
-
-			@Override
-			public @Nonnull CompatBaseVertex begin(final int mode) {
-				w.begin(mode, DefaultVertexFormats.POSITION);
-				init();
-				return this;
-			}
-
-			@Override
-			public @Nonnull CompatBaseVertex beginTexture(final int mode) {
-				w.begin(mode, DefaultVertexFormats.POSITION_TEX);
-				init();
-				return this;
-			}
-
-			private void init() {
-				this.stack = false;
-			}
-
-			private boolean stack;
-
-			@Override
-			public @Nonnull CompatBaseVertex pos(final double x, final double y, final double z) {
-				endVertex();
-				w.pos(x, y, z);
-				this.stack = true;
-				return this;
-			}
-
-			@Override
-			public @Nonnull CompatBaseVertex tex(final double u, final double v) {
-				w.tex(u, v);
-				return this;
-			}
-
-			@Override
-			public @Nonnull CompatBaseVertex color(final float red, final float green, final float blue, final float alpha) {
-				return this.color((int) (red*255.0F), (int) (green*255.0F), (int) (blue*255.0F), (int) (alpha*255.0F));
-			}
-
-			@Override
-			public @Nonnull CompatBaseVertex color(final int red, final int green, final int blue, final int alpha) {
-				w.putColorRGBA(0, red, green, blue, alpha);
-				return this;
-			}
-
-			@Override
-			public @Nonnull CompatBaseVertex normal(final float nx, final float ny, final float nz) {
-				w.normal(nx, ny, nz);
-				return this;
-			}
-
-			@Override
-			public void setTranslation(final double x, final double y, final double z) {
-				w.setTranslation(x, y, z);
-			}
-
-			private void endVertex() {
-				if (this.stack) {
-					this.stack = false;
-					w.endVertex();
-				}
-			}
-		}
-
-		public static @Nonnull CompatBaseVertex getTessellator() {
-			return new CompatBaseVertexImpl();
 		}
 	}
 
@@ -1142,10 +1218,114 @@ public class Compat {
 	}
 
 	public static abstract class CompatGlyph {
-		public CompatGlyph(final ResourceLocation texture, final float width, final float height) {
+		public CompatGlyph(final float width, final float height) {
+		}
+	}
+
+	public static abstract class CompatTexturedGlyph {
+		public CompatTexturedGlyph(final ResourceLocation texture, final float width, final float height) {
 		}
 
 		public void onRender(final TextureManager textureManager, final boolean hasShadow, final float x, final float y, final CompatBufferBuilder vbuilder, final float red, final float green, final float blue, final float alpha) {
+		}
+	}
+
+	public static class CompatVersionChecker {
+		public static void startVersionCheck(final String modId, final String modVersion, final String updateURL) {
+		}
+
+		public static CompatCheckResult getResult(final String modId) {
+			final ModContainer container = Loader.instance().getIndexedModList().get(modId);
+			return CompatCheckResult.from(ForgeVersion.getResult(container));
+		}
+
+		public static class CompatCheckResult {
+			@Nonnull
+			public final CompatStatus status;
+			@Nullable
+			public final String target;
+			@Nullable
+			public final Map<String, String> changes;
+			@Nullable
+			public final String url;
+
+			public CompatCheckResult(@Nonnull final CompatStatus status, @Nullable final String target, @Nullable final Map<String, String> changes, @Nullable final String url) {
+				this.status = status;
+				this.target = target;
+				this.changes = changes==null ? Collections.<String, String> emptyMap() : Collections.unmodifiableMap(changes);
+				this.url = url;
+			}
+
+			public static CompatCheckResult from(final CheckResult result) {
+				Map<String, String> compatChanges = null;
+				if (result.changes!=null)
+					compatChanges = result.changes.entrySet().stream().collect(Collectors.toMap(e -> e.getKey().toString(), e -> e.getValue()));
+				return new CompatCheckResult(CompatStatus.getStatus(result.status),
+						result.target!=null ? result.target.toString() : null,
+						compatChanges,
+						result.url);
+			}
+		}
+
+		public static enum CompatStatus {
+			PENDING,
+			FAILED,
+			UP_TO_DATE,
+			OUTDATED,
+			AHEAD,
+			BETA,
+			BETA_OUTDATED,
+			;
+
+			public static CompatStatus getStatus(final ForgeVersion.Status status) {
+				switch (status) {
+					default:
+					case PENDING:
+						return CompatStatus.PENDING;
+					case FAILED:
+						return CompatStatus.FAILED;
+					case UP_TO_DATE:
+						return CompatStatus.UP_TO_DATE;
+					case OUTDATED:
+						return CompatStatus.OUTDATED;
+					case AHEAD:
+						return CompatStatus.AHEAD;
+					case BETA:
+						return CompatStatus.BETA;
+					case BETA_OUTDATED:
+						return CompatStatus.BETA_OUTDATED;
+				}
+			}
+		}
+	}
+
+	public static class CompatSession {
+		private final Session session;
+
+		public CompatSession(final Session session) {
+			this.session = session;
+		}
+
+		public String getPlayerID() {
+			return this.session.getPlayerID();
+		}
+
+		public String getUsername() {
+			return this.session.getUsername();
+		}
+
+		public String getToken() {
+			return this.session.getToken();
+		}
+	}
+
+	public static class CompatMinecraftVersion {
+		public static String getMinecraftVersion() {
+			return MinecraftForge.MC_VERSION;
+		}
+
+		public static String getForgeVersion() {
+			return ForgeVersion.getVersion();
 		}
 	}
 }

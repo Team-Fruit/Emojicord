@@ -20,7 +20,7 @@ import net.teamfruit.emojicord.compat.CompatBaseProxy.CompatFMLInitializationEve
 import net.teamfruit.emojicord.compat.CompatBaseProxy.CompatFMLPostInitializationEvent;
 import net.teamfruit.emojicord.compat.CompatBaseProxy.CompatFMLPreInitializationEvent;
 
-@Mod(modid = Reference.MODID, name = Reference.NAME, version = Reference.VERSION, guiFactory = Reference.GUI_FACTORY)
+@Mod(modid = Reference.MODID, name = Reference.NAME, version = VersionReference.VERSION, guiFactory = Reference.GUI_FACTORY)
 public class EmojicordL {
 	@Instance(Reference.MODID)
 	public static @Nullable EmojicordL instance;
