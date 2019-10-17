@@ -1,45 +1,45 @@
 {
   "homepage": "http://emojicord.teamfruit.net/download/",
   "promos": {
-    "1.7.10-latest": "1.0.0",
-    "1.7.10-recommended": "1.0.0",
-    "1.8.9-latest": "1.0.0",
-    "1.8.9-recommended": "1.0.0",
-    "1.9.4-latest": "1.0.0",
-    "1.9.4-recommended": "1.0.0",
-    "1.10.2-latest": "1.0.0",
-    "1.10.2-recommended": "1.0.0",
-    "1.11.2-latest": "1.0.0",
-    "1.11.2-recommended": "1.0.0",
-    "1.12.2-latest": "1.0.0",
-    "1.12.2-recommended": "1.0.0",
-    "1.13.2-latest": "1.0.0",
-    "1.13.2-recommended": "1.0.0",
-    "1.14.4-latest": "1.0.0",
-    "1.14.4-recommended": "1.0.0"
+    "1.7.10-latest": "0.1.0",
+    "1.7.10-recommended": "0.1.0",
+    "1.8.9-latest": "0.1.0",
+    "1.8.9-recommended": "0.1.0",
+    "1.9.4-latest": "0.1.0",
+    "1.9.4-recommended": "0.1.0",
+    "1.10.2-latest": "0.1.0",
+    "1.10.2-recommended": "0.1.0",
+    "1.11.2-latest": "0.1.0",
+    "1.11.2-recommended": "0.1.0",
+    "1.12.2-latest": "0.1.0",
+    "1.12.2-recommended": "0.1.0",
+    "1.13.2-latest": "0.1.0",
+    "1.13.2-recommended": "0.1.0",
+    "1.14.4-latest": "0.1.0",
+    "1.14.4-recommended": "0.1.0"
   },
   "1.7.10": {
-    "1.0.0": "Released"
+    "0.1.0": "Beta"
   },
   "1.8.9": {
-    "1.0.0": "Released"
+    "0.1.0": "Beta"
   },
   "1.9.4": {
-    "1.0.0": "Released"
+    "0.1.0": "Beta"
   },
   "1.10.2": {
-    "1.0.0": "Released"
+    "0.1.0": "Beta"
   },
   "1.11.2": {
-    "1.0.0": "Released"
+    "0.1.0": "Beta"
   },
   "1.12.2": {
-    "1.0.0": "Released"
+    "0.1.0": "Beta"
   },
   "1.13.2": {
-    "1.0.0": "Released"
+    "0.1.0": "Beta"
   },
   "1.14.4": {
-    "1.0.0": "Released"
+    "0.1.0": "Beta"
   }
 }
