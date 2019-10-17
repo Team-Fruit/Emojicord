@@ -4,9 +4,12 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -59,6 +62,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Session;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -72,6 +76,9 @@ import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.IModel;
+import net.minecraftforge.common.ForgeVersion;
+import net.minecraftforge.common.ForgeVersion.CheckResult;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.common.config.Configuration;
@@ -81,6 +88,8 @@ import net.minecraftforge.fml.client.IModGuiFactory;
 import net.minecraftforge.fml.client.config.GuiConfig;
 import net.minecraftforge.fml.client.config.IConfigElement;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
@@ -136,6 +145,14 @@ public class Compat {
 		public File getGameDir() {
 			return this.mc.mcDataDir;
 		}
+
+		public boolean isGameFocused() {
+			return this.mc.inGameHasFocus;
+		}
+
+		public CompatSession getSession() {
+			return new CompatSession(this.mc.getSession());
+		}
 	}
 
 	public static class CompatFontRenderer {
@@ -155,6 +172,10 @@ public class Compat {
 
 		public int drawStringWithShadow(final String msg, final float x, final float y, final int color) {
 			return drawString(msg, x, y, color, true);
+		}
+
+		public String wrapFormattedStringToWidth(final String msg, final int width) {
+			return this.font.wrapFormattedStringToWidth(msg, width);
 		}
 
 		public int getStringWidth(final @Nullable String s) {
@@ -183,6 +204,10 @@ public class Compat {
 
 		public int getAnisotropicFiltering() {
 			return 0;
+		}
+
+		public String getLanguage() {
+			return this.settings.language;
 		}
 	}
 
@@ -754,6 +779,14 @@ public class Compat {
 			this.font = CompatMinecraft.getMinecraft().getFontRenderer();
 		}
 
+		public CompatTextFieldWidget(final CompatFontRenderer font, final int x, final int y, final int width, final int height, final String title) {
+			this(new GuiTextField(-1, font.getFontRendererObj(), x, y, width, height));
+		}
+
+		public GuiTextField getTextFieldWidgetObj() {
+			return this.textField;
+		}
+
 		public String getText() {
 			return this.textField.getText();
 		}
@@ -787,6 +820,46 @@ public class Compat {
 
 		public void setSelectionPos(final int i) {
 			this.textField.setSelectionPos(i);
+		}
+
+		public void setMaxStringLength(final int length) {
+			this.textField.setMaxStringLength(length);
+		}
+
+		public void setEnableBackgroundDrawing(final boolean enabled) {
+			this.textField.setEnableBackgroundDrawing(enabled);
+		}
+
+		public void changeFocus(final boolean active) {
+			this.textField.setFocused(active);
+		}
+
+		public void setFocused(final boolean focused) {
+			this.textField.setFocused(focused);
+		}
+
+		public boolean mouseClicked(final int mouseX, final int mouseY, final int button) {
+			return this.textField.mouseClicked(mouseX, mouseY, button);
+		}
+
+		public boolean charTyped(final char typed, final int keycode) {
+			return this.textField.textboxKeyTyped(typed, keycode);
+		}
+
+		public boolean keyPressed(final int keycode, final int mouseX, final int mouseY) {
+			return true; //this.textField.textboxKeyTyped(keycode, mouseX, mouseY);
+		}
+
+		public void render(final int mouseX, final int mouseY, final float partialTicks) {
+			this.textField.drawTextBox();
+		}
+
+		public void tick() {
+			this.textField.updateCursorCounter();
+		}
+
+		public void writeText(final String string) {
+			this.textField.writeText(string);
 		}
 
 		@CoreInvoke
@@ -1154,6 +1227,105 @@ public class Compat {
 		}
 
 		public void onRender(final TextureManager textureManager, final boolean hasShadow, final float x, final float y, final CompatBufferBuilder vbuilder, final float red, final float green, final float blue, final float alpha) {
+		}
+	}
+
+	public static class CompatVersionChecker {
+		public static void startVersionCheck(final String modId, final String modVersion, final String updateURL) {
+		}
+
+		public static CompatCheckResult getResult(final String modId) {
+			final ModContainer container = Loader.instance().getIndexedModList().get(modId);
+			return CompatCheckResult.from(ForgeVersion.getResult(container));
+		}
+
+		public static class CompatCheckResult {
+			@Nonnull
+			public final CompatStatus status;
+			@Nullable
+			public final String target;
+			@Nullable
+			public final Map<String, String> changes;
+			@Nullable
+			public final String url;
+
+			public CompatCheckResult(@Nonnull final CompatStatus status, @Nullable final String target, @Nullable final Map<String, String> changes, @Nullable final String url) {
+				this.status = status;
+				this.target = target;
+				this.changes = changes==null ? Collections.<String, String> emptyMap() : Collections.unmodifiableMap(changes);
+				this.url = url;
+			}
+
+			public static CompatCheckResult from(final CheckResult result) {
+				Map<String, String> compatChanges = null;
+				if (result.changes!=null)
+					compatChanges = result.changes.entrySet().stream().collect(Collectors.toMap(e -> e.getKey().toString(), e -> e.getValue()));
+				return new CompatCheckResult(CompatStatus.getStatus(result.status),
+						result.target!=null ? result.target.toString() : null,
+						compatChanges,
+						result.url);
+			}
+		}
+
+		public static enum CompatStatus {
+			PENDING,
+			FAILED,
+			UP_TO_DATE,
+			OUTDATED,
+			AHEAD,
+			BETA,
+			BETA_OUTDATED,
+			;
+
+			public static CompatStatus getStatus(final ForgeVersion.Status status) {
+				switch (status) {
+					default:
+					case PENDING:
+						return CompatStatus.PENDING;
+					case FAILED:
+						return CompatStatus.FAILED;
+					case UP_TO_DATE:
+						return CompatStatus.UP_TO_DATE;
+					case OUTDATED:
+						return CompatStatus.OUTDATED;
+					case AHEAD:
+						return CompatStatus.AHEAD;
+					case BETA:
+						return CompatStatus.BETA;
+					case BETA_OUTDATED:
+						return CompatStatus.BETA_OUTDATED;
+				}
+			}
+		}
+	}
+
+	public static class CompatSession {
+		private final Session session;
+
+		public CompatSession(final Session session) {
+			this.session = session;
+		}
+
+		public String getPlayerID() {
+			return this.session.getPlayerID();
+		}
+
+		public String getUsername() {
+			return this.session.getUsername();
+		}
+
+		public String getToken() {
+			return this.session.getToken();
+		}
+	}
+
+	public static class CompatMinecraftVersion {
+		public static String getMinecraftVersion() {
+			return MinecraftForge.MC_VERSION;
+		}
+
+		public static String getForgeVersion() {
+			return ForgeVersion.getVersion();
 		}
 	}
 }

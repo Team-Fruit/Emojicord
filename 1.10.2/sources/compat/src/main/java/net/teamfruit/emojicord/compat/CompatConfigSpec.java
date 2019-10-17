@@ -67,6 +67,10 @@ public class CompatConfigSpec {
 			};
 	}
 
+	public void save() {
+		this.config.config.save();
+	}
+
 	public static class Builder {
 		private BuilderContext context = new BuilderContext();
 		private List<String> currentPath = new ArrayList<>();
@@ -264,6 +268,13 @@ public class CompatConfigSpec {
 			return getPropertyValue();
 		}
 
+		protected abstract void setPropertyValue(T value);
+
+		public void set(final T value) {
+			Preconditions.checkNotNull(this.value, "Cannot set config value without assigned Config object present");
+			setPropertyValue(value);
+		}
+
 		public Builder next() {
 			return this.parent;
 		}
@@ -291,6 +302,11 @@ public class CompatConfigSpec {
 		protected String getPropertyValue() {
 			return this.value.getString();
 		}
+
+		@Override
+		protected void setPropertyValue(final String value) {
+			this.value.set(value);
+		}
 	}
 
 	public static class BooleanValue extends ConfigValue<Boolean> {
@@ -308,6 +324,11 @@ public class CompatConfigSpec {
 		@Override
 		protected Boolean getPropertyValue() {
 			return this.value.getBoolean();
+		}
+
+		@Override
+		protected void setPropertyValue(final Boolean value) {
+			this.value.set(value);
 		}
 	}
 
@@ -327,6 +348,11 @@ public class CompatConfigSpec {
 		protected Integer getPropertyValue() {
 			return this.value.getInt();
 		}
+
+		@Override
+		protected void setPropertyValue(final Integer value) {
+			this.value.set(value);
+		}
 	}
 
 	public static class DoubleValue extends ConfigValue<Double> {
@@ -344,6 +370,11 @@ public class CompatConfigSpec {
 		@Override
 		protected Double getPropertyValue() {
 			return this.value.getDouble();
+		}
+
+		@Override
+		protected void setPropertyValue(final Double value) {
+			this.value.set(value);
 		}
 	}
 
