@@ -178,6 +178,28 @@ if (project.forgegradle.contains('3.+')) {
 	tasks.idea.dependsOn 'genIntellijRuns'
 }
 
+// FG1.2 Replace boostrap_main
+if (project.forgegradle.contains('1.2')) {
+	afterEvaluate {
+		def set = sourceSets.bootstrap_main
+		def dir = fg_plugin.delayedFile(net.minecraftforge.gradle.user.UserConstants.SOURCES_DIR+'/java')
+
+		def capName = set.name.substring(0, 1).toUpperCase() + set.name.substring(1);
+		String taskPrefix = "source"+capName;
+
+		def newtask = task(taskPrefix, type: net.minecraftforge.gradle.tasks.user.SourceCopyTask)
+		newtask.source = set.java
+		newtask.output = dir
+
+		newtask.replacements.putAll(minecraft.replacements);
+		newtask.includes.addAll(minecraft.includes);
+
+		def compile = tasks.getByName(set.compileJavaTaskName)
+		compile.dependsOn(taskPrefix)
+		compile.source = dir
+	}
+}
+
 // Configure Minecraft
 minecraft {
 	if (project.forgegradle.contains('2.2'))
@@ -236,7 +258,7 @@ minecraft {
 				}
 			}
 
-	        data {
+			data {
 				taskName = "${project.name}_Data"
 
 				if (!project.isProperty('run_location'))
@@ -246,9 +268,9 @@ minecraft {
 
 				property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
 
-	            // property 'forge.logging.console.level', 'debug'
+				// property 'forge.logging.console.level', 'debug'
 
-	            args '--mod', project.modid, '--all', '--output', file('src/generated/resources/')
+				args '--mod', project.modid, '--all', '--output', file('src/generated/resources/')
 
 				mods {
 					create(project.modid) {
@@ -258,7 +280,7 @@ minecraft {
 						source sourceSets.bootstrap_main
 					}
 				}
-	        }
+			}
 		}
 	} else {
 		version = "${project.version_minecraft}-${project.version_forge}"
@@ -270,8 +292,13 @@ minecraft {
 
 		replaceIn 'VersionReference.java'
 		replace '${version}', mod_version
-		replace '${mcversion}', project.version_minecraft
-		replace '${forgeversion}', project.version_forge
+		if (project.name==mod_commonname) {
+			replace '${mcversion}', "Universal-${project.version_minecraft}"
+			replace '${forgeversion}', "Universal-${project.version_forge}"
+		} else {
+			replace '${mcversion}', project.version_minecraft
+			replace '${forgeversion}', project.version_forge
+		}
 	}
 }
 
@@ -297,7 +324,7 @@ processResources {
 	inputs.property 'mcversion', project.version_minecraft
 
 	// copy everything else, thats not the mcmod.info
-	sourceSets.each { from(it.resources.srcDirs) }
+	//sourceSets.each { from(it.resources.srcDirs) }
 }
 
 // Dependency Repositories
@@ -395,9 +422,15 @@ ext.commonManifest = {
 	}
 
 	// Prevent from CurseForge duplicate error
-	attributes 'ModVersion': mod_version_full
-	attributes 'ForgeVersion': project.version_forge
-	attributes 'MinecraftVersion': project.version_minecraft
+	attributes 'ModVersionFull': mod_version_full
+	attributes 'ModVersion': mod_version
+	if (project.name==mod_commonname) {
+		attributes 'ForgeVersion': "Universal-${project.version_forge}"
+		attributes 'MinecraftVersion': "Universal-${project.version_minecraft}"
+	} else {
+		attributes 'ForgeVersion': project.version_forge
+		attributes 'MinecraftVersion': project.version_minecraft
+	}
 }
 
 // Output Jar Universal
