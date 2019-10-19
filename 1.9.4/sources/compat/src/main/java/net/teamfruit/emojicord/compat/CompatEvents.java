@@ -121,7 +121,10 @@ public class CompatEvents {
 		@SubscribeEvent
 		public void onKeyPressed(final @Nonnull GuiScreenEvent.KeyboardInputEvent.Pre event) {
 			if (Keyboard.getEventKeyState()) {
-				final Integer key = this.lwjgl2glfwKeyMappings.get(Keyboard.getEventKey());
+				final char eventChar = Keyboard.getEventCharacter();
+				final int eventKey = Keyboard.getEventKey();
+				onCharTyped(new CompatGuiScreenEvent.CompatKeyboardCharTypedEvent.CompatPre(event, eventChar, eventKey));
+				final Integer key = this.lwjgl2glfwKeyMappings.get(eventKey);
 				if (key!=null)
 					onKeyPressed(new CompatGuiScreenEvent.CompatKeyboardKeyPressedEvent.CompatPre(event, key));
 			}
