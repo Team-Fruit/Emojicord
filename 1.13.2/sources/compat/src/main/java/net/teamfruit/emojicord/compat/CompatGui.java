@@ -159,7 +159,7 @@ public class CompatGui {
 	}
 
 	public static class CompatGuiConfig extends GuiScreen {
-		public CompatGuiConfig(final CompatScreen parentScreen, final List<Compat.CompatConfigElement> configElements, final String modID, final boolean allRequireWorldRestart, final boolean allRequireMcRestart, final String title) {
+		public CompatGuiConfig(final CompatScreen parentScreen, final List<CompatConfig.CompatConfigElement> configElements, final String modID, final boolean allRequireWorldRestart, final boolean allRequireMcRestart, final String title) {
 			super();
 		}
 	}

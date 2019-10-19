@@ -16,7 +16,6 @@ import com.google.common.collect.Lists;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.teamfruit.emojicord.compat.Compat.CompatConfiguration;
 import net.teamfruit.emojicord.compat.Compat.CompatSide;
 
 /*
@@ -26,7 +25,7 @@ import net.teamfruit.emojicord.compat.Compat.CompatSide;
 
 public class CompatConfigSpec {
 	private final List<ConfigValue<?>> values;
-	private CompatConfiguration config;
+	private CompatConfig.CompatConfiguration config;
 
 	private CompatConfigSpec(final List<ConfigValue<?>> values) {
 		this.values = values;
@@ -36,12 +35,12 @@ public class CompatConfigSpec {
 		return this.config!=null;
 	}
 
-	public CompatConfiguration configure(final CompatConfiguration config) {
+	public CompatConfig.CompatConfiguration configure(final CompatConfig.CompatConfiguration config) {
 		this.values.forEach(v -> v.apply(config));
 		return this.config = config;
 	}
 
-	public CompatConfiguration getConfiguration() {
+	public CompatConfig.CompatConfiguration getConfiguration() {
 		return this.config;
 	}
 
@@ -58,7 +57,7 @@ public class CompatConfigSpec {
 
 	public CompatConfigHandler registerConfigHandler(final CompatSide side, final File location) {
 		if (FMLCommonHandler.instance().getEffectiveSide()==side.toSide()) {
-			final CompatConfiguration config = new CompatConfiguration(new Configuration(location));
+			final CompatConfig.CompatConfiguration config = new CompatConfig.CompatConfiguration(new Configuration(location));
 			configure(config);
 			config.config.save();
 			return config.config::save;
@@ -279,9 +278,9 @@ public class CompatConfigSpec {
 			return this.parent;
 		}
 
-		protected abstract Property applyDefine(CompatConfiguration builder);
+		protected abstract Property applyDefine(CompatConfig.CompatConfiguration builder);
 
-		public void apply(final CompatConfiguration builder) {
+		public void apply(final CompatConfig.CompatConfiguration builder) {
 			this.value = applyDefine(builder);
 		}
 	}
@@ -292,7 +291,7 @@ public class CompatConfigSpec {
 		}
 
 		@Override
-		protected Property applyDefine(final CompatConfiguration builder) {
+		protected Property applyDefine(final CompatConfig.CompatConfiguration builder) {
 			final Property ret = builder.config.get(DOT_JOINER.join(this.path.subList(0, this.path.size()-1)), this.path.get(this.path.size()-1), this.defaultSupplier.get());
 			this.builderContext.apply(ret);
 			return ret;
@@ -315,7 +314,7 @@ public class CompatConfigSpec {
 		}
 
 		@Override
-		protected Property applyDefine(final CompatConfiguration builder) {
+		protected Property applyDefine(final CompatConfig.CompatConfiguration builder) {
 			final Property ret = builder.config.get(DOT_JOINER.join(this.path.subList(0, this.path.size()-1)), this.path.get(this.path.size()-1), this.defaultSupplier.get());
 			this.builderContext.apply(ret);
 			return ret;
@@ -338,7 +337,7 @@ public class CompatConfigSpec {
 		}
 
 		@Override
-		protected Property applyDefine(final CompatConfiguration builder) {
+		protected Property applyDefine(final CompatConfig.CompatConfiguration builder) {
 			final Property ret = builder.config.get(DOT_JOINER.join(this.path.subList(0, this.path.size()-1)), this.path.get(this.path.size()-1), this.defaultSupplier.get());
 			this.builderContext.apply(ret);
 			return ret;
@@ -361,7 +360,7 @@ public class CompatConfigSpec {
 		}
 
 		@Override
-		protected Property applyDefine(final CompatConfiguration builder) {
+		protected Property applyDefine(final CompatConfig.CompatConfiguration builder) {
 			final Property ret = builder.config.get(DOT_JOINER.join(this.path.subList(0, this.path.size()-1)), this.path.get(this.path.size()-1), this.defaultSupplier.get());
 			this.builderContext.apply(ret);
 			return ret;

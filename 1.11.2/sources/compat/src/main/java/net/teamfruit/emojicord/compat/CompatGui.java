@@ -179,8 +179,8 @@ public class CompatGui {
 	}
 
 	public static class CompatGuiConfig extends GuiConfig {
-		public CompatGuiConfig(final CompatScreen parentScreen, final List<Compat.CompatConfigElement> configElements, final String modID, final boolean allRequireWorldRestart, final boolean allRequireMcRestart, final String title) {
-			super(parentScreen.getScreenObj(), Compat.CompatConfigElement.getConfigElements(configElements), modID, allRequireWorldRestart, allRequireMcRestart, GuiConfig.getAbridgedConfigPath(title));
+		public CompatGuiConfig(final CompatScreen parentScreen, final List<CompatConfig.CompatConfigElement> configElements, final String modID, final boolean allRequireWorldRestart, final boolean allRequireMcRestart, final String title) {
+			super(parentScreen.getScreenObj(), CompatConfig.CompatConfigElement.getConfigElements(configElements), modID, allRequireWorldRestart, allRequireMcRestart, GuiConfig.getAbridgedConfigPath(title));
 		}
 	}
 

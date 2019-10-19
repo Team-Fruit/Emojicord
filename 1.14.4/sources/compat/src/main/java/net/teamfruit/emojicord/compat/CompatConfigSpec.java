@@ -14,7 +14,6 @@ import com.google.common.collect.Lists;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
-import net.teamfruit.emojicord.compat.Compat.CompatConfiguration;
 import net.teamfruit.emojicord.compat.Compat.CompatSide;
 
 /*
@@ -46,12 +45,12 @@ public class CompatConfigSpec {
 		void onConfigChanged();
 	}
 
-	public CompatConfiguration configure(final CompatConfiguration config) {
+	public CompatConfig.CompatConfiguration configure(final CompatConfig.CompatConfiguration config) {
 		return config;
 	}
 
-	public CompatConfiguration getConfiguration() {
-		return new CompatConfiguration();
+	public CompatConfig.CompatConfiguration getConfiguration() {
+		return new CompatConfig.CompatConfiguration();
 	}
 
 	public File getConfigFile() {

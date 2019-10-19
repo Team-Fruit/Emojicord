@@ -9,8 +9,7 @@ import com.google.common.collect.Lists;
 
 import net.teamfruit.emojicord.EmojicordConfig;
 import net.teamfruit.emojicord.Reference;
-import net.teamfruit.emojicord.compat.Compat.CompatConfigCategory;
-import net.teamfruit.emojicord.compat.Compat.CompatConfigElement;
+import net.teamfruit.emojicord.compat.CompatConfig;
 import net.teamfruit.emojicord.compat.CompatGui;
 
 public class ConfigGui extends CompatGui.CompatGuiConfig {
@@ -18,16 +17,16 @@ public class ConfigGui extends CompatGui.CompatGuiConfig {
 		super(parent, getConfigElements(), Reference.MODID, false, false, EmojicordConfig.spec.getConfigFile().getName());
 	}
 
-	private static @Nonnull List<CompatConfigElement> getConfigElements() {
-		final List<CompatConfigElement> list = Lists.newArrayList();
+	private static @Nonnull List<CompatConfig.CompatConfigElement> getConfigElements() {
+		final List<CompatConfig.CompatConfigElement> list = Lists.newArrayList();
 
 		for (final String cat : EmojicordConfig.spec.getConfiguration().getCategoryNames()) {
-			final CompatConfigCategory cc = EmojicordConfig.spec.getConfiguration().getCategory(cat);
+			final CompatConfig.CompatConfigCategory cc = EmojicordConfig.spec.getConfiguration().getCategory(cat);
 
 			if (cc.isChild())
 				continue;
 
-			list.add(CompatConfigElement.fromCategory(cc));
+			list.add(CompatConfig.CompatConfigElement.fromCategory(cc));
 		}
 
 		return list;
