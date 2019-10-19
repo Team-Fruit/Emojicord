@@ -1151,7 +1151,8 @@ public class Compat {
 			final boolean blur = true;
 			final boolean clamp = false;
 
-			TextureUtil.uploadTextureImageAllocate(this.texture.getRawGlTextureId(), bufferedimage, blur, clamp);
+			if (bufferedimage!=null)
+				TextureUtil.uploadTextureImageAllocate(this.texture.getRawGlTextureId(), bufferedimage, blur, clamp);
 		}
 	}
 
