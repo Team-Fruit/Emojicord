@@ -24,7 +24,6 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.teamfruit.emojicord.CoreEvent;
 import net.teamfruit.emojicord.CoreInvoke;
-import net.teamfruit.emojicord.compat.Compat.CompatScreen;
 import net.teamfruit.emojicord.compat.CompatEvents.CompatGuiScreenEvent.KeyboardInputEvent;
 import net.teamfruit.emojicord.compat.CompatEvents.CompatGuiScreenEvent.MouseInputEvent;
 
@@ -290,8 +289,8 @@ public class CompatEvents {
 			super(event);
 		}
 
-		public CompatScreen getGui() {
-			return new CompatScreen(this.event.gui);
+		public CompatGui.CompatScreen getGui() {
+			return new CompatGui.CompatScreen(this.event.gui);
 		}
 
 		public static class CompatDrawScreenEvent extends CompatGuiScreenEvent<GuiScreenEvent.DrawScreenEvent> {

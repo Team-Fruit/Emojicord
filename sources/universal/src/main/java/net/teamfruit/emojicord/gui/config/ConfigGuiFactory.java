@@ -7,14 +7,13 @@ import com.google.common.base.Suppliers;
 
 import net.minecraft.client.Minecraft;
 import net.teamfruit.emojicord.Log;
-import net.teamfruit.emojicord.compat.Compat.CompatModGuiFactory;
-import net.teamfruit.emojicord.compat.Compat.CompatScreen;
+import net.teamfruit.emojicord.compat.CompatGui;
 import net.teamfruit.emojicord.util.DynamicClassUtils;
 
-public class ConfigGuiFactory extends CompatModGuiFactory {
+public class ConfigGuiFactory extends CompatGui.CompatModGuiFactory {
 	private final Supplier<Class<?>> configGuiClassSupplier = Suppliers.memoize(() -> {
 		try {
-			return DynamicClassUtils.instance.createConstructorWrappedClass(ConfigGui.class, Class.forName("net.minecraft.client.gui.GuiScreen"), CompatScreen.class);
+			return DynamicClassUtils.instance.createConstructorWrappedClass(ConfigGui.class, Class.forName("net.minecraft.client.gui.GuiScreen"), CompatGui.CompatScreen.class);
 		} catch (final Throwable e) {
 			Log.log.error("Failed to create ASM wrapped class", e);
 		}
@@ -31,7 +30,7 @@ public class ConfigGuiFactory extends CompatModGuiFactory {
 	}
 
 	@Override
-	public CompatScreen createConfigGuiCompat(final CompatScreen parentScreen) {
-		return new CompatScreen(new ConfigGui(parentScreen));
+	public CompatGui.CompatScreen createConfigGuiCompat(final CompatGui.CompatScreen parentScreen) {
+		return new CompatGui.CompatScreen(new ConfigGui(parentScreen));
 	}
 }

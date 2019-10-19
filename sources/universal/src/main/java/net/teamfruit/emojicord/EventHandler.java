@@ -24,7 +24,6 @@ import javax.annotation.Nonnull;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
-import net.teamfruit.emojicord.compat.Compat.CompatChatScreen;
 import net.teamfruit.emojicord.compat.CompatEvents.CompatClientChatEvent;
 import net.teamfruit.emojicord.compat.CompatEvents.CompatClientTickEvent;
 import net.teamfruit.emojicord.compat.CompatEvents.CompatConfigChangedEvent.CompatOnConfigChangedEvent;
@@ -32,6 +31,7 @@ import net.teamfruit.emojicord.compat.CompatEvents.CompatGuiScreenEvent;
 import net.teamfruit.emojicord.compat.CompatEvents.CompatGuiScreenEvent.CompatMouseReleasedEvent.CompatPre;
 import net.teamfruit.emojicord.compat.CompatEvents.CompatHandler;
 import net.teamfruit.emojicord.compat.CompatEvents.CompatRenderGameOverlayEvent;
+import net.teamfruit.emojicord.compat.CompatGui;
 import net.teamfruit.emojicord.emoji.EmojiFrequently;
 import net.teamfruit.emojicord.emoji.EmojiText;
 import net.teamfruit.emojicord.emoji.PickerItem;
@@ -43,7 +43,7 @@ import net.teamfruit.emojicord.gui.SuggestionChat;
 public class EventHandler extends CompatHandler {
 	static final @Nonnull Pattern skintonePattern = Pattern.compile("\\:skin-tone-(\\d)\\:");
 
-	private final List<Function<CompatChatScreen, IChatOverlay>> overlayFactories = Arrays.asList(
+	private final List<Function<CompatGui.CompatChatScreen, IChatOverlay>> overlayFactories = Arrays.asList(
 			EmojiSettings::new,
 			EmojiSelectionChat::new,
 			SuggestionChat::new);
@@ -122,7 +122,7 @@ public class EventHandler extends CompatHandler {
 
 	@Override
 	public void onInitGui(final CompatGuiScreenEvent.CompatInitGuiEvent.CompatPost event) {
-		final CompatChatScreen chatScreen = CompatChatScreen.cast(event.getGui());
+		final CompatGui.CompatChatScreen chatScreen = CompatGui.CompatChatScreen.cast(event.getGui());
 		if (chatScreen!=null)
 			this.overlays = this.overlayFactories.stream().map(e -> e.apply(chatScreen)).collect(Collectors.toList());
 		else

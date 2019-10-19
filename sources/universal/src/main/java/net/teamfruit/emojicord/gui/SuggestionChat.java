@@ -15,20 +15,18 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
 import net.teamfruit.emojicord.EmojicordConfig;
-import net.teamfruit.emojicord.compat.Compat.CompatChatScreen;
 import net.teamfruit.emojicord.compat.Compat.CompatFontRenderer;
 import net.teamfruit.emojicord.compat.Compat.CompatMinecraft;
-import net.teamfruit.emojicord.compat.Compat.CompatScreen;
-import net.teamfruit.emojicord.compat.Compat.CompatTextFieldWidget;
 import net.teamfruit.emojicord.compat.CompatBaseVersion;
+import net.teamfruit.emojicord.compat.CompatGui;
 import net.teamfruit.emojicord.compat.CompatVersion;
 import net.teamfruit.emojicord.emoji.DiscordEmojiIdDictionary;
 import net.teamfruit.emojicord.emoji.StandardEmojiIdDictionary;
 
 public class SuggestionChat implements IChatOverlay {
-	public final CompatScreen screen;
-	public final CompatChatScreen chatScreen;
-	public final CompatTextFieldWidget inputField;
+	public final CompatGui.CompatScreen screen;
+	public final CompatGui.CompatChatScreen chatScreen;
+	public final CompatGui.CompatTextFieldWidget inputField;
 	public final CompatFontRenderer font;
 	public int mouseX, mouseY;
 	private SuggestionsList suggestions;
@@ -36,7 +34,7 @@ public class SuggestionChat implements IChatOverlay {
 	private boolean applyingSuggestion;
 	private String inputFieldTextLast;
 
-	public SuggestionChat(final CompatChatScreen chatScreen) {
+	public SuggestionChat(final CompatGui.CompatChatScreen chatScreen) {
 		this.screen = chatScreen.cast();
 		this.chatScreen = chatScreen;
 		this.font = CompatMinecraft.getMinecraft().getFontRenderer();
@@ -263,7 +261,7 @@ public class SuggestionChat implements IChatOverlay {
 				return true;
 			} else if (keyTyped==258) {
 				if (this.arrowKeyUsed)
-					cycle(CompatScreen.hasShiftDown() ? -1 : 1);
+					cycle(CompatGui.CompatScreen.hasShiftDown() ? -1 : 1);
 				useSuggestion();
 				return true;
 			} else if ((keyTyped==257||keyTyped==335)&&EmojicordConfig.SUGGEST.enterSuggest.get()) {

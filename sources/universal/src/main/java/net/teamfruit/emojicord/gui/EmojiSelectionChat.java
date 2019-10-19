@@ -16,12 +16,10 @@ import com.google.common.collect.Lists;
 import net.teamfruit.emojicord.EmojicordConfig;
 import net.teamfruit.emojicord.OSUtils;
 import net.teamfruit.emojicord.Reference;
-import net.teamfruit.emojicord.compat.Compat.CompatChatScreen;
 import net.teamfruit.emojicord.compat.Compat.CompatFontRenderer;
 import net.teamfruit.emojicord.compat.Compat.CompatMinecraft;
-import net.teamfruit.emojicord.compat.Compat.CompatScreen;
-import net.teamfruit.emojicord.compat.Compat.CompatTextFieldWidget;
 import net.teamfruit.emojicord.compat.Compat.CompatVersionChecker;
+import net.teamfruit.emojicord.compat.CompatGui;
 import net.teamfruit.emojicord.emoji.DiscordEmojiIdDictionary;
 import net.teamfruit.emojicord.emoji.EmojiFrequently;
 import net.teamfruit.emojicord.emoji.EmojiId;
@@ -30,9 +28,9 @@ import net.teamfruit.emojicord.emoji.PickerItem;
 import net.teamfruit.emojicord.emoji.StandardEmojiIdPicker;
 
 public class EmojiSelectionChat implements IChatOverlay {
-	public final CompatScreen screen;
-	public final CompatChatScreen chatScreen;
-	public final CompatTextFieldWidget inputField;
+	public final CompatGui.CompatScreen screen;
+	public final CompatGui.CompatChatScreen chatScreen;
+	public final CompatGui.CompatTextFieldWidget inputField;
 	public final CompatFontRenderer font;
 	public int mouseX, mouseY;
 	private EmojiSelectionList selectionList;
@@ -42,7 +40,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 	private boolean onButton;
 	private String face = ":smile:";
 
-	public EmojiSelectionChat(final CompatChatScreen chatScreen) {
+	public EmojiSelectionChat(final CompatGui.CompatChatScreen chatScreen) {
 		this.screen = chatScreen.cast();
 		this.chatScreen = chatScreen;
 		this.font = CompatMinecraft.getMinecraft().getFontRenderer();
@@ -166,7 +164,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 		private final List<Pair<String, PickerGroup>> buttonCategories;
 		private List<PickerGroup> categories;
 
-		private CompatTextFieldWidget searchField;
+		private CompatGui.CompatTextFieldWidget searchField;
 		private float scrollY;
 		private int scrollY0;
 		private int selectedGroupIndex = -1;
@@ -204,7 +202,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 			this.categories = categories;
 
 			select(0, 0);
-			this.searchField = new CompatTextFieldWidget(EmojiSelectionChat.this.font, this.rectInputField.getX(), this.rectInputField.getY(), this.rectInputField.getWidth(), this.rectInputField.getHeight(), "Search Field");
+			this.searchField = new CompatGui.CompatTextFieldWidget(EmojiSelectionChat.this.font, this.rectInputField.getX(), this.rectInputField.getY(), this.rectInputField.getWidth(), this.rectInputField.getHeight(), "Search Field");
 			this.searchField.setMaxStringLength(256);
 			this.searchField.setEnableBackgroundDrawing(false);
 			this.searchField.changeFocus(true);

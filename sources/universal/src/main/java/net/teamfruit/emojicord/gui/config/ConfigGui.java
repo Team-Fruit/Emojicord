@@ -11,11 +11,10 @@ import net.teamfruit.emojicord.EmojicordConfig;
 import net.teamfruit.emojicord.Reference;
 import net.teamfruit.emojicord.compat.Compat.CompatConfigCategory;
 import net.teamfruit.emojicord.compat.Compat.CompatConfigElement;
-import net.teamfruit.emojicord.compat.Compat.CompatGuiConfig;
-import net.teamfruit.emojicord.compat.Compat.CompatScreen;
+import net.teamfruit.emojicord.compat.CompatGui;
 
-public class ConfigGui extends CompatGuiConfig {
-	public ConfigGui(final @Nullable CompatScreen parent) {
+public class ConfigGui extends CompatGui.CompatGuiConfig {
+	public ConfigGui(final @Nullable CompatGui.CompatScreen parent) {
 		super(parent, getConfigElements(), Reference.MODID, false, false, EmojicordConfig.spec.getConfigFile().getName());
 	}
 

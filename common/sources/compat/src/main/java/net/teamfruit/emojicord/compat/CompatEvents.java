@@ -22,7 +22,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 import net.teamfruit.emojicord.CoreEvent;
 import net.teamfruit.emojicord.CoreInvoke;
-import net.teamfruit.emojicord.compat.Compat.CompatScreen;
 
 public class CompatEvents {
 	public static abstract class CompatHandler {
@@ -283,8 +282,8 @@ public class CompatEvents {
 			super(event);
 		}
 
-		public CompatScreen getGui() {
-			return new CompatScreen(this.event.getGui());
+		public CompatGui.CompatScreen getGui() {
+			return new CompatGui.CompatScreen(this.event.getGui());
 		}
 
 		public static class CompatDrawScreenEvent extends CompatGuiScreenEvent<GuiScreenEvent.DrawScreenEvent> {

@@ -13,7 +13,6 @@ import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.teamfruit.emojicord.CoreEvent;
-import net.teamfruit.emojicord.compat.Compat.CompatScreen;
 
 public class CompatEvents {
 	public static abstract class CompatHandler {
@@ -230,8 +229,8 @@ public class CompatEvents {
 			super(event);
 		}
 
-		public CompatScreen getGui() {
-			return new CompatScreen(this.event.getGui());
+		public CompatGui.CompatScreen getGui() {
+			return new CompatGui.CompatScreen(this.event.getGui());
 		}
 
 		public static class CompatDrawScreenEvent extends CompatGuiScreenEvent<GuiScreenEvent.DrawScreenEvent> {

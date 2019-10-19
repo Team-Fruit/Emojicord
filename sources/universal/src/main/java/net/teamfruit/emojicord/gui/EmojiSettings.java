@@ -5,12 +5,10 @@ import net.teamfruit.emojicord.EmojicordConfig;
 import net.teamfruit.emojicord.EmojicordWeb;
 import net.teamfruit.emojicord.OSUtils;
 import net.teamfruit.emojicord.Reference;
-import net.teamfruit.emojicord.compat.Compat.CompatChatScreen;
 import net.teamfruit.emojicord.compat.Compat.CompatFontRenderer;
 import net.teamfruit.emojicord.compat.Compat.CompatMinecraft;
-import net.teamfruit.emojicord.compat.Compat.CompatScreen;
-import net.teamfruit.emojicord.compat.Compat.CompatTextFieldWidget;
 import net.teamfruit.emojicord.compat.Compat.CompatVersionChecker;
+import net.teamfruit.emojicord.compat.CompatGui;
 import net.teamfruit.emojicord.compat.OpenGL;
 import net.teamfruit.emojicord.emoji.DiscordEmojiIdDictionary;
 import net.teamfruit.emojicord.emoji.Models.EmojiDiscordList;
@@ -19,9 +17,9 @@ public class EmojiSettings implements IChatOverlay {
 	public static Runnable showSettings;
 	public static Runnable onWindowActive;
 
-	public final CompatScreen screen;
-	public final CompatChatScreen chatScreen;
-	public final CompatTextFieldWidget inputField;
+	public final CompatGui.CompatScreen screen;
+	public final CompatGui.CompatChatScreen chatScreen;
+	public final CompatGui.CompatTextFieldWidget inputField;
 	public final CompatFontRenderer font;
 	public int mouseX, mouseY;
 	private EmojiSettingMenu settingMenu;
@@ -53,7 +51,7 @@ public class EmojiSettings implements IChatOverlay {
 		}
 	}
 
-	public EmojiSettings(final CompatChatScreen chatScreen) {
+	public EmojiSettings(final CompatGui.CompatChatScreen chatScreen) {
 		this.screen = chatScreen.cast();
 		this.chatScreen = chatScreen;
 		this.font = CompatMinecraft.getMinecraft().getFontRenderer();

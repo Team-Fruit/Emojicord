@@ -122,7 +122,7 @@ public class GuiTextFieldTransform implements INodeTreeTransformer {
 									insertion.add(new FieldInsnNode(Opcodes.GETFIELD, getClassName().getBytecodeName(), "suggestion", DescHelper.toDesc(ClassName.of("java.lang.String"))));
 									insertion.add(new VarInsnNode(Opcodes.ILOAD, 11));
 									insertion.add(new VarInsnNode(Opcodes.ILOAD, 8));
-									insertion.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ClassName.of("net.teamfruit.emojicord.compat.Compat$CompatTextFieldWidget").getBytecodeName(), "renderSuggestion", DescHelper.toDescMethod(void.class, ClassName.of("net.minecraft.client.gui.FontRenderer"), boolean.class, ClassName.of("java.lang.String"), int.class, int.class), false));
+									insertion.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ClassName.of("net.teamfruit.emojicord.compat.CompatGui$CompatTextFieldWidget").getBytecodeName(), "renderSuggestion", DescHelper.toDescMethod(void.class, ClassName.of("net.minecraft.client.gui.FontRenderer"), boolean.class, ClassName.of("java.lang.String"), int.class, int.class), false));
 									method.instructions.insert(marker0, insertion);
 									validator.check("drawTextBox.suggestion");
 								}

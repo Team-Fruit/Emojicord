@@ -12,7 +12,7 @@ import net.minecraft.util.ChatAllowedCharacters;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import net.teamfruit.emojicord.compat.Compat.CompatTextFieldWidget;
+import net.teamfruit.emojicord.compat.CompatGui;
 
 @SideOnly(Side.CLIENT)
 public class GuiTextFieldTest extends Gui {
@@ -428,7 +428,7 @@ public class GuiTextFieldTest extends Gui {
 
 			if (!s.isEmpty()&&flag&&j<s.length())
 				j1 = this.fontRenderer.drawStringWithShadow(s.substring(j), j1, i1, i);
-			CompatTextFieldWidget.renderSuggestion(this.fontRenderer, flag2, this.suggestion, k1, i1);
+			CompatGui.CompatTextFieldWidget.renderSuggestion(this.fontRenderer, flag2, this.suggestion, k1, i1);
 			if (flag1)
 				if (flag2)
 					Gui.drawRect(k1, i1-1, k1+1, i1+1+this.fontRenderer.FONT_HEIGHT, -3092272);
