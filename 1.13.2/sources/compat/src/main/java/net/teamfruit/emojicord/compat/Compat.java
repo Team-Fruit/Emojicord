@@ -193,8 +193,12 @@ public class Compat {
 			return I18n.format(format, args);
 		}
 
+		public static boolean hasKey(final String key) {
+			return I18n.hasKey(key);
+		}
+
 		public static String translateToLocal(final String text) {
-			return I18n.format(text);
+			return hasKey(text) ? format(text) : text;
 		}
 	}
 

@@ -188,6 +188,10 @@ public class Compat {
 			return I18n.format(format, args);
 		}
 
+		public static boolean hasKey(final String key) {
+			return I18n.hasKey(key);
+		}
+
 		@SuppressWarnings("deprecation")
 		public static String translateToLocal(final String text) {
 			return net.minecraft.util.text.translation.I18n.translateToLocal(text);

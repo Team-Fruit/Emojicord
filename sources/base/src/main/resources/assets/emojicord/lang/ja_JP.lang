@@ -1,0 +1,52 @@
+
+# Config
+emojicord.config.render=描画設定
+emojicord.config.render.tooltip=絵文字の描画設定
+emojicord.config.render.enabled=有効化
+emojicord.config.render.enabled.tooltip=絵文字の描画を有効/無効にします
+emojicord.config.suggest=予測変換設定
+emojicord.config.suggest.tooltip=テキストの予測変換機能の設定
+emojicord.config.suggest.enabled=有効化
+emojicord.config.suggest.enabled.tooltip=オートサジェストを有効/無効にします
+emojicord.config.suggest.enter=Enterキーでサジェスト
+emojicord.config.suggest.enter.tooltip=Enterキーを押すとサジェストが確定します
+emojicord.config.picker=絵文字ピッカー設定
+emojicord.config.picker.tooltip=絵文字ピッカーの設定
+emojicord.config.picker.skintone=スキントーン
+emojicord.config.picker.skintone.tooltip=肌の色の設定
+emojicord.config.update=アップデート設定
+emojicord.config.update.tooltip=Modのアップデートチェッカーの設定
+emojicord.config.update.notification=通知
+emojicord.config.update.notification.tooltip=アップデートの通知をします
+
+# Emoji Picker
+emojicord.gui.picker.update=:arrows_counterclockwise: バージョン %s がご利用可能です!
+emojicord.gui.picker.search=絵文字を検索する
+emojicord.gui.picker.standard.frequently=よく使う絵文字
+emojicord.gui.picker.standard.people=人物
+emojicord.gui.picker.standard.nature=自然
+emojicord.gui.picker.standard.food=食べ物
+emojicord.gui.picker.standard.activities=アクティビティ
+emojicord.gui.picker.standard.travel=旅行
+emojicord.gui.picker.standard.objects=オブジェクト
+emojicord.gui.picker.standard.symbols=記号
+emojicord.gui.picker.standard.flags=国旗
+
+# Emoji Settings
+emojicord.gui.settings.update=:arrows_counterclockwise: バージョン %s がご利用可能です!
+emojicord.gui.settings.update.click=クリックして最新版を入手!
+emojicord.gui.settings.menu.packs=ロード済み絵文字
+emojicord.gui.settings.menu.more=その他...
+emojicord.gui.settings.menu.button.web=:globe_with_meridians: Emojicord Web で絵文字を追加
+emojicord.gui.settings.menu.button.manual=:open_file_folder: 手動で絵文字を管理
+emojicord.gui.settings.menu.button.done=完了
+emojicord.gui.settings.waiting.desc.web=Emojicord Web\nブラウザでページを開きました。\nWeb上で操作を完了してください。
+emojicord.gui.settings.waiting.desc.manual=マニュアルモード\nフォルダを開きました。\nJsonを追加したり削除したりしてください。
+emojicord.gui.settings.waiting.button.cancel=キャンセル
+emojicord.gui.settings.completed.desc.web=Emojicord Web\nお疲れ様です!\n新しい絵文字が追加されました!
+emojicord.gui.settings.completed.desc.manual=マニュアルモード\nお疲れ様です!\n変更は保存されました!
+emojicord.gui.settings.completed.button.done=完了
+emojicord.gui.settings.aborting.desc.web=Emojicord Web\nWeb上の操作は完了していません。\n本当にキャンセルしますか?
+emojicord.gui.settings.aborting.desc.manual=マニュアルモード\nフォルダに変更は見つかりませんでした。\n本当に閉じてもよろしいですか?
+emojicord.gui.settings.aborting.button.ok=OK
+emojicord.gui.settings.aborting.button.cancel=キャンセル

@@ -187,6 +187,10 @@ public class Compat {
 			return I18n.format(format, args);
 		}
 
+		public static boolean hasKey(final String key) {
+			return StatCollector.canTranslate(key);
+		}
+
 		public static String translateToLocal(final String text) {
 			return StatCollector.translateToLocal(text);
 		}

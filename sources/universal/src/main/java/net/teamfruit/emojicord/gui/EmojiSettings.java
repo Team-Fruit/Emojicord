@@ -6,6 +6,7 @@ import net.teamfruit.emojicord.EmojicordWeb;
 import net.teamfruit.emojicord.OSUtils;
 import net.teamfruit.emojicord.Reference;
 import net.teamfruit.emojicord.compat.Compat.CompatFontRenderer;
+import net.teamfruit.emojicord.compat.Compat.CompatI18n;
 import net.teamfruit.emojicord.compat.Compat.CompatMinecraft;
 import net.teamfruit.emojicord.compat.Compat.CompatVersionChecker;
 import net.teamfruit.emojicord.compat.CompatGui;
@@ -174,9 +175,9 @@ public class EmojiSettings implements IChatOverlay {
 					final boolean b = this.rectUpdate.contains(EmojiSettings.this.mouseX, EmojiSettings.this.mouseY);
 					final double t = (Math.sin(System.currentTimeMillis()/200d)+1)/2;
 					IChatOverlay.fill(this.rectUpdate, 0xFAA61A|(b ? 0xFF : (int) MathHelper.lerp(0x77, 0xFF, (float) t))<<24);
-					final String text1 = ":arrows_counterclockwise: Version "+this.update.target+" Available!";
+					final String text1 = CompatI18n.format("emojicord.gui.settings.update", this.update.target);
 					EmojiSettings.this.font.drawString(text1, this.rectUpdate.getX()+this.rectUpdate.getWidth()/2-EmojiSettings.this.font.getStringWidth(text1)/2, this.rectUpdate.getY()+7, 0xFFFFFFFF);
-					final String text2 = "Click to Get New Version!";
+					final String text2 = CompatI18n.format("emojicord.gui.settings.update.click", this.update.target);
 					EmojiSettings.this.font.drawString(text2, this.rectUpdate.getX()+this.rectUpdate.getWidth()/2-EmojiSettings.this.font.getStringWidth(text2)/2, this.rectUpdate.getY()+18, 0xFFFFFFFF);
 				}
 			} else {
@@ -194,11 +195,11 @@ public class EmojiSettings implements IChatOverlay {
 				{
 					final Rectangle2d rectInner = this.rectMain.inner(2, 2, 2, 2);
 					float posY = rectInner.getY()+2;
-					EmojiSettings.this.font.drawString("Loaded Emoji Packs", rectInner.getX()+2, posY, 0xFF777777);
+					EmojiSettings.this.font.drawString(CompatI18n.format("emojicord.gui.settings.menu.packs"), rectInner.getX()+2, posY, 0xFF777777);
 					posY += 13;
 					for (final EmojiDiscordList group : DiscordEmojiIdDictionary.instance.groups)
 						if (posY+13>rectInner.getY()+rectInner.getHeight()) {
-							EmojiSettings.this.font.drawString("And more...", rectInner.getX()+12, posY, 0xFF777777);
+							EmojiSettings.this.font.drawString(CompatI18n.format("emojicord.gui.settings.menu.more"), rectInner.getX()+12, posY, 0xFF777777);
 							break;
 						} else {
 							EmojiSettings.this.font.drawString(group.name, rectInner.getX()+12, posY, 0xFFFFFFFF);
@@ -207,21 +208,21 @@ public class EmojiSettings implements IChatOverlay {
 				}
 				{
 					IChatOverlay.fill(this.rectButton1, this.rectButton1.contains(EmojiSettings.this.mouseX, EmojiSettings.this.mouseY) ? 0xFF3CA374 : 0xFF43B581);
-					final String text = ":globe_with_meridians: Add via Emojicord Web";
+					final String text = CompatI18n.format("emojicord.gui.settings.menu.button.web");
 					EmojiSettings.this.font.drawString(text, this.rectButton1.getX()+this.rectButton1.getWidth()/2
 							-EmojiSettings.this.font.getStringWidth(text)/2, this.rectButton1.getY()+5, 0xFFFFFFFF);
 				}
 
 				{
 					IChatOverlay.fill(this.rectButton2, this.rectButton2.contains(EmojiSettings.this.mouseX, EmojiSettings.this.mouseY) ? 0xFF677BC4 : 0xFF7289DA);
-					final String text = ":open_file_folder: Manage Manually";
+					final String text = CompatI18n.format("emojicord.gui.settings.menu.button.manual");
 					EmojiSettings.this.font.drawString(text, this.rectButton2.getX()+this.rectButton2.getWidth()/2
 							-EmojiSettings.this.font.getStringWidth(text)/2, this.rectButton2.getY()+2, 0xFFFFFFFF);
 				}
 
 				{
 					IChatOverlay.fill(this.rectButton3, this.rectButton3.contains(EmojiSettings.this.mouseX, EmojiSettings.this.mouseY) ? 0xFF62666D : 0xFF72767D);
-					final String text = "Done";
+					final String text = CompatI18n.format("emojicord.gui.settings.menu.button.done");
 					EmojiSettings.this.font.drawString(text, this.rectButton3.getX()+this.rectButton3.getWidth()/2
 							-EmojiSettings.this.font.getStringWidth(text)/2, this.rectButton3.getY()+2, 0xFFFFFFFF);
 				}
@@ -246,7 +247,7 @@ public class EmojiSettings implements IChatOverlay {
 
 					{
 						IChatOverlay.fill(this.rectButton3, this.rectButton3.contains(EmojiSettings.this.mouseX, EmojiSettings.this.mouseY) ? 0xFFD84040 : 0xFFF04747);
-						final String text = "Cancel";
+						final String text = CompatI18n.format("emojicord.gui.settings.waiting.button.cancel");
 						EmojiSettings.this.font.drawString(text, this.rectButton3.getX()+this.rectButton3.getWidth()/2
 								-EmojiSettings.this.font.getStringWidth(text)/2, this.rectButton3.getY()+2, 0xFFFFFFFF);
 					}
@@ -270,7 +271,7 @@ public class EmojiSettings implements IChatOverlay {
 
 					{
 						IChatOverlay.fill(this.rectButton3, this.rectButton3.contains(EmojiSettings.this.mouseX, EmojiSettings.this.mouseY) ? 0xFF3CA374 : 0xFF43B581);
-						final String text = "Done";
+						final String text = CompatI18n.format("emojicord.gui.settings.completed.button.done");
 						EmojiSettings.this.font.drawString(text, this.rectButton3.getX()+this.rectButton3.getWidth()/2
 								-EmojiSettings.this.font.getStringWidth(text)/2, this.rectButton3.getY()+2, 0xFFFFFFFF);
 					}
@@ -295,14 +296,14 @@ public class EmojiSettings implements IChatOverlay {
 
 				{
 					IChatOverlay.fill(this.rectButton2, this.rectButton2.contains(EmojiSettings.this.mouseX, EmojiSettings.this.mouseY) ? 0xFFD84040 : 0xFFF04747);
-					final String text = "OK";
+					final String text = CompatI18n.format("emojicord.gui.settings.aborting.button.ok");
 					EmojiSettings.this.font.drawString(text, this.rectButton2.getX()+this.rectButton2.getWidth()/2
 							-EmojiSettings.this.font.getStringWidth(text)/2, this.rectButton2.getY()+2, 0xFFFFFFFF);
 				}
 
 				{
 					IChatOverlay.fill(this.rectButton3, this.rectButton3.contains(EmojiSettings.this.mouseX, EmojiSettings.this.mouseY) ? 0xFF62666D : 0xFF72767D);
-					final String text = "Cancel";
+					final String text = CompatI18n.format("emojicord.gui.settings.aborting.button.cancel");
 					EmojiSettings.this.font.drawString(text, this.rectButton3.getX()+this.rectButton3.getWidth()/2
 							-EmojiSettings.this.font.getStringWidth(text)/2, this.rectButton3.getY()+2, 0xFFFFFFFF);
 				}
@@ -401,23 +402,17 @@ public class EmojiSettings implements IChatOverlay {
 
 			@Override
 			public String getDescription() {
-				return "Emojicord Web"
-						+"\nA page was opened on your browser."
-						+"\nPlease proceed on the web.";
+				return CompatI18n.format("emojicord.gui.settings.waiting.desc.web");
 			}
 
 			@Override
 			public String getClosingDescription() {
-				return "Emojicord Web"
-						+"\nWeb process not done."
-						+"\nAre you sure you want to cancel?";
+				return CompatI18n.format("emojicord.gui.settings.aborting.desc.web");
 			}
 
 			@Override
 			public String getApplyPreferredDescription() {
-				return "Emojicord Web"
-						+"\nCongratulations!"
-						+"\nNew Emojis are Now Available!";
+				return CompatI18n.format("emojicord.gui.settings.completed.desc.web");
 			}
 
 			@Override
@@ -465,21 +460,17 @@ public class EmojiSettings implements IChatOverlay {
 
 			@Override
 			public String getDescription() {
-				return "Manual Management"
-						+"\nPut or Delete a Json";
+				return CompatI18n.format("emojicord.gui.settings.waiting.desc.manual");
 			}
 
 			@Override
 			public String getClosingDescription() {
-				return "Manual Management"
-						+"\nNo changes found, Are you sure you want to close?";
+				return CompatI18n.format("emojicord.gui.settings.aborting.desc.manual");
 			}
 
 			@Override
 			public String getApplyPreferredDescription() {
-				return "Manual Management"
-						+"\nCongratulations"
-						+"\nYour Changes are Saved!";
+				return CompatI18n.format("emojicord.gui.settings.completed.desc.manual");
 			}
 
 			@Override

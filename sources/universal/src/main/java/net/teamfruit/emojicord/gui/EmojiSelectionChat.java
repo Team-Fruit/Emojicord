@@ -17,6 +17,7 @@ import net.teamfruit.emojicord.EmojicordConfig;
 import net.teamfruit.emojicord.OSUtils;
 import net.teamfruit.emojicord.Reference;
 import net.teamfruit.emojicord.compat.Compat.CompatFontRenderer;
+import net.teamfruit.emojicord.compat.Compat.CompatI18n;
 import net.teamfruit.emojicord.compat.Compat.CompatMinecraft;
 import net.teamfruit.emojicord.compat.Compat.CompatVersionChecker;
 import net.teamfruit.emojicord.compat.CompatGui;
@@ -127,16 +128,16 @@ public class EmojiSelectionChat implements IChatOverlay {
 		final List<PickerGroup> categories = Stream.of(frequently.stream(), discordCategories.stream(), standardCategories.stream()).flatMap(stream -> stream).collect(Collectors.toList());
 		final List<Pair<String, PickerGroup>> buttonCategories = ((Supplier<List<Pair<String, PickerGroup>>>) () -> {
 			return Arrays.asList(
-					Pair.of("<:frequently:630652521911943191>", frequently.stream().findFirst().orElse(null)),
+					Pair.of("<:frequently:630652521911943191>", frequently.stream().findFirst().map(e -> e.setTranslation("emojicord.gui.picker.standard.frequently")).orElse(null)),
 					Pair.of("<:custom:630652548331864085>", discordCategories.stream().findFirst().orElse(null)),
-					Pair.of("<:people:630652609807515658>", standardCategories.stream().filter(e -> "PEOPLE".equalsIgnoreCase(e.name)).findFirst().orElse(null)),
-					Pair.of("<:nature:630652621497171979>", standardCategories.stream().filter(e -> "NATURE".equalsIgnoreCase(e.name)).findFirst().orElse(null)),
-					Pair.of("<:food:630652671510183956>", standardCategories.stream().filter(e -> "FOOD".equalsIgnoreCase(e.name)).findFirst().orElse(null)),
-					Pair.of("<:activities:630652683480465408>", standardCategories.stream().filter(e -> "ACTIVITIES".equalsIgnoreCase(e.name)).findFirst().orElse(null)),
-					Pair.of("<:travel:630652707631267860>", standardCategories.stream().filter(e -> "TRAVEL".equalsIgnoreCase(e.name)).findFirst().orElse(null)),
-					Pair.of("<:objects:630652735083249664>", standardCategories.stream().filter(e -> "OBJECTS".equalsIgnoreCase(e.name)).findFirst().orElse(null)),
-					Pair.of("<:symbols:630652764955082752>", standardCategories.stream().filter(e -> "SYMBOLS".equalsIgnoreCase(e.name)).findFirst().orElse(null)),
-					Pair.of("<:flags:630652781866385490>", standardCategories.stream().filter(e -> "FLAGS".equalsIgnoreCase(e.name)).findFirst().orElse(null)));
+					Pair.of("<:people:630652609807515658>", standardCategories.stream().filter(e -> "PEOPLE".equalsIgnoreCase(e.name)).findFirst().map(e -> e.setTranslation("emojicord.gui.picker.standard.people")).orElse(null)),
+					Pair.of("<:nature:630652621497171979>", standardCategories.stream().filter(e -> "NATURE".equalsIgnoreCase(e.name)).findFirst().map(e -> e.setTranslation("emojicord.gui.picker.standard.nature")).orElse(null)),
+					Pair.of("<:food:630652671510183956>", standardCategories.stream().filter(e -> "FOOD".equalsIgnoreCase(e.name)).findFirst().map(e -> e.setTranslation("emojicord.gui.picker.standard.food")).orElse(null)),
+					Pair.of("<:activities:630652683480465408>", standardCategories.stream().filter(e -> "ACTIVITIES".equalsIgnoreCase(e.name)).findFirst().map(e -> e.setTranslation("emojicord.gui.picker.standard.activities")).orElse(null)),
+					Pair.of("<:travel:630652707631267860>", standardCategories.stream().filter(e -> "TRAVEL".equalsIgnoreCase(e.name)).findFirst().map(e -> e.setTranslation("emojicord.gui.picker.standard.travel")).orElse(null)),
+					Pair.of("<:objects:630652735083249664>", standardCategories.stream().filter(e -> "OBJECTS".equalsIgnoreCase(e.name)).findFirst().map(e -> e.setTranslation("emojicord.gui.picker.standard.objects")).orElse(null)),
+					Pair.of("<:symbols:630652764955082752>", standardCategories.stream().filter(e -> "SYMBOLS".equalsIgnoreCase(e.name)).findFirst().map(e -> e.setTranslation("emojicord.gui.picker.standard.symbols")).orElse(null)),
+					Pair.of("<:flags:630652781866385490>", standardCategories.stream().filter(e -> "FLAGS".equalsIgnoreCase(e.name)).findFirst().map(e -> e.setTranslation("emojicord.gui.picker.standard.flags")).orElse(null)));
 		}).get();
 		this.selectionList = new EmojiSelectionList(this.screen.getWidth(), this.screen.getHeight()-12, width, height, categories, buttonCategories);
 	}
@@ -244,7 +245,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 				for (final PickerGroup group : this.categories) {
 					posY += titleSpanY;
 					if (this.rectMain.contains(this.rectMain.getX(), posY)||this.rectMain.contains(this.rectMain.getX()+this.rectMain.getWidth(), posY+titleSpanY2))
-						EmojiSelectionChat.this.font.drawString(group.name, posX, posY, 0xFFABABAB);
+						EmojiSelectionChat.this.font.drawString(group.getTranslation(), posX, posY, 0xFFABABAB);
 					posY += titleSpanY2;
 					int index = 0;
 					for (final PickerItem item : group.items) {
@@ -364,7 +365,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 
 			if (this.update!=null&&this.update.status==CompatVersionChecker.CompatStatus.OUTDATED) {
 				IChatOverlay.fill(this.rectUpdate, 0xFF36393F);
-				final String text1 = ":arrows_counterclockwise: Version "+this.update.target+" Available!";
+				final String text1 = CompatI18n.format("emojicord.gui.picker.update", this.update.target);
 				EmojiSelectionChat.this.font.drawString(text1, this.rectUpdate.getX()+2, this.rectUpdate.getY()+3, 0xFFFFFFFF);
 			}
 
@@ -475,7 +476,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 				final List<PickerItem> candidates = this.baseCategories.stream().flatMap(e -> e.items.stream()).filter(e -> e.alias.stream().anyMatch(s -> s.contains(searchText))).collect(Collectors.toList());
 				this.categories = Lists.newArrayList(new PickerGroup("Search", candidates));
 			} else {
-				this.searchField.setSuggestion("Find the perfect emoji");
+				this.searchField.setSuggestion(CompatI18n.format("emojicord.gui.picker.search"));
 				this.categories = this.baseCategories;
 			}
 		}
