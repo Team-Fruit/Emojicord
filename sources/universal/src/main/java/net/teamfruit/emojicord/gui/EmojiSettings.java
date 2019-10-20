@@ -159,7 +159,7 @@ public class EmojiSettings implements IChatOverlay {
 
 			{
 				OpenGL.glPushMatrix();
-				OpenGL.glTranslatef(this.rectLogo.getX(), this.rectLogo.getY(), 0);
+				OpenGL.glTranslatef(this.rectLogo.getX(), this.rectLogo.getY()+2, 0);
 				OpenGL.glScalef(5, 5, 1);
 				EmojiSettings.this.font.drawString("<:emojicord:631339297886175295>", 0, 0, 0xFFFFFFFF);
 				OpenGL.glPopMatrix();
@@ -198,7 +198,7 @@ public class EmojiSettings implements IChatOverlay {
 					EmojiSettings.this.font.drawString(CompatI18n.format("emojicord.gui.settings.menu.packs"), rectInner.getX()+2, posY, 0xFF777777);
 					posY += 13;
 					for (final EmojiDiscordList group : DiscordEmojiIdDictionary.instance.groups)
-						if (posY+13>rectInner.getY()+rectInner.getHeight()) {
+						if (posY+20>rectInner.getY()+rectInner.getHeight()) {
 							EmojiSettings.this.font.drawString(CompatI18n.format("emojicord.gui.settings.menu.more"), rectInner.getX()+12, posY, 0xFF777777);
 							break;
 						} else {
