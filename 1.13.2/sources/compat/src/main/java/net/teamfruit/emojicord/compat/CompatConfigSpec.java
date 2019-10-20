@@ -1,7 +1,6 @@
 package net.teamfruit.emojicord.compat;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -70,15 +69,6 @@ public class CompatConfigSpec {
 	public static class Builder {
 		private ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
 		private BuilderContext context = new BuilderContext();
-		private List<String> currentPath = new ArrayList<>();
-		private List<ConfigValue<?>> values = new ArrayList<>();
-
-		private List<String> concat(final List<String> lhs, final List<String> rhs) {
-			final List<String> list = Lists.newArrayList();
-			list.addAll(lhs);
-			list.addAll(rhs);
-			return list;
-		}
 
 		//string
 		public StringValue define(final String path, final String defaultValue) {
@@ -86,9 +76,8 @@ public class CompatConfigSpec {
 		}
 
 		public StringValue defineString(final List<String> path, final Supplier<String> defaultSupplier) {
-			final List<String> newpath = concat(this.currentPath, path);
-			final StringValue ret = new StringValue(this, newpath, defaultSupplier, this.context);
-			this.values.add(ret);
+			final StringValue ret = new StringValue(this, path, defaultSupplier, this.context);
+			ret.apply(this.builder);
 			this.context = new BuilderContext();
 			return ret;
 		}
@@ -99,9 +88,8 @@ public class CompatConfigSpec {
 		}
 
 		private BooleanValue defineBoolean(final List<String> path, final Supplier<Boolean> defaultSupplier) {
-			final List<String> newpath = concat(this.currentPath, path);
-			final BooleanValue ret = new BooleanValue(this, newpath, defaultSupplier, this.context);
-			this.values.add(ret);
+			final BooleanValue ret = new BooleanValue(this, path, defaultSupplier, this.context);
+			ret.apply(this.builder);
 			this.context = new BuilderContext();
 			return ret;
 		}
@@ -112,9 +100,8 @@ public class CompatConfigSpec {
 		}
 
 		private IntValue defineInt(final List<String> path, final Supplier<Integer> defaultSupplier) {
-			final List<String> newpath = concat(this.currentPath, path);
-			final IntValue ret = new IntValue(this, newpath, defaultSupplier, this.context);
-			this.values.add(ret);
+			final IntValue ret = new IntValue(this, path, defaultSupplier, this.context);
+			ret.apply(this.builder);
 			this.context = new BuilderContext();
 			return ret;
 		}
@@ -125,9 +112,8 @@ public class CompatConfigSpec {
 		}
 
 		private DoubleValue defineDouble(final List<String> path, final Supplier<Double> defaultSupplier) {
-			final List<String> newpath = concat(this.currentPath, path);
-			final DoubleValue ret = new DoubleValue(this, newpath, defaultSupplier, this.context);
-			this.values.add(ret);
+			final DoubleValue ret = new DoubleValue(this, path, defaultSupplier, this.context);
+			ret.apply(this.builder);
 			this.context = new BuilderContext();
 			return ret;
 		}
@@ -157,10 +143,11 @@ public class CompatConfigSpec {
 		}
 
 		public Builder push(final List<String> path) {
-			this.currentPath.addAll(path);
-			if (this.context.getComment()!=null)
-				this.context.setComment((String[]) null);
-			this.context.ensureEmpty();
+			final String[] comment = this.context.getComment();
+			if (comment!=null)
+				this.builder.comment(comment);
+			this.builder.push(path);
+			this.context = new BuilderContext();
 			return this;
 		}
 
@@ -169,10 +156,7 @@ public class CompatConfigSpec {
 		}
 
 		public Builder pop(final int count) {
-			if (count>this.currentPath.size())
-				throw new IllegalArgumentException("Attempted to pop "+count+" elements when we only had: "+this.currentPath);
-			for (int x = 0; x<count; x++)
-				this.currentPath.remove(this.currentPath.size()-1);
+			this.builder.pop(count);
 			return this;
 		}
 
@@ -183,7 +167,6 @@ public class CompatConfigSpec {
 
 		public CompatConfigSpec build() {
 			this.context.ensureEmpty();
-			this.values.forEach(v -> v.apply(this.builder));
 			return new CompatConfigSpec(this.builder.build());
 		}
 
@@ -251,7 +234,6 @@ public class CompatConfigSpec {
 			this.parent = parent;
 			this.path = path;
 			this.defaultSupplier = defaultSupplier;
-			this.parent.values.add(this);
 			this.builderContext = builderContext;
 		}
 

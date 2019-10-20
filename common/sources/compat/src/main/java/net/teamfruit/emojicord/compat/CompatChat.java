@@ -79,7 +79,7 @@ public class CompatChat {
 	}
 
 	public static class CompatClickEvent {
-		private final ClickEvent event;
+		final ClickEvent event;
 
 		public CompatClickEvent(final ClickEvent event) {
 			this.event = event;
