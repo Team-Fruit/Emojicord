@@ -1,0 +1,19 @@
+
+emojicord.config.render=Rendering Settings
+emojicord.config.render.tooltip=Emoji Rendering Settings
+emojicord.config.render.enabled=Enabled
+emojicord.config.render.enabled.tooltip=Enables/Disables emoji rendering
+emojicord.config.suggest=Suggestion Settings
+emojicord.config.suggest.tooltip=Text Suggestion Settings
+emojicord.config.suggest.enabled=Enabled
+emojicord.config.suggest.enabled.tooltip=Enables/Disables auto suggest
+emojicord.config.suggest.enter=Enter to Suggest
+emojicord.config.suggest.enter.tooltip=Enter key to suggest
+emojicord.config.picker=Picker Settings
+emojicord.config.picker.tooltip=Emoji Picker Settings
+emojicord.config.picker.skintone=SkinTone
+emojicord.config.picker.skintone.tooltip=Emoji Picker Skin Tone
+emojicord.config.update=Update Checker
+emojicord.config.update.tooltip=Mod Update Checker
+emojicord.config.update.notification=Notification
+emojicord.config.update.notification.tooltip=Show Update Notification

@@ -14,6 +14,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.teamfruit.emojicord.compat.Compat.CompatSide;
@@ -57,7 +58,7 @@ public class CompatConfigSpec {
 
 	public CompatConfigHandler registerConfigHandler(final CompatSide side, final File location) {
 		if (FMLCommonHandler.instance().getEffectiveSide()==side.toSide()) {
-			final CompatConfig.CompatConfiguration config = new CompatConfig.CompatConfiguration(new Configuration(location));
+			final CompatConfig.CompatConfiguration config = new CompatConfig.CompatConfiguration(new Configuration(location, null, true));
 			configure(config);
 			config.config.save();
 			return config.config::save;
@@ -134,6 +135,14 @@ public class CompatConfigSpec {
 			return ret;
 		}
 
+		private CategoryValue defineCategory(final List<String> path, final Supplier<Void> defaultSupplier) {
+			final List<String> newpath = concat(this.currentPath, path);
+			final CategoryValue ret = new CategoryValue(this, newpath, defaultSupplier, this.context);
+			this.values.add(ret);
+			this.context = new BuilderContext();
+			return ret;
+		}
+
 		public Builder comment(final String comment) {
 			this.context.setComment(comment);
 			return this;
@@ -159,10 +168,8 @@ public class CompatConfigSpec {
 		}
 
 		public Builder push(final List<String> path) {
+			defineCategory(path, () -> null);
 			this.currentPath.addAll(path);
-			if (this.context.getComment()!=null)
-				this.context.setComment((String[]) null);
-			this.context.ensureEmpty();
 			return this;
 		}
 
@@ -202,10 +209,6 @@ public class CompatConfigSpec {
 			this.comment = value;
 		}
 
-		public String[] getComment() {
-			return this.comment;
-		}
-
 		public void setTranslationKey(final String value) {
 			this.langKey = value;
 		}
@@ -232,7 +235,16 @@ public class CompatConfigSpec {
 
 		public void apply(final Property builder) {
 			if (this.comment!=null)
-				builder.comment = DOT_JOINER.join(this.comment);
+				builder.comment = LINE_JOINER.join(this.comment);
+			if (this.langKey!=null)
+				builder.setLanguageKey(this.langKey);
+			if (this.worldRestart)
+				builder.setRequiresWorldRestart(true);
+		}
+
+		public void apply(final ConfigCategory builder) {
+			if (this.comment!=null)
+				builder.setComment(LINE_JOINER.join(this.comment));
 			if (this.langKey!=null)
 				builder.setLanguageKey(this.langKey);
 			if (this.worldRestart)
@@ -282,6 +294,28 @@ public class CompatConfigSpec {
 
 		public void apply(final CompatConfig.CompatConfiguration builder) {
 			this.value = applyDefine(builder);
+		}
+	}
+
+	public static class CategoryValue extends ConfigValue<Void> {
+		CategoryValue(final Builder parent, final List<String> path, final Supplier<Void> defaultSupplier, final BuilderContext builderContext) {
+			super(parent, path, defaultSupplier, builderContext);
+		}
+
+		@Override
+		protected Property applyDefine(final CompatConfig.CompatConfiguration builder) {
+			final ConfigCategory ret = builder.getCategory(DOT_JOINER.join(this.path)).category;
+			this.builderContext.apply(ret);
+			return null;
+		}
+
+		@Override
+		protected Void getPropertyValue() {
+			return null;
+		}
+
+		@Override
+		protected void setPropertyValue(final Void value) {
 		}
 	}
 
@@ -377,6 +411,7 @@ public class CompatConfigSpec {
 		}
 	}
 
+	private static final Joiner LINE_JOINER = Joiner.on("\n");
 	private static final Splitter DOT_SPLITTER = Splitter.on(".");
 	private static final Joiner DOT_JOINER = Joiner.on(".");
 

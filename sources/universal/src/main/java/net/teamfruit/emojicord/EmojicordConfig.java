@@ -14,10 +14,13 @@ public class EmojicordConfig {
 		public final CompatConfigSpec.ConfigValue<Boolean> renderEnabled;
 
 		public Render(final CompatConfigSpec.Builder builder) {
-			builder.push("Render");
+			builder
+					.comment("Emoji Rendering Settings")
+					.translation("emojicord.config.render")
+					.push("Render");
 			this.renderEnabled = builder
 					.comment("Enables/Disables emoji rendering")
-					.translation("config.emojicord.render.enabled")
+					.translation("emojicord.config.render.enabled")
 					.define("Enabled", true);
 			builder.pop();
 		}
@@ -28,14 +31,17 @@ public class EmojicordConfig {
 		public final CompatConfigSpec.ConfigValue<Boolean> enterSuggest;
 
 		public Suggest(final CompatConfigSpec.Builder builder) {
-			builder.push("Suggest");
+			builder
+					.comment("Text Suggestion Settings")
+					.translation("emojicord.config.suggest")
+					.push("Suggest");
 			this.autoSuggest = builder
 					.comment("Enables/Disables auto suggest")
-					.translation("config.emojicord.suggest.enabled")
+					.translation("emojicord.config.suggest.enabled")
 					.define("Enabled", true);
 			this.enterSuggest = builder
 					.comment("Enter key to suggest")
-					.translation("config.emojicord.suggest.enter")
+					.translation("emojicord.config.suggest.enter")
 					.define("EnterToSuggest", true);
 			builder.pop();
 		}
@@ -45,10 +51,13 @@ public class EmojicordConfig {
 		public final CompatConfigSpec.ConfigValue<Integer> skinTone;
 
 		public Picker(final CompatConfigSpec.Builder builder) {
-			builder.push("Picker");
+			builder
+					.comment("Emoji Picker Settings")
+					.translation("emojicord.config.picker")
+					.push("Picker");
 			this.skinTone = builder
 					.comment("Emoji Picker Skin Tone")
-					.translation("config.emojicord.picker.skintone")
+					.translation("emojicord.config.picker.skintone")
 					.define("SkinTone", 0);
 			builder.pop();
 		}
@@ -58,10 +67,13 @@ public class EmojicordConfig {
 		public final CompatConfigSpec.ConfigValue<Boolean> showUpdate;
 
 		public Update(final CompatConfigSpec.Builder builder) {
-			builder.push("Update");
+			builder
+					.comment("Mod Update Checker")
+					.translation("emojicord.config.update")
+					.push("Update");
 			this.showUpdate = builder
 					.comment("Show Update Notification")
-					.translation("config.emojicord.update.notification")
+					.translation("emojicord.config.update.notification")
 					.define("Notification", true);
 			builder.pop();
 		}
