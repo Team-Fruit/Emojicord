@@ -1,4 +1,4 @@
-package net.teamfruit.emojicord.gui;
+package net.teamfruit.emojicord.util;
 
 public class MathHelper {
 	public static int clamp(final int num, final int min, final int max) {
@@ -12,5 +12,9 @@ public class MathHelper {
 
 	public static float lerp(final float start, final float end, final float percent) {
 		return start+Math.max(0, Math.min(1, percent))*(end-start);
+	}
+
+	public static int repeat(final int num, final int max) {
+		return (num%max+max)%max;
 	}
 }

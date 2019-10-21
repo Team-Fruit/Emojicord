@@ -27,6 +27,7 @@ import net.teamfruit.emojicord.emoji.EmojiId;
 import net.teamfruit.emojicord.emoji.PickerGroup;
 import net.teamfruit.emojicord.emoji.PickerItem;
 import net.teamfruit.emojicord.emoji.StandardEmojiIdPicker;
+import net.teamfruit.emojicord.util.MathHelper;
 
 public class EmojiSelectionChat implements IChatOverlay {
 	public final CompatGui.CompatScreen screen;

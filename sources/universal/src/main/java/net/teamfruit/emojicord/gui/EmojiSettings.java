@@ -13,6 +13,7 @@ import net.teamfruit.emojicord.compat.CompatGui;
 import net.teamfruit.emojicord.compat.OpenGL;
 import net.teamfruit.emojicord.emoji.DiscordEmojiIdDictionary;
 import net.teamfruit.emojicord.emoji.Models.EmojiDiscordList;
+import net.teamfruit.emojicord.util.MathHelper;
 
 public class EmojiSettings implements IChatOverlay {
 	public static Runnable showSettings;

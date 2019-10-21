@@ -1,15 +1,25 @@
 package net.teamfruit.emojicord.emoji;
 
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.annotation.Nonnull;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
@@ -23,6 +33,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalNotification;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.madgag.gif.fmsware.GifDecoder;
 
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.util.ResourceLocation;
@@ -32,15 +44,14 @@ import net.teamfruit.emojicord.compat.Compat.CompatResourceManager;
 import net.teamfruit.emojicord.compat.Compat.CompatSimpleTexture;
 import net.teamfruit.emojicord.compat.Compat.CompatTexture;
 import net.teamfruit.emojicord.util.Downloader;
-import net.teamfruit.emojicord.util.ThreadUtils;
+import net.teamfruit.emojicord.util.Timer;
 
 public class EmojiObject {
 	public static final ResourceLocation loading_texture = new ResourceLocation("emojicord", "textures/26a0.png");
-	public static final ResourceLocation noSignal_texture = new ResourceLocation("emojicord", "textures/26d4.png");
 	public static final ResourceLocation error_texture = new ResourceLocation("emojicord", "textures/26d4.png");
 
-	private static final @Nonnull ExecutorService threadpool = ThreadUtils
-			.newFixedCachedThreadPool(16, "emojicord-http-%d");
+	private static final @Nonnull ExecutorService threadpool = Executors.newCachedThreadPool(
+			new ThreadFactoryBuilder().setNameFormat("emojicord-emoji-%d").setDaemon(true).build());
 
 	private final EmojiId id;
 	private boolean deleteOldTexture;
@@ -80,13 +91,47 @@ public class EmojiObject {
 		}
 	}
 
+	public static class InfinityIterator<T> implements Iterator<T> {
+		private final Iterable<T> iterable;
+		private Iterator<T> iterator;
+
+		public InfinityIterator(final Iterable<T> iterable) {
+			this.iterable = iterable;
+			this.iterator = iterable.iterator();
+		}
+
+		@Override
+		public boolean hasNext() {
+			return this.iterator.hasNext();
+		}
+
+		@Override
+		public T next() {
+			final T next = this.iterator.next();
+			if (!this.iterator.hasNext())
+				this.iterator = this.iterable.iterator();
+			return next;
+		}
+	}
+
 	public class DownloadImageData extends CompatSimpleTexture {
 		private final File cacheFile;
 		private final String imageUrl;
-		private byte[] imageData;
-		private boolean downloading;
+		private final ResourceLocation textureResourceLocation;
+
+		private CompletableFuture<byte[]> downloading;
 		private boolean textureUploaded;
+
+		private byte[] rawData;
+		private BufferedImage imageData;
+		private List<Pair<Integer, BufferedImage>> animationData;
+
 		private final CompatTexture texture;
+		private List<Pair<Integer, CompatTexture>> animation;
+
+		private Timer timer = new Timer();
+		private Iterator<Pair<Integer, CompatTexture>> animationIterator;
+		private Pair<Integer, CompatTexture> current;
 
 		public DownloadImageData(
 				final File cacheFileIn, final String imageUrlIn,
@@ -95,58 +140,110 @@ public class EmojiObject {
 			super(textureResourceLocation);
 			this.cacheFile = cacheFileIn;
 			this.imageUrl = imageUrlIn;
+			this.textureResourceLocation = textureResourceLocation;
 			this.texture = CompatTexture.getTexture(this);
 		}
 
 		private void checkTextureUploaded() {
-			if (!this.textureUploaded&&this.imageData!=null) {
-				if (this.textureLocation!=null)
-					deleteGlTexture();
+			if (!this.textureUploaded)
+				if (this.imageData!=null&&this.animationData!=null) {
+					if (this.textureLocation!=null)
+						deleteGlTexture();
 
-				//final DynamicImageTexture texture = DynamicImageTexture.createSized(this.bufferedImage);
-				//texture.load();
-				//this.glTextureId = texture.getId();
-				//TextureUtil.uploadTextureImage(super.getGlTextureId(), this.imageData);
-				try {
-					this.texture.uploadTexture(new ByteArrayInputStream(this.imageData));
-				} catch (final IOException e) {
-					Log.log.warn("Failed to load texture: ", e);
+					try {
+						this.texture.uploadTexture(this.imageData);
+						this.animation = this.animationData.stream().map(e -> {
+							final CompatTexture t = CompatTexture.getTexture(new CompatSimpleTexture(this.textureResourceLocation));
+							try {
+								t.uploadTexture(e.getRight());
+							} catch (final IOException e1) {
+								throw new UncheckedIOException(e1);
+							}
+							return Pair.of(e.getLeft(), t);
+						}).collect(Collectors.toList());
+						this.animationIterator = new InfinityIterator<>(this.animation);
+					} catch (final IOException|UncheckedIOException e) {
+						Log.log.warn("Failed to load texture: ", e);
+					}
+					this.imageData = null;
+					this.animationData = null;
+					this.textureUploaded = true;
+				} else if (this.rawData!=null) {
+					if (this.textureLocation!=null)
+						deleteGlTexture();
+
+					try {
+						this.texture.uploadTexture(new ByteArrayInputStream(this.rawData));
+					} catch (final IOException e) {
+						Log.log.warn("Failed to load texture: ", e);
+					}
+					this.rawData = null;
+					this.textureUploaded = true;
 				}
-				this.imageData = null;
-				this.textureUploaded = true;
-			}
 		}
 
 		@Override
 		public int getGlTextureId() {
 			checkTextureUploaded();
-			return super.getGlTextureId();
-		}
-
-		public void setImageData(final byte[] imageDataIn) {
-			this.imageData = imageDataIn;
+			if (this.animationIterator!=null&&this.animationIterator.hasNext()) {
+				if (this.current==null)
+					this.current = this.animationIterator.next();
+				Timer.tick();
+				final int currentId = this.current.getRight().getTextureObj().getRawGlTextureId();
+				final float t = this.timer.getTime()-this.current.getLeft()/1e+3f;
+				if (t>0) {
+					this.current = null;
+					this.timer.set(t);
+				}
+				return currentId;
+			}
+			return super.getRawGlTextureId();
 		}
 
 		@Override
 		public void loadTexture(final CompatResourceManager resourceManager) throws IOException {
 			if (this.textureUploaded)
 				return;
-			if (this.imageData==null&&this.textureLocation!=null)
+			if (this.textureLocation!=null)
 				super.loadTexture(resourceManager);
-			if (!this.downloading)
-				if (this.cacheFile!=null&&this.cacheFile.isFile())
-					try {
-						this.imageData = IOUtils.toByteArray(FileUtils.openInputStream(this.cacheFile));
-					} catch (final IOException ioexception) {
-						loadTextureFromServer();
+			if (this.downloading==null) {
+				CompletableFuture<byte[]> dataFuture;
+				if (this.cacheFile==null)
+					dataFuture = CompletableFuture.completedFuture(null);
+				else {
+					final CompletableFuture<File> cacheFuture = this.cacheFile.isFile()
+							? CompletableFuture.completedFuture(this.cacheFile)
+							: CompletableFuture.supplyAsync(downloadTextureFromServer(this.cacheFile), threadpool);
+					dataFuture = cacheFuture.thenApplyAsync(cacheFile -> {
+						try {
+							return IOUtils.toByteArray(FileUtils.openInputStream(cacheFile));
+						} catch (final IOException ioexception) {
+							throw new UncheckedIOException(ioexception);
+						}
+					}, threadpool);
+				}
+				final CompletableFuture<byte[]> statusFuture = dataFuture.exceptionally(e -> {
+					Log.log.warn("Failed to load texture: ", e);
+					return null;
+				});
+				statusFuture.thenAcceptAsync(data -> {
+					if (data==null) {
+						EmojiObject.this.resourceLocation = EmojiObject.error_texture;
+						EmojiObject.this.deleteOldTexture = true;
+					} else {
+						final GifDecoder d = new GifDecoder();
+						if (d.read(new ByteArrayInputStream(data))==GifDecoder.STATUS_OK) {
+							this.imageData = d.getImage();
+							this.animationData = IntStream.range(0, d.getFrameCount()).mapToObj(i -> Pair.of(d.getDelay(i), d.getFrame(i))).collect(Collectors.toList());
+						} else
+							this.rawData = data;
 					}
-				else
-					loadTextureFromServer();
+				}, threadpool);
+			}
 		}
 
-		protected void loadTextureFromServer() {
-			this.downloading = true;
-			threadpool.execute(() -> {
+		protected Supplier<File> downloadTextureFromServer(final File cacheFile) {
+			return () -> {
 				CloseableHttpResponse response = null;
 				try {
 					final HttpUriRequest req = new HttpGet(DownloadImageData.this.imageUrl);
@@ -162,27 +259,18 @@ public class EmojiObject {
 					final HttpEntity entity = response.getEntity();
 
 					final int statusCode = response.getStatusLine().getStatusCode();
-					if (statusCode==HttpStatus.SC_OK) {
-						byte[] imageData;
-						if (DownloadImageData.this.cacheFile!=null) {
-							FileUtils.copyInputStreamToFile(entity.getContent(),
-									DownloadImageData.this.cacheFile);
-							imageData = IOUtils.toByteArray(FileUtils.openInputStream(DownloadImageData.this.cacheFile));
-						} else
-							imageData = IOUtils.toByteArray(entity.getContent());
+					if (statusCode!=HttpStatus.SC_OK)
+						throw new IOException("Invalid Status Code: "+statusCode);
 
-						setImageData(imageData);
-					} else {
-						EmojiObject.this.resourceLocation = EmojiObject.noSignal_texture;
-						EmojiObject.this.deleteOldTexture = true;
-					}
-				} catch (final Exception exception) {
-					EmojiObject.this.resourceLocation = EmojiObject.error_texture;
-					EmojiObject.this.deleteOldTexture = true;
+					FileUtils.copyInputStreamToFile(entity.getContent(),
+							DownloadImageData.this.cacheFile);
+					return cacheFile;
+				} catch (final IOException exception) {
+					throw new UncheckedIOException(exception);
 				} finally {
 					IOUtils.closeQuietly(response);
 				}
-			});
+			};
 		}
 	}
 

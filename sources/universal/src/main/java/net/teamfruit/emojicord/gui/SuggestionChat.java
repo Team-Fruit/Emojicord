@@ -22,6 +22,7 @@ import net.teamfruit.emojicord.compat.CompatGui;
 import net.teamfruit.emojicord.compat.CompatVersion;
 import net.teamfruit.emojicord.emoji.DiscordEmojiIdDictionary;
 import net.teamfruit.emojicord.emoji.StandardEmojiIdDictionary;
+import net.teamfruit.emojicord.util.MathHelper;
 
 public class SuggestionChat implements IChatOverlay {
 	public final CompatGui.CompatScreen screen;
