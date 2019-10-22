@@ -31,7 +31,7 @@ public class EmojiContext {
 	}
 
 	public static enum EmojiContextAttribute {
-		CHAT_TEXTFIELD,
+		CHAT_INPUT,
 		CHAT_MESSAGE,
 	}
 
@@ -39,7 +39,7 @@ public class EmojiContext {
 		public static EmojiContext getEmojiFormattedString(final String text, final EnumSet<EmojiContextAttribute> attributes) {
 			if (!StringUtils.isEmpty(text)) {
 				final EnumSet<ParseFlag> flags = EnumSet.of(ESCAPE, ENCODE, ENCODE_ALIAS, PARSE);
-				if (attributes.contains(EmojiContextAttribute.CHAT_MESSAGE)||attributes.contains(EmojiContextAttribute.CHAT_TEXTFIELD))
+				if (attributes.contains(EmojiContextAttribute.CHAT_MESSAGE)||attributes.contains(EmojiContextAttribute.CHAT_INPUT))
 					flags.add(ENCODE_UTF);
 				final EmojiText emojiText = EmojiText.create(text, flags);
 				final EmojiContext context = emojiText.getEmojiContext();

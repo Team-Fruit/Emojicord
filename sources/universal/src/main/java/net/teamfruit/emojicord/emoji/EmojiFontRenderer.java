@@ -23,9 +23,6 @@ import net.teamfruit.emojicord.emoji.EmojiText.EmojiTextElement;
 @CoreInvoke
 public class EmojiFontRenderer {
 	@CoreInvoke
-	public static boolean isTextFieldRendering;
-
-	@CoreInvoke
 	public static boolean shadow;
 	@CoreInvoke
 	public static int index;
@@ -36,10 +33,10 @@ public class EmojiFontRenderer {
 	public static String updateEmojiContext(final String text) {
 		if (EmojicordConfig.spec.isAvailable()&&EmojicordConfig.RENDER.renderEnabled.get()) {
 			final EnumSet<EmojiContextAttribute> attributes = EnumSet.noneOf(EmojiContextAttribute.class);
-			if (isTextFieldRendering)
-				attributes.add(EmojiContextAttribute.CHAT_TEXTFIELD);
 			final StackTraceElement[] stacks = Thread.currentThread().getStackTrace();
-			if (EmojicordScope.instance.checkUnicodeEmojiAllowed(stacks))
+			if (EmojicordScope.instance.checkIsInput(stacks))
+				attributes.add(EmojiContextAttribute.CHAT_INPUT);
+			if (EmojicordScope.instance.checkIsMessage(stacks))
 				attributes.add(EmojiContextAttribute.CHAT_MESSAGE);
 			CurrentContext = EmojiContext.EmojiContextCache.instance.getContext(text, attributes);
 			return CurrentContext.text;

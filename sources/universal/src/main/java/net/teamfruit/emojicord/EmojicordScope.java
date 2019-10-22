@@ -16,21 +16,28 @@ public class EmojicordScope {
 	public static EmojicordScope instance = new EmojicordScope();
 
 	public static class EmojicordScopeModel {
-		public List<String> allow_unicode_emoji;
+		public List<String> input;
+		public List<String> message;
 	}
 
-	public Set<String> allowUnicodeEmoji = Sets.newHashSet();
+	public Set<String> input = Sets.newHashSet();
+	public Set<String> message = Sets.newHashSet();
 
 	public void loadAll() {
-		final List<String> list = Lists.newArrayList();
+		final List<String> input = Lists.newArrayList();
+		final List<String> message = Lists.newArrayList();
 		try {
 			final Enumeration<URL> ress = getClass().getClassLoader().getResources("META-INF/"+Reference.MODID+"/scope.json");
 			while (ress.hasMoreElements()) {
 				final URL url = ress.nextElement();
 				try {
 					final EmojicordScopeModel scope = DataUtils.loadStream(url.openStream(), EmojicordScopeModel.class, "Emojicord Scope Config");
-					if (scope!=null&&scope.allow_unicode_emoji!=null)
-						list.addAll(scope.allow_unicode_emoji);
+					if (scope!=null) {
+						if (scope.input!=null)
+							input.addAll(scope.input);
+						if (scope.message!=null)
+							message.addAll(scope.message);
+					}
 				} catch (final IOException e) {
 					Log.log.info("Failed to load Emojicord Scope Config: ", e);
 				}
@@ -38,12 +45,19 @@ public class EmojicordScope {
 		} catch (final IOException e) {
 			Log.log.info("Failed to load Emojicord Scope Config: ", e);
 		}
-		this.allowUnicodeEmoji = Sets.newHashSet(list);
+		this.input = Sets.newHashSet(input);
+		this.message = Sets.newHashSet(message);
 	}
 
-	public boolean checkUnicodeEmojiAllowed(final StackTraceElement[] stacks) {
+	public boolean checkIsInput(final StackTraceElement[] stacks) {
 		if (stacks==null)
 			return true;
-		return Stream.of(stacks).map(StackTraceElement::getClassName).anyMatch(this.allowUnicodeEmoji::contains);
+		return Stream.of(stacks).map(StackTraceElement::getClassName).anyMatch(this.input::contains);
+	}
+
+	public boolean checkIsMessage(final StackTraceElement[] stacks) {
+		if (stacks==null)
+			return true;
+		return Stream.of(stacks).map(StackTraceElement::getClassName).anyMatch(this.message::contains);
 	}
 }

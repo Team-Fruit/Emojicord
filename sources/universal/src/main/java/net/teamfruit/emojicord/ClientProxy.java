@@ -29,6 +29,8 @@ public class ClientProxy extends CommonProxy {
 		DiscordEmojiIdDictionary.instance.init(Locations.instance.getDictionaryDirectory());
 		DiscordEmojiIdDictionary.instance.loadAll();
 
+		EmojicordScope.instance.loadAll();
+
 		if (Endpoint.loadGateway()) {
 			Endpoint.loadStandardEmojis();
 			Endpoint.loadStandardPicker();

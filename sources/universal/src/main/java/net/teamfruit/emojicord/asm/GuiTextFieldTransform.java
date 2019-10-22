@@ -9,7 +9,6 @@ import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
@@ -36,8 +35,6 @@ public class GuiTextFieldTransform implements INodeTreeTransformer {
 	@Override
 	public ClassNode apply(final ClassNode node) {
 		final ASMValidate validator = ASMValidate.create(getSimpleName());
-		validator.test("drawTextBox.begin");
-		validator.test("drawTextBox.return");
 		validator.test("drawTextBox.suggestion", !CompatVersion.version().newer(CompatBaseVersion.V13));
 		validator.test("drawTextBox.suggestion.field", !CompatVersion.version().newer(CompatBaseVersion.V13));
 
@@ -57,32 +54,6 @@ public class GuiTextFieldTransform implements INodeTreeTransformer {
 					return new MethodMatcher(getClassName(), DescHelper.toDescMethod(void.class, int.class, int.class, float.class), ASMDeobfNames.GuiTextFieldDrawTextField);
 			}).get();
 			node.methods.stream().filter(matcher).forEach(method -> {
-				{
-					/*
-					 0  iconst_1
-					 1  putstatic net.teamfruit.emojicord.emoji.EmojiFontRenderer.IsNewChatRendering : boolean [15]
-					*/
-					final InsnList insertion = new InsnList();
-					insertion.add(new InsnNode(Opcodes.ICONST_1));
-					insertion.add(new FieldInsnNode(Opcodes.PUTSTATIC, ClassName.of("net.teamfruit.emojicord.emoji.EmojiFontRenderer").getBytecodeName(), "isTextFieldRendering", DescHelper.toDesc(boolean.class)));
-					method.instructions.insert(insertion);
-					validator.check("drawTextBox.begin");
-				}
-				VisitorHelper.stream(method.instructions).filter(e -> {
-					return e instanceof InsnNode&&e.getOpcode()==Opcodes.RETURN;
-				}).forEach(marker -> {
-					{
-						/*
-						 0  iconst_0
-						 1  putstatic net.teamfruit.emojicord.emoji.EmojiFontRenderer.IsNewChatRendering : boolean [15]
-						*/
-						final InsnList insertion = new InsnList();
-						insertion.add(new InsnNode(Opcodes.ICONST_0));
-						insertion.add(new FieldInsnNode(Opcodes.PUTSTATIC, ClassName.of("net.teamfruit.emojicord.emoji.EmojiFontRenderer").getBytecodeName(), "isTextFieldRendering", DescHelper.toDesc(boolean.class)));
-						method.instructions.insertBefore(marker, insertion);
-						validator.checks("drawTextBox.return");
-					}
-				});
 				if (!CompatVersion.version().newer(CompatBaseVersion.V13)) {
 					final MethodMatcher matcher0 = ((Supplier<MethodMatcher>) () -> {
 						if (CompatVersion.version().older(CompatBaseVersion.V7))

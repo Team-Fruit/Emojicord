@@ -34,7 +34,7 @@ public class StandardEmojiIdDictionary {
 	public static class StandardEmojiIdDictionaryBuilder {
 		// Blacklist
 		private static final Set<String> shortAliasBlacklist = Sets.newHashSet("+1", "-1");
-		private static final Set<String> utfBlacklist = Sets.newHashSet("\u2604");
+		private static final Set<String> utfBlacklist = Sets.newHashSet();
 
 		private final Map<String, EmojiId> nameDictionary = Maps.newHashMap();
 		private final Map<String, EmojiId> aliasDictionary = Maps.newHashMap();
