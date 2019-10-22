@@ -1,7 +1,10 @@
 package net.teamfruit.emojicord.emoji;
 
+import static net.teamfruit.emojicord.emoji.EmojiText.ParseFlag.*;
+
 import java.io.File;
 import java.util.Deque;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -54,7 +57,10 @@ public class EmojiFrequently {
 		this.save = new File(dictDir, "history.json");
 		final EmojiHistoryModel model = DataUtils.loadFileIfExists(this.save, EmojiHistoryModel.class, "Emoji Frequently History");
 		if (model!=null&&model.history!=null)
-			Stream.of(model.history).flatMap(e -> PickerItem.fromText(EmojiText.createParsed(e)).stream()).forEach(this::use);
+			Stream.of(model.history).flatMap(e -> {
+				final EmojiText emojiText = EmojiText.create(e, EnumSet.of(ESCAPE, ENCODE, ENCODE_ALIAS, ENCODE_UTF, PARSE));
+				return PickerItem.fromText(emojiText).stream();
+			}).forEach(this::use);
 	}
 
 	public void save() {

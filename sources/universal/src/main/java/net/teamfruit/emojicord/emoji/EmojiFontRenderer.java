@@ -9,6 +9,7 @@ import org.lwjgl.opengl.GL11;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.teamfruit.emojicord.CoreInvoke;
 import net.teamfruit.emojicord.EmojicordConfig;
+import net.teamfruit.emojicord.EmojicordScope;
 import net.teamfruit.emojicord.compat.Compat;
 import net.teamfruit.emojicord.compat.Compat.CompatBufferBuilder;
 import net.teamfruit.emojicord.compat.Compat.CompatGlyph;
@@ -37,12 +38,30 @@ public class EmojiFontRenderer {
 			final EnumSet<EmojiContextAttribute> attributes = EnumSet.noneOf(EmojiContextAttribute.class);
 			if (isTextFieldRendering)
 				attributes.add(EmojiContextAttribute.CHAT_TEXTFIELD);
+			final StackTraceElement[] stacks = Thread.currentThread().getStackTrace();
+			if (EmojicordScope.instance.checkUnicodeEmojiAllowed(stacks))
+				attributes.add(EmojiContextAttribute.CHAT_MESSAGE);
 			CurrentContext = EmojiContext.EmojiContextCache.instance.getContext(text, attributes);
 			return CurrentContext.text;
 		}
 		CurrentContext = null;
 		return text;
 	}
+
+	/*
+	public static void main(final String... args) {
+		Log.log.info("Start");
+		final int count = 1_000_000;
+		Log.log.info("Count: "+count);
+		final long time = System.nanoTime();
+		for (int i = 0; i<count; i++)
+			Thread.currentThread().getStackTrace();
+		final long diff = System.nanoTime()-time;
+		Log.log.info("Finish");
+		Log.log.info(diff/1e9);
+		Log.log.info(diff/1e9/count);
+	}
+	*/
 
 	@CoreInvoke
 	public static boolean renderEmojiChar(final char c, final boolean italic, final float x, final float y, final float red, final float green, final float blue, final float alpha) {

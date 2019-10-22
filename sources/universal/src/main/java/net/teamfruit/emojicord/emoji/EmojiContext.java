@@ -1,5 +1,7 @@
 package net.teamfruit.emojicord.emoji;
 
+import static net.teamfruit.emojicord.emoji.EmojiText.ParseFlag.*;
+
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -15,6 +17,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Maps;
 
 import net.teamfruit.emojicord.emoji.EmojiText.EmojiTextElement;
+import net.teamfruit.emojicord.emoji.EmojiText.ParseFlag;
 
 public class EmojiContext {
 	public static final char EMOJI_REPLACE_CHARACTOR = '\u0000';
@@ -35,7 +38,10 @@ public class EmojiContext {
 	public static class EmojiContextLoader {
 		public static EmojiContext getEmojiFormattedString(final String text, final EnumSet<EmojiContextAttribute> attributes) {
 			if (!StringUtils.isEmpty(text)) {
-				final EmojiText emojiText = EmojiText.createParsed(text);
+				final EnumSet<ParseFlag> flags = EnumSet.of(ESCAPE, ENCODE, ENCODE_ALIAS, PARSE);
+				if (attributes.contains(EmojiContextAttribute.CHAT_MESSAGE)||attributes.contains(EmojiContextAttribute.CHAT_TEXTFIELD))
+					flags.add(ENCODE_UTF);
+				final EmojiText emojiText = EmojiText.create(text, flags);
 				final EmojiContext context = emojiText.getEmojiContext();
 				return context;
 			}

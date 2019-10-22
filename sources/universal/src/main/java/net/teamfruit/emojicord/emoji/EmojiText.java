@@ -1,5 +1,6 @@
 package net.teamfruit.emojicord.emoji;
 
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -26,28 +27,30 @@ public class EmojiText {
 		this.emojis = emojis;
 	}
 
-	public static EmojiText createUnparsed(final String text) {
+	public static enum ParseFlag {
+		ESCAPE,
+		ENCODE,
+		ENCODE_ALIAS,
+		ENCODE_UTF,
+		PARSE,
+	}
+
+	private static EmojiText createUnparsed(final String text) {
 		return new EmojiText(text, ImmutableList.of());
 	}
 
-	public static EmojiText createEscaped(final String text) {
+	public static EmojiText create(final String text, final EnumSet<ParseFlag> flags) {
 		EmojiText emojiText = EmojiText.createUnparsed(text);
-		emojiText = EmojiTextParser.escape(emojiText);
-		return emojiText;
-	}
-
-	public static EmojiText createEncoded(final String text) {
-		EmojiText emojiText = EmojiText.createUnparsed(text);
-		emojiText = EmojiTextParser.escape(emojiText);
-		emojiText = EmojiTextParser.encode(emojiText);
-		return emojiText;
-	}
-
-	public static EmojiText createParsed(final String text) {
-		EmojiText emojiText = EmojiText.createUnparsed(text);
-		emojiText = EmojiTextParser.escape(emojiText);
-		emojiText = EmojiTextParser.encode(emojiText);
-		emojiText = EmojiTextParser.parse(emojiText);
+		if (flags.contains(ParseFlag.ESCAPE))
+			emojiText = EmojiTextParser.escape(emojiText);
+		if (flags.contains(ParseFlag.ENCODE))
+			emojiText = EmojiTextParser.encode(emojiText);
+		if (flags.contains(ParseFlag.ENCODE_ALIAS))
+			emojiText = EmojiTextParser.encodeAlias(emojiText);
+		if (flags.contains(ParseFlag.ENCODE_UTF))
+			emojiText = EmojiTextParser.encodeUtf(emojiText);
+		if (flags.contains(ParseFlag.PARSE))
+			emojiText = EmojiTextParser.parse(emojiText);
 		return emojiText;
 	}
 
@@ -238,6 +241,10 @@ public class EmojiText {
 					}
 				return null;
 			});
+			return emojiText;
+		}
+
+		public static EmojiText encodeAlias(EmojiText emojiText) {
 			emojiText = EmojiTextBuilder.builder(StandardEmojiIdDictionary.instance.shortAliasPattern, emojiText).apply(matcher -> {
 				final String g0 = matcher.group(0);
 				final EmojiId emojiId = EmojiId.StandardEmojiId.fromAlias(g0);
@@ -245,6 +252,10 @@ public class EmojiText {
 					return new EmojiTextElement(emojiId, g0, String.format(":%s:", emojiId.getCacheName()), String.format(":%s:", emojiId.getCacheName()));
 				return null;
 			});
+			return emojiText;
+		}
+
+		public static EmojiText encodeUtf(EmojiText emojiText) {
 			emojiText = EmojiTextBuilder.builder(StandardEmojiIdDictionary.instance.utfPattern, emojiText).apply(matcher -> {
 				final String g0 = matcher.group(0);
 				final EmojiId emojiId = EmojiId.StandardEmojiId.fromUtf(g0);

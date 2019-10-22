@@ -1,6 +1,7 @@
 package net.teamfruit.emojicord;
 
 import static java.nio.file.StandardWatchEventKinds.*;
+import static net.teamfruit.emojicord.emoji.EmojiText.ParseFlag.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,6 +12,7 @@ import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.concurrent.ExecutorService;
@@ -92,12 +94,17 @@ public class EventHandler extends CompatHandler {
 	public void onChat(final CompatClientChatEvent event) {
 		final String message = event.getMessage();
 		if (!message.startsWith("/")) {
-			final String untoned = skintonePattern.matcher(message).replaceAll("");
-			PickerItem.fromText(EmojiText.createParsed(untoned)).forEach(EmojiFrequently.instance::use);
-			if (EmojiFrequently.instance.hasChanged())
-				EmojiFrequently.instance.save();
-			final EmojiText emojiText = EmojiText.createEncoded(message);
-			event.setMessage(emojiText.getEncoded());
+			{
+				final String untoned = skintonePattern.matcher(message).replaceAll("");
+				final EmojiText emojiText = EmojiText.create(untoned, EnumSet.of(ESCAPE, ENCODE, ENCODE_ALIAS, ENCODE_UTF, PARSE));
+				PickerItem.fromText(emojiText).forEach(EmojiFrequently.instance::use);
+				if (EmojiFrequently.instance.hasChanged())
+					EmojiFrequently.instance.save();
+			}
+			{
+				final EmojiText emojiText = EmojiText.create(message, EnumSet.of(ESCAPE, ENCODE, ENCODE_ALIAS, ENCODE_UTF));
+				event.setMessage(emojiText.getEncoded());
+			}
 		}
 	}
 
