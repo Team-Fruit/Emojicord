@@ -20,7 +20,7 @@ emojicord.config.update.notification=Notification
 emojicord.config.update.notification.tooltip=Show Update Notification
 
 # Emoji Picker
-emojicord.gui.picker.update=:arrows_counterclockwise: Version %s Available!
+emojicord.gui.picker.update=<:update:636169014317678592> Version %s Available!
 emojicord.gui.picker.search=Find the perfect emoji
 emojicord.gui.picker.standard.frequently=FREQUENTLY
 emojicord.gui.picker.standard.people=PEOPLE
@@ -33,7 +33,7 @@ emojicord.gui.picker.standard.symbols=SYMBOLS
 emojicord.gui.picker.standard.flags=FLAGS
 
 # Emoji Settings
-emojicord.gui.settings.update=:arrows_counterclockwise: Version %s Available!
+emojicord.gui.settings.update=<:update:636169014317678592> Version %s Available!
 emojicord.gui.settings.update.click=Click to Get New Version!
 emojicord.gui.settings.menu.packs=Loaded Emoji Packs
 emojicord.gui.settings.menu.more=And more...
