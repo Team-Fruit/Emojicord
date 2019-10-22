@@ -175,6 +175,13 @@ public class CallbackServerInstance implements AutoCloseable {
 				return;
 			}
 
+			if (method.equals("GET")) {
+				response.setStatusCode(HttpStatus.SC_OK);
+				response.setEntity(new StringEntity("OK", ContentType.create("text/plain", StandardCharsets.UTF_8)));
+				Log.log.debug("GET");
+				return;
+			}
+
 			boolean authorized = false;
 			final Header authorization = request.getFirstHeader(HttpHeaders.AUTHORIZATION);
 			if (authorization!=null) {
