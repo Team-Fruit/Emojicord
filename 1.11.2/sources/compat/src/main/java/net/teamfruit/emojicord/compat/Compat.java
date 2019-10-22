@@ -227,6 +227,16 @@ public class Compat {
 			if (bufferedimage!=null)
 				TextureUtil.uploadTextureImageAllocate(this.texture.getRawGlTextureId(), bufferedimage, blur, clamp);
 		}
+
+		public void uploadTexture(final BufferedImage bufferedimage) throws IOException {
+			this.texture.deleteGlTexture();
+
+			final boolean blur = true;
+			final boolean clamp = false;
+
+			if (bufferedimage!=null)
+				TextureUtil.uploadTextureImageAllocate(this.texture.getRawGlTextureId(), bufferedimage, blur, clamp);
+		}
 	}
 
 	public static class CompatResourceManager {

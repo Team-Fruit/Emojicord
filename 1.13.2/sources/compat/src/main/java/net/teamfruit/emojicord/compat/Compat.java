@@ -1,5 +1,6 @@
 package net.teamfruit.emojicord.compat;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,6 +24,7 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.MissingTextureSprite;
 import net.minecraft.client.renderer.texture.NativeImage;
+import net.minecraft.client.renderer.texture.NativeImage.PixelFormat;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.renderer.texture.TextureUtil;
@@ -226,6 +228,38 @@ public class Compat {
 			try (
 					NativeImage nativeimage = NativeImage.read(image);
 			) {
+				final boolean blur = true;
+				final boolean clamp = false;
+
+				TextureUtil.allocateTextureImpl(this.texture.getRawGlTextureId(), 0, nativeimage.getWidth(), nativeimage.getHeight());
+				nativeimage.uploadTextureSub(0, 0, 0, 0, 0, nativeimage.getWidth(), nativeimage.getHeight(), blur, clamp, false);
+			}
+		}
+
+		public void uploadTexture(final BufferedImage bufferedimage) throws IOException {
+			this.texture.deleteGlTexture();
+
+			final int width = bufferedimage.getWidth();
+			final int height = bufferedimage.getHeight();
+			try (
+					NativeImage nativeimage = new NativeImage(PixelFormat.RGBA, width, height, false);
+			) {
+				final int[] pixels = new int[width*height];
+				bufferedimage.getRGB(0, 0, width, height, pixels, 0, width);
+
+				for (int y = 0; y<height; y++)
+					for (int x = 0; x<width; x++) {
+						final int argb = pixels[y*width+x];
+						final int alpha = 0xFF&argb>>24;
+						final int red = 0xFF&argb>>16;
+						final int green = 0xFF&argb>>8;
+						final int blue = 0xFF&argb>>0;
+						final int abgr = alpha<<24|blue<<16|green<<8|red<<0;
+
+						// ABGR
+						nativeimage.setPixelRGBA(x, y, abgr);
+					}
+
 				final boolean blur = true;
 				final boolean clamp = false;
 
