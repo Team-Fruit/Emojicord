@@ -25,10 +25,6 @@ ext {
 	mod_commonname = "${rootProject.name}-common"
 	mod_build_prefix = 'build/b'
 
-	assert project.isProperty('version_major'): 'missing property: version_major'
-	assert project.isProperty('version_minor'): 'missing property: version_minor'
-	assert project.isProperty('version_patch'): 'missing property: version_patch'
-
 	mod_travis = System.getenv('TRAVIS') as boolean
 	mod_buildnumber = System.getenv('TRAVIS_BUILD_NUMBER') as Integer
 	mod_buildtag = System.getenv('TRAVIS_TAG')
@@ -36,6 +32,29 @@ ext {
 
 	if (mod_buildtag!=null && mod_buildtag.startsWith(mod_build_prefix))
 		throw new GradleException("Oops, circulated travis build. A push starting with the prefix '${mod_build_prefix}' was detected: ${mod_buildtag}")
+
+	mod_git_repo = plugins.findPlugin('com.palantir.git-version').gitRepo(rootProject).repository
+	mod_git_head = mod_git_repo.getRef('HEAD').objectId.name()
+
+	mod_version_min = ({
+		def git_ref = mod_git_repo.getRef "refs/heads/update"
+		if (git_ref!=null) {
+			def git_revwalk = new org.eclipse.jgit.revwalk.RevWalk(mod_git_repo)
+			try {
+				return git_revwalk.parseTag(git_ref.getObjectId()).getShortMessage()
+			} catch(org.eclipse.jgit.errors.IncorrectObjectTypeException e) {
+			} finally {
+				git_revwalk.dispose()
+			}
+		}
+		return null
+	})()
+	if (mod_version_min==null) {
+		assert project.isProperty('version_major'): 'missing property: version_major'
+		assert project.isProperty('version_minor'): 'missing property: version_minor'
+		assert project.isProperty('version_patch'): 'missing property: version_patch'
+		mod_version_min = "${project.version_major}.${project.version_minor}.${project.version_patch}"
+	}
 
 	(mod_version_build, mod_version_meta) = ({
 		if (mod_buildnumber)
@@ -52,10 +71,7 @@ ext {
 							props.load stream
 						}
 
-					if (props.buildnumber &&
-							props.version_major == project.version_major &&
-							props.version_minor == project.version_minor &&
-							props.version_patch == project.version_patch)
+					if (props.buildnumber && props.version == mod_version_min)
 						buildnumbermicro = props.buildnumber as Integer
 					return buildnumbermicro
 				})()
@@ -66,9 +82,7 @@ ext {
 				task increment {
 					doLast {
 						def props = new Properties()
-						props.version_major = project.version_major
-						props.version_minor = project.version_minor
-						props.version_patch = project.version_patch
+						props.version = mod_version_min
 						props.buildnumber = version_build+1 as String
 						buildnumberfile.parentFile.mkdirs()
 						buildnumberfile.withOutputStream { stream ->
@@ -87,13 +101,9 @@ ext {
 			})()
 	})()
 
-	mod_version_min = "${project.version_major}.${project.version_minor}.${project.version_patch}"
 	mod_version = "${mod_version_min}${mod_version_build}"
 	mod_version_full = "${mod_version}${mod_version_meta}"
 	mod_artifacts_dir = file "artifacts/${mod_version_min}/${mod_version_full}"
-
-	mod_git_repo = plugins.findPlugin('com.palantir.git-version').gitRepo(rootProject).repository
-	mod_git_head = mod_git_repo.getRef('HEAD').objectId.name()
 
 	// Parse Changelog
 	def parseChangelog = { changelog ->
