@@ -360,6 +360,8 @@ if (sec_curseforge_key!=null&&project.isProperty('extra_curseforge_id')) {
 				displayName = "${jar.baseName}-${jar.version} Universal"
 			}
 
+			addGameVersion 'Forge'
+
 			subprojects.each { p ->
 				addGameVersion p.version_minecraft
 			}

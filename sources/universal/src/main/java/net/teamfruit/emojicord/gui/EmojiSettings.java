@@ -403,17 +403,17 @@ public class EmojiSettings implements IChatOverlay {
 
 			@Override
 			public String getDescription() {
-				return CompatI18n.format("emojicord.gui.settings.waiting.desc.web");
+				return CompatI18n.format("emojicord.gui.settings.waiting.desc.web").replace("\\n", "\n");
 			}
 
 			@Override
 			public String getClosingDescription() {
-				return CompatI18n.format("emojicord.gui.settings.aborting.desc.web");
+				return CompatI18n.format("emojicord.gui.settings.aborting.desc.web").replace("\\n", "\n");
 			}
 
 			@Override
 			public String getApplyPreferredDescription() {
-				return CompatI18n.format("emojicord.gui.settings.completed.desc.web");
+				return CompatI18n.format("emojicord.gui.settings.completed.desc.web").replace("\\n", "\n");
 			}
 
 			@Override
@@ -461,17 +461,17 @@ public class EmojiSettings implements IChatOverlay {
 
 			@Override
 			public String getDescription() {
-				return CompatI18n.format("emojicord.gui.settings.waiting.desc.manual");
+				return CompatI18n.format("emojicord.gui.settings.waiting.desc.manual").replace("\\n", "\n");
 			}
 
 			@Override
 			public String getClosingDescription() {
-				return CompatI18n.format("emojicord.gui.settings.aborting.desc.manual");
+				return CompatI18n.format("emojicord.gui.settings.aborting.desc.manual").replace("\\n", "\n");
 			}
 
 			@Override
 			public String getApplyPreferredDescription() {
-				return CompatI18n.format("emojicord.gui.settings.completed.desc.manual");
+				return CompatI18n.format("emojicord.gui.settings.completed.desc.manual").replace("\\n", "\n");
 			}
 
 			@Override
