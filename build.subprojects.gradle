@@ -171,7 +171,7 @@ if (tasks.findByPath('makeEclipseCleanRunClient')!=null) {
 
 // FG3 task
 if (project.forgegradle.contains('3.+')) {
-	task setupCIWorkspace(dependsOn: 'prepareRuns')
+	task setupCIWorkspace
 	task setupDevWorkspace(dependsOn: 'prepareRuns')
 	task setupDecompWorkspace(dependsOn: 'prepareRuns')
 	tasks.eclipse.dependsOn 'genEclipseRuns'
@@ -522,12 +522,6 @@ artifacts {
 }
 
 // Release CurseForge
-gradle.taskGraph.whenReady {taskGraph ->
-	if (taskGraph.hasTask(tasks.curseforge)) {
-		assert sec_curseforge_key!=null, 'missing sec_curseforge_key'
-		assert project.isProperty('extra_curseforge_id'), 'missing extra_curseforge_id'
-	}
-}
 if (sec_curseforge_key!=null&&project.isProperty('extra_curseforge_id')) {
 	curseforge {
 		tasks.curseforge.enabled = !mod_autorelease && project.name!=mod_commonname
