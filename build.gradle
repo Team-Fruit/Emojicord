@@ -37,11 +37,11 @@ ext {
 	mod_git_head = mod_git_repo.getRef('HEAD').objectId.name()
 
 	mod_version_min = ({
-		def git_ref = mod_git_repo.getRef "refs/heads/update"
+		def git_ref = mod_git_repo.getRef "refs/remotes/origin/update"
 		if (git_ref!=null) {
 			def git_revwalk = new org.eclipse.jgit.revwalk.RevWalk(mod_git_repo)
 			try {
-				return git_revwalk.parseTag(git_ref.getObjectId()).getShortMessage()
+				return git_revwalk.parseCommit(git_ref.getObjectId()).getShortMessage()
 			} catch(org.eclipse.jgit.errors.IncorrectObjectTypeException e) {
 			} finally {
 				git_revwalk.dispose()
@@ -55,6 +55,7 @@ ext {
 		assert project.isProperty('version_patch'): 'missing property: version_patch'
 		mod_version_min = "${project.version_major}.${project.version_minor}.${project.version_patch}"
 	}
+	println("ModVersion: ${mod_version_min}")
 
 	(mod_version_build, mod_version_meta) = ({
 		if (mod_buildnumber)
@@ -273,18 +274,6 @@ if (sec_github_key!=null&&project.isProperty('extra_github_owner')&&project.isPr
 
 // Maven Publishing
 publishing {
-	tasks.publish.enabled = !mod_autorelease
-	repositories {
-		maven {
-			name = "GitHubPackages"
-			url = uri("https://maven.pkg.github.com/${project.extra_github_owner}/${project.extra_github_repo}")
-			credentials {
-				username = sec_github_user
-				password = sec_github_key
-			}
-		}
-	}
-
 	publications {
 		ModPublication(MavenPublication) {
 			groupId = project.group
@@ -304,6 +293,19 @@ publishing {
 					artifact p.devJar
 					artifact p.sourceJar
 					artifact p.apiJar
+				}
+			}
+		}
+	}
+
+	if (!mod_autorelease) {
+		repositories {
+			maven {
+				name = "GitHubPackages"
+				url = uri("https://maven.pkg.github.com/${project.extra_github_owner}/${project.extra_github_repo}")
+				credentials {
+					username = sec_github_user
+					password = sec_github_key
 				}
 			}
 		}
