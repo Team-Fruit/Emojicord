@@ -380,7 +380,8 @@ public class EmojiSelectionChat implements IChatOverlay {
 
 			if (this.update!=null&&this.update.status==CompatVersionChecker.CompatStatus.OUTDATED)
 				if (this.rectUpdate.contains(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY)) {
-					OSUtils.getOSType().openURI(Reference.UPDATE_URL);
+					if (this.update.url!=null)
+						OSUtils.getOSType().openURI(this.update.url);
 					return true;
 				}
 

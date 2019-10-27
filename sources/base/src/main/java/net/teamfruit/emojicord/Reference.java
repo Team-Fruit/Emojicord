@@ -14,5 +14,4 @@ public class Reference {
 
 	public static final @Nonnull String EMOJI_GATEWAY = "https://raw.githubusercontent.com/Team-Fruit/Emojicord/api/api.json";
 	public static final @Nonnull String UPDATE_JSON = "https://raw.githubusercontent.com/Team-Fruit/Emojicord/update/update.json";
-	public static final @Nonnull String UPDATE_URL = "https://emojicord.teamfruit.net/download/";
 }

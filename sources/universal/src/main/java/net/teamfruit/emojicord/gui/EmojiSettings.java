@@ -333,7 +333,8 @@ public class EmojiSettings implements IChatOverlay {
 			} else {
 				if (this.update!=null&&this.update.status==CompatVersionChecker.CompatStatus.OUTDATED)
 					if (this.rectUpdate.contains(EmojiSettings.this.mouseX, EmojiSettings.this.mouseY)) {
-						OSUtils.getOSType().openURI(Reference.UPDATE_URL);
+						if (this.update.url!=null)
+							OSUtils.getOSType().openURI(this.update.url);
 						return true;
 					}
 
