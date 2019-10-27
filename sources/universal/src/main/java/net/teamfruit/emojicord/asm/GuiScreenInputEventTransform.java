@@ -43,7 +43,7 @@ public class GuiScreenInputEventTransform implements INodeTreeTransformer {
 					  6  goto 20
 					
 					  9  aload_0 [this]
-					 10  invokestatic net.teamfruit.emojicord.compat.CompatEvents$CompatGuiScreenEvent$MouseInputEvent$Pre.onMouseInput(net.minecraft.client.gui.GuiScreen) : boolean [21]
+					 10  invokestatic net.teamfruit.emojicord.compat.MouseInputEvent$Pre.onMouseInput(net.minecraft.client.gui.GuiScreen) : boolean [21]
 					 13  ifne 20
 					
 					 16  aload_0 [this]
@@ -55,7 +55,7 @@ public class GuiScreenInputEventTransform implements INodeTreeTransformer {
 					 32  goto 46
 					
 					 35  aload_0 [this]
-					 36  invokestatic net.teamfruit.emojicord.compat.CompatEvents$CompatGuiScreenEvent$KeyboardInputEvent$Pre.onKeyboardInput(net.minecraft.client.gui.GuiScreen) : boolean [36]
+					 36  invokestatic net.teamfruit.emojicord.compat.KeyboardInputEvent$Pre.onKeyboardInput(net.minecraft.client.gui.GuiScreen) : boolean [36]
 					 39  ifne 46
 					
 					 42  aload_0 [this]
@@ -71,7 +71,7 @@ public class GuiScreenInputEventTransform implements INodeTreeTransformer {
 							{
 								final InsnList insertion = new InsnList();
 								insertion.add(new VarInsnNode(Opcodes.ALOAD, 0));
-								insertion.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ClassName.of("net.teamfruit.emojicord.compat.CompatEvents$CompatGuiScreenEvent$MouseInputEvent$Pre").getBytecodeName(), "onMouseInput", DescHelper.toDescMethod(boolean.class, getClassName()), false));
+								insertion.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ClassName.of("net.teamfruit.emojicord.compat.MouseInputEvent$Pre").getBytecodeName(), "onMouseInput", DescHelper.toDescMethod(boolean.class, getClassName()), false));
 								insertion.add(new JumpInsnNode(Opcodes.IFNE, label));
 								method.instructions.insertBefore(marker.getPrevious(), insertion);
 							}
@@ -90,7 +90,7 @@ public class GuiScreenInputEventTransform implements INodeTreeTransformer {
 							{
 								final InsnList insertion = new InsnList();
 								insertion.add(new VarInsnNode(Opcodes.ALOAD, 0));
-								insertion.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ClassName.of("net.teamfruit.emojicord.compat.CompatEvents$CompatGuiScreenEvent$KeyboardInputEvent$Pre").getBytecodeName(), "onKeyboardInput", DescHelper.toDescMethod(boolean.class, getClassName()), false));
+								insertion.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ClassName.of("net.teamfruit.emojicord.compat.KeyboardInputEvent$Pre").getBytecodeName(), "onKeyboardInput", DescHelper.toDescMethod(boolean.class, getClassName()), false));
 								insertion.add(new JumpInsnNode(Opcodes.IFNE, label));
 								method.instructions.insertBefore(marker.getPrevious(), insertion);
 							}

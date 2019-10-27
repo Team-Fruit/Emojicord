@@ -6,7 +6,6 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
 
-import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
@@ -16,12 +15,10 @@ import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
-import net.minecraftforge.fml.common.eventhandler.Cancelable;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 import net.teamfruit.emojicord.CoreEvent;
-import net.teamfruit.emojicord.CoreInvoke;
 
 public class CompatEvents {
 	public static abstract class CompatHandler {
@@ -153,36 +150,6 @@ public class CompatEvents {
 
 		public void setCanceled(final boolean cancel) {
 			this.event.setCanceled(cancel);
-		}
-	}
-
-	@Cancelable
-	public static class ClientChatEvent extends Event {
-		private String message;
-		private final String originalMessage;
-
-		public ClientChatEvent(final String message) {
-			setMessage(message);
-			this.originalMessage = StringUtils.defaultString(message);
-		}
-
-		public String getMessage() {
-			return this.message;
-		}
-
-		public void setMessage(final String message) {
-			this.message = StringUtils.defaultString(message);
-		}
-
-		public String getOriginalMessage() {
-			return this.originalMessage;
-		}
-
-		@CoreInvoke
-		@Nonnull
-		public static String onClientSendMessage(final String message) {
-			final ClientChatEvent event = new ClientChatEvent(message);
-			return MinecraftForge.EVENT_BUS.post(event) ? "" : event.getMessage();
 		}
 	}
 

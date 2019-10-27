@@ -4,7 +4,8 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
 import net.minecraft.client.gui.GuiScreen;
-import net.teamfruit.emojicord.compat.CompatEvents;
+import net.teamfruit.emojicord.compat.KeyboardInputEvent;
+import net.teamfruit.emojicord.compat.MouseInputEvent;
 
 public class GuiScreenTest extends GuiScreen {
 	/**
@@ -14,12 +15,12 @@ public class GuiScreenTest extends GuiScreen {
 	public void handleInput() {
 		if (Mouse.isCreated())
 			while (Mouse.next())
-				if (!CompatEvents.CompatGuiScreenEvent.MouseInputEvent.Pre.onMouseInput(this))
+				if (!MouseInputEvent.Pre.onMouseInput(this))
 					handleMouseInput();
 
 		if (Keyboard.isCreated())
 			while (Keyboard.next())
-				if (!CompatEvents.CompatGuiScreenEvent.KeyboardInputEvent.Pre.onKeyboardInput(this))
+				if (!KeyboardInputEvent.Pre.onKeyboardInput(this))
 					handleKeyboardInput();
 	}
 
@@ -29,14 +30,14 @@ public class GuiScreenTest extends GuiScreen {
 	public void handleInputContinue() {
 		if (Mouse.isCreated())
 			while (Mouse.next()) {
-				if (CompatEvents.CompatGuiScreenEvent.MouseInputEvent.Pre.onMouseInput(this))
+				if (MouseInputEvent.Pre.onMouseInput(this))
 					continue;
 				handleMouseInput();
 			}
 
 		if (Keyboard.isCreated())
 			while (Keyboard.next()) {
-				if (CompatEvents.CompatGuiScreenEvent.KeyboardInputEvent.Pre.onKeyboardInput(this))
+				if (KeyboardInputEvent.Pre.onKeyboardInput(this))
 					continue;
 				handleKeyboardInput();
 			}

@@ -43,12 +43,12 @@ public class SendChatMessageTransform implements INodeTreeTransformer {
 				{
 					/*
 					 0  aload_1 [text]
-					 1  invokestatic net.teamfruit.emojicord.compat.CompatEvents.ClientChatEvent.onClientSendMessage(java.lang.String) : java.lang.String [61]
+					 1  invokestatic net.teamfruit.emojicord.compat.ClientChatEvent.onClientSendMessage(java.lang.String) : java.lang.String [61]
 					 4  astore_1 [text]
 					*/
 					final InsnList insertion = new InsnList();
 					insertion.add(new VarInsnNode(Opcodes.ALOAD, 1));
-					insertion.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ClassName.of("net.teamfruit.emojicord.compat.CompatEvents$ClientChatEvent").getBytecodeName(), "onClientSendMessage", DescHelper.toDescMethod(ClassName.of("java.lang.String"), ClassName.of("java.lang.String")), false));
+					insertion.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ClassName.of("net.teamfruit.emojicord.compat.ClientChatEvent").getBytecodeName(), "onClientSendMessage", DescHelper.toDescMethod(ClassName.of("java.lang.String"), ClassName.of("java.lang.String")), false));
 					insertion.add(new VarInsnNode(Opcodes.ASTORE, 1));
 					method.instructions.insert(insertion);
 					validator.check("sendChatMessage");
