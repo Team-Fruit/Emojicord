@@ -34,3 +34,4 @@ Wrong emoji is shown.
 
 ## Additional context
 Any additional context
+If there are crash reports and logs, links such as pastebin, gist, etc.
