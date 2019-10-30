@@ -32,11 +32,27 @@ public class GuiTextFieldTransform implements INodeTreeTransformer {
 			return ClassName.of("net.minecraft.client.gui.widget.TextFieldWidget");
 	}
 
+	/*
+	public static String insnToString(final AbstractInsnNode insn) {
+		insn.accept(mp);
+		final StringWriter sw = new StringWriter();
+		printer.print(new PrintWriter(sw));
+		printer.getText().clear();
+		return sw.toString();
+	}
+	
+	private static Printer printer = new Textifier();
+	private static TraceMethodVisitor mp = new TraceMethodVisitor(printer);
+	*/
+
 	@Override
 	public ClassNode apply(final ClassNode node) {
 		final ASMValidate validator = ASMValidate.create(getSimpleName());
 		validator.test("drawTextBox.suggestion", !CompatVersion.version().newer(CompatBaseVersion.V13));
 		validator.test("drawTextBox.suggestion.field", !CompatVersion.version().newer(CompatBaseVersion.V13));
+
+		// Compat for IntelliInput
+		final int o = EmojicordTransformer.intelliInputDeferred.hasTarget() ? 1 : 0;
 
 		if (!CompatVersion.version().newer(CompatBaseVersion.V13)) {
 			final FieldMatcher matcher = new FieldMatcher(getClassName(), DescHelper.toDesc(ClassName.of("java.lang.String")), RefName.name("suggestion"));
@@ -62,7 +78,7 @@ public class GuiTextFieldTransform implements INodeTreeTransformer {
 							return new MethodMatcher(ClassName.of("net.minecraft.client.gui.FontRenderer"), DescHelper.toDescMethod(int.class, ClassName.of("java.lang.String"), float.class, float.class, int.class), ASMDeobfNames.FontRendererDrawStringWithShadow);
 					}).get();
 					final Optional<AbstractInsnNode> marker1 = VisitorHelper.stream(method.instructions).filter(e -> {
-						return e instanceof VarInsnNode&&e.getOpcode()==Opcodes.ISTORE&&((VarInsnNode) e).var==10;
+						return e instanceof VarInsnNode&&e.getOpcode()==Opcodes.ISTORE&&((VarInsnNode) e).var==o+10;
 					}).findFirst();
 					VisitorHelper.stream(method.instructions)
 							.filter(matcher0.insnMatcher())
@@ -85,14 +101,21 @@ public class GuiTextFieldTransform implements INodeTreeTransformer {
 									 451  iload 8 [i1]
 									 453  invokestatic net.teamfruit.emojicord.compat.Compat$CompatTextFieldWidget.renderSuggestion(net.minecraft.client.gui.FontRenderer, boolean, java.lang.String, int, int) : void [329]
 									*/
+
+									/*
+									final InsnList inList = method.instructions;
+									for (int i = 0; i<inList.size(); i++)
+										Log.log.info(insnToString(inList.get(i)));
+									*/
+
 									final InsnList insertion = new InsnList();
 									insertion.add(new VarInsnNode(Opcodes.ALOAD, 0));
 									insertion.add(new FieldInsnNode(Opcodes.GETFIELD, getClassName().getBytecodeName(), ASMDeobfNames.GuiTextFieldFontRenderer.name(), DescHelper.toDesc(ClassName.of("net.minecraft.client.gui.FontRenderer"))));
-									insertion.add(new VarInsnNode(Opcodes.ILOAD, 10));
+									insertion.add(new VarInsnNode(Opcodes.ILOAD, o+10));
 									insertion.add(new VarInsnNode(Opcodes.ALOAD, 0));
 									insertion.add(new FieldInsnNode(Opcodes.GETFIELD, getClassName().getBytecodeName(), "suggestion", DescHelper.toDesc(ClassName.of("java.lang.String"))));
-									insertion.add(new VarInsnNode(Opcodes.ILOAD, 11));
-									insertion.add(new VarInsnNode(Opcodes.ILOAD, 8));
+									insertion.add(new VarInsnNode(Opcodes.ILOAD, o+11));
+									insertion.add(new VarInsnNode(Opcodes.ILOAD, o+8));
 									insertion.add(new MethodInsnNode(Opcodes.INVOKESTATIC, ClassName.of("net.teamfruit.emojicord.compat.CompatGui$CompatTextFieldWidget").getBytecodeName(), "renderSuggestion", DescHelper.toDescMethod(void.class, ClassName.of("net.minecraft.client.gui.FontRenderer"), boolean.class, ClassName.of("java.lang.String"), int.class, int.class), false));
 									method.instructions.insert(marker0, insertion);
 									validator.check("drawTextBox.suggestion");

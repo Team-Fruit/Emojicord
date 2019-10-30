@@ -50,8 +50,10 @@ public class EmojicordTransformer extends CompatTransformer {
 		return input;
 	}
 
-	DeferredTransform[] deferredTransforms = {
-			new DeferredTransform(EmojicordTransformer.class.getName(), "com.tsoft_web.IntelliInput.asm.IntelliInputTransformer"),
+	public static final DeferredTransform intelliInputDeferred = new DeferredTransform(EmojicordTransformer.class.getName(), "com.tsoft_web.IntelliInput.asm.IntelliInputTransformer");
+
+	private final DeferredTransform[] deferredTransforms = {
+			intelliInputDeferred,
 	};
 
 	@Override

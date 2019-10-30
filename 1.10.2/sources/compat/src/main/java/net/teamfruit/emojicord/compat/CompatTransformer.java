@@ -42,8 +42,16 @@ public abstract class CompatTransformer implements IClassTransformer {
 
 		private boolean targetloaded;
 		private boolean targetinitialized;
+		private boolean targetfound;
+
+		public boolean hasTarget() {
+			return this.targetfound;
+		}
 
 		public void transform(final String name, final String transformedName) {
+			if (StringUtils.equals(transformedName, "$wrapper."+this.targetname))
+				this.targetfound = true;
+
 			if (!this.targetloaded) {
 				if (StringUtils.equals(transformedName, "$wrapper."+this.targetname))
 					this.targetloaded = true;
@@ -52,7 +60,7 @@ public abstract class CompatTransformer implements IClassTransformer {
 				try {
 					final Field $transformers = Class.forName("net.minecraft.launchwrapper.LaunchClassLoader").getDeclaredField("transformers");
 					$transformers.setAccessible(true);
-					final List<?> transformers = (List<?>) $transformers.get(Class.forName("net.minecraft.launchwrapper.Launch").getField("net.minecraft.launchwrapper.Launch").get(null));
+					final List<?> transformers = (List<?>) $transformers.get(Class.forName("net.minecraft.launchwrapper.Launch").getField("classLoader").get(null));
 					int thistransformer = -1, targettransformer = -1;
 					for (final ListIterator<?> itr = transformers.listIterator(); itr.hasNext();) {
 						final int index = itr.nextIndex();

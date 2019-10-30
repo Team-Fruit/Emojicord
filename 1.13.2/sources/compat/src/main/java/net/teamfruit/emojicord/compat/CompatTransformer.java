@@ -8,6 +8,9 @@ import javax.annotation.Nonnull;
 
 import org.objectweb.asm.tree.ClassNode;
 
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
+
 import cpw.mods.modlauncher.api.ITransformer;
 import cpw.mods.modlauncher.api.ITransformerVotingContext;
 import cpw.mods.modlauncher.api.TransformerVoteResult;
@@ -28,18 +31,26 @@ public abstract class CompatTransformer implements ITransformer<ClassNode> {
 
 	public static class DeferredTransform {
 		private final String targetname;
+		private Supplier<Boolean> shouldDeferSupplier;
 
 		public DeferredTransform(final String thisname, final String targetname) {
 			this.targetname = targetname;
+			this.shouldDeferSupplier = Suppliers.memoize(() -> {
+				try {
+					Class.forName(this.targetname, false, getClass().getClassLoader());
+					return true;
+				} catch (final ClassNotFoundException e) {
+				}
+				return false;
+			});
+		}
+
+		public boolean hasTarget() {
+			return this.shouldDeferSupplier.get();
 		}
 
 		public boolean shouldDefer() {
-			try {
-				Class.forName(this.targetname, false, getClass().getClassLoader());
-				return true;
-			} catch (final ClassNotFoundException e) {
-			}
-			return false;
+			return this.shouldDeferSupplier.get();
 		}
 	}
 
