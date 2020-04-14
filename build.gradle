@@ -1,5 +1,13 @@
 // Buildscript Dependencies
 buildscript {
+	repositories {
+		mavenCentral()
+		jcenter()
+	}
+
+	dependencies {
+		classpath 'com.google.guava:guava:26.0-jre'
+	}
 }
 
 // Plugins
