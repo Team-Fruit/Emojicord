@@ -1,4 +1,4 @@
-rootProject.name = 'testroot'
+rootProject.name = 'Emojicord'
 include ':shared', ':versions'
 include ':versions:1.7.10', ':versions:1.10.2', ':versions:1.12.2', ':versions:1.14.4', ':versions:1.15.2'
 project(':versions').children.each { project ->
