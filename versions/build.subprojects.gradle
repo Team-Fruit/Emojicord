@@ -92,9 +92,9 @@ configurations {
 }
 
 // Configure Java Compile Options
-tasks.withType(AbstractCompile).each {
-	it.options.encoding = 'UTF-8'
-	it.sourceCompatibility = '1.8'
+tasks.withType(AbstractCompile) {
+	options.encoding = 'UTF-8'
+	sourceCompatibility = targetCompatibility = '1.8'
 }
 tasks.withType(GroovyCompile).each { it.groovyOptions.encoding = 'UTF-8' }
 sourceCompatibility = targetCompatibility = '1.8'
@@ -122,7 +122,7 @@ minecraft {
 			client {
 				taskName = "${project.name}_Client"
 
-				arg '--username Kamesuta'
+				arg '--username Dev'
 
 				if (!project.isProperty('run_location'))
 					workingDirectory project.file('run')
@@ -183,6 +183,14 @@ minecraft {
 	} else {
 		version = "${project.version_minecraft}-${project.version_forge}"
 
+		if (!project.forgegradle.contains('1.2')) {
+			clientRunArgs += "--username Dev"
+			if (project.isProperty('extra_fmlcore')) {
+				clientJvmArgs += "-Dfml.coreMods.load=${project.extra_fmlcore}"
+				serverJvmArgs += "-Dfml.coreMods.load=${project.extra_fmlcore}"
+			}
+		}
+
 		if (!project.isProperty('run_location'))
 			runDir = 'run'
 		else
@@ -229,30 +237,21 @@ dependencies {
 	}
 
 	// Manifold
-	compile group: 'systems.manifold', name: 'manifold-preprocessor', version: '2020.1.4'
-	testCompile group: 'junit', name: 'junit', version: '4.12'
+	implementation group: 'systems.manifold', name: 'manifold-all', version: '2020.1.4'
+	testImplementation group: 'junit', name: 'junit', version: '4.12'
 
-	if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
-		// tools.jar dependency (for Java 8 only), primarily to support structural typing without static proxies.
-		// Thus if you are *not* using structural typing, you **don't** need tools.jar
-		compile files("${System.properties['java.home']}/../lib/tools.jar")
-	}
+	// tools.jar dependency (for Java 8 only), primarily to support structural typing without static proxies.
+	// Thus if you are *not* using structural typing, you **don't** need tools.jar
+	implementation files("${System.properties['java.home']}/../lib/tools.jar")
+
 	// Add manifold to -processorpath for javac
 	annotationProcessor group: 'systems.manifold', name: 'manifold-preprocessor', version: '2020.1.4'
 }
 
 // Manifold
-if (JavaVersion.current() != JavaVersion.VERSION_1_8 &&
-		sourceSets.main.allJava.files.any { it.name == "module-info.java" }) {
-	tasks.withType(JavaCompile) {
-		// if you DO define a module-info.java file:
-		options.compilerArgs += ['-Xplugin:Manifold no-bootstrap', '--module-path', it.classpath.asPath]
-	}
-} else {
-	tasks.withType(JavaCompile) {
-		// If you DO NOT define a module-info.java file:
-		options.compilerArgs += ['-Xplugin:Manifold no-bootstrap']
-	}
+tasks.withType(JavaCompile) {
+	// If you DO NOT define a module-info.java file:
+	options.compilerArgs += ['-Xplugin:Manifold no-bootstrap']
 }
 
 // ReobfShadowJar for 1.7.10
