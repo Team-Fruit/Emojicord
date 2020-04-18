@@ -104,9 +104,10 @@ public class CompatGui {
 
 		public int getInsertPos(final int start) {
 			final String text = this.textField.getText();
+			int x = this.textField. #if MC_12_OR_LATER x #else xPosition #endif ;
 			if (start>text.length())
-				return this.textField.x;
-			return this.textField.x+this.font.getStringWidth(text.substring(0, start));
+				return x;
+			return x+this.font.getStringWidth(text.substring(0, start));
 		}
 
 		public void setSuggestion(final String string) {
@@ -146,7 +147,11 @@ public class CompatGui {
 		}
 
 		public boolean mouseClicked(final int mouseX, final int mouseY, final int button) {
-			return this.textField.mouseClicked(mouseX, mouseY, button);
+			#if MC_12_OR_LATER return #endif this.textField.mouseClicked(mouseX, mouseY, button);
+			#if !MC_12_OR_LATER
+			return this.textField.xPosition<=mouseX&&mouseX<=this.textField.xPosition+this.textField.width
+					&&this.textField.yPosition<=mouseY&&mouseY<=this.textField.yPosition+this.textField.height;
+			#endif
 		}
 
 		public boolean charTyped(final char typed, final int keycode) {
@@ -188,17 +193,31 @@ public class CompatGui {
 			return null;
 		}
 
+		#if MC_12_OR_LATER
 		@Override
 		public boolean hasConfigGui() {
 			return mainConfigGuiClassCompat()!=null;
 		}
 
-		public abstract @Nullable Class<?> mainConfigGuiClassCompat();
-
 		@Override
 		public GuiScreen createConfigGui(final GuiScreen parentScreen) {
 			return createConfigGuiCompat(new CompatScreen(parentScreen)).screen;
 		}
+		#else
+		@SuppressWarnings("deprecation")
+		@Override
+		public RuntimeOptionGuiHandler getHandlerFor(final RuntimeOptionCategoryElement element) {
+			return null;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public @Nullable Class<? extends GuiScreen> mainConfigGuiClass() {
+			return (Class<? extends GuiScreen>) mainConfigGuiClassCompat();
+		}
+		#endif
+
+		public abstract @Nullable Class<?> mainConfigGuiClassCompat();
 
 		public abstract CompatScreen createConfigGuiCompat(CompatScreen parentScreen);
 	}

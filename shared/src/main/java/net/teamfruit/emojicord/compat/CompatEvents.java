@@ -11,7 +11,9 @@ import org.lwjgl.input.Mouse;
 
 import com.google.common.collect.Maps;
 
+#if MC_12_OR_LATER
 import net.minecraftforge.client.event.ClientChatEvent;
+#endif
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;

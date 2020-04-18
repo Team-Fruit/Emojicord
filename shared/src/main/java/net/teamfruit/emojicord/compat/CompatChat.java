@@ -74,7 +74,7 @@ public class CompatChat {
 		}
 
 		public void sendPlayer(final @Nonnull ICommandSender target) {
-			target.sendMessage(this.component);
+			target. #if MC_12_OR_LATER sendMessage #else addChatMessage #endif (this.component);
 		}
 	}
 

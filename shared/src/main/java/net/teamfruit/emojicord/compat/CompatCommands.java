@@ -16,48 +16,48 @@ public class CompatCommands {
 
 	public static class CompatCommand {
 		public static @Nonnull String getCommandName(final ICommand command) {
-			return command.getName();
+			return command. #if MC_12_OR_LATER getName #else getCommandName #endif ();
 		}
 	
 		public static @Nullable List<String> getCommandAliases(final ICommand command) {
-			return command.getAliases();
+			return command. #if MC_12_OR_LATER getAliases #else getCommandAliases #endif ();
 		}
 	
 		public static @Nonnull String getCommandUsage(final ICommand command, final @Nullable ICommandSender sender) {
-			return command.getUsage(sender);
+			return command. #if MC_12_OR_LATER getUsage #else getCommandUsage #endif (sender);
 		}
 	}
 
 	public static class CompatCommandSender {
 		public static boolean canCommandSenderUseCommand(final ICommandSender sender, final int level, final String name) {
-			return sender.canUseCommand(level, name);
+			return sender. #if MC_12_OR_LATER canUseCommand #else canCommandSenderUseCommand #endif (level, name);
 		}
 	}
 
 	public static abstract class CompatRootCommand extends CommandBase implements ICommand {
 		@Override
-		public @Nullable List<String> getTabCompletions(final MinecraftServer server, final @Nullable ICommandSender sender, final @Nullable String[] args, final @Nullable BlockPos pos) {
+		public @Nullable List<String> #if MC_12_OR_LATER getTabCompletions #else getTabCompletionOptions #endif (final MinecraftServer server, final @Nullable ICommandSender sender, final @Nullable String[] args, final @Nullable BlockPos pos) {
 			return addTabCompletionOptionCompat(sender, args);
 		}
 	
 		public @Nullable abstract List<String> addTabCompletionOptionCompat(final @Nullable ICommandSender sender, final @Nullable String[] args);
 	
 		@Override
-		public @Nonnull String getName() {
+		public @Nonnull String #if MC_12_OR_LATER getName #else getCommandName #endif () {
 			return getCommandNameCompat();
 		}
 	
 		public abstract @Nonnull String getCommandNameCompat();
 	
 		@Override
-		public @Nullable List<String> getAliases() {
+		public @Nullable List<String> #if MC_12_OR_LATER getAliases #else getCommandAliases #endif () {
 			return getCommandAliasesCompat();
 		}
 	
 		public abstract @Nullable List<String> getCommandAliasesCompat();
 	
 		@Override
-		public @Nonnull String getUsage(final @Nullable ICommandSender sender) {
+		public @Nonnull String #if MC_12_OR_LATER getUsage #else getCommandUsage #endif (final @Nullable ICommandSender sender) {
 			return getCommandUsageCompat(sender);
 		}
 	
@@ -73,28 +73,28 @@ public class CompatCommands {
 
 	public static abstract class CompatSubCommand implements ICommand {
 		@Override
-		public @Nullable List<String> getTabCompletions(final MinecraftServer server, final @Nullable ICommandSender sender, final @Nullable String[] args, final @Nullable BlockPos pos) {
+		public @Nullable List<String> #if MC_12_OR_LATER getTabCompletions #else getTabCompletionOptions #endif (final MinecraftServer server, final @Nullable ICommandSender sender, final @Nullable String[] args, final @Nullable BlockPos pos) {
 			return addTabCompletionOptionCompat(sender, args);
 		}
 	
 		public @Nullable abstract List<String> addTabCompletionOptionCompat(final @Nullable ICommandSender sender, final @Nullable String[] args);
 	
 		@Override
-		public @Nonnull String getName() {
+		public @Nonnull String #if MC_12_OR_LATER getName #else getCommandName #endif () {
 			return getCommandNameCompat();
 		}
 	
 		public abstract @Nonnull String getCommandNameCompat();
 	
 		@Override
-		public @Nullable List<String> getAliases() {
+		public @Nullable List<String> #if MC_12_OR_LATER getAliases #else getCommandAliases #endif () {
 			return getCommandAliasesCompat();
 		}
 	
 		public abstract @Nullable List<String> getCommandAliasesCompat();
 	
 		@Override
-		public @Nonnull String getUsage(final @Nullable ICommandSender sender) {
+		public @Nonnull String #if MC_12_OR_LATER getUsage #else getCommandUsage #endif (final @Nullable ICommandSender sender) {
 			return getCommandUsageCompat(sender);
 		}
 	

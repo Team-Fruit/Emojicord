@@ -1,15 +1,18 @@
 package net.teamfruit.emojicord.compat;
 
-import javax.annotation.Nonnull;
-
-import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+
+import javax.annotation.Nonnull;
 
 public class CompatVertex {
 	private static class CompatBaseVertexImpl implements CompatBaseVertex {
 		public static final @Nonnull Tessellator t = Tessellator.getInstance();
-		public static final @Nonnull BufferBuilder w = t.getBuffer();
+		#if MC_12_OR_LATER
+		public static final @Nonnull net.minecraft.client.renderer.BufferBuilder w = t.getBuffer();
+		#else
+		public static final @Nonnull net.minecraft.client.renderer.VertexBuffer w = t.getBuffer();
+		#endif
 
 		public CompatBaseVertexImpl() {
 		}

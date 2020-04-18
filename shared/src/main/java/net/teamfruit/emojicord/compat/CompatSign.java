@@ -114,20 +114,34 @@ public class CompatSign {
 
 	public static abstract class CompatTileEntitySignRenderer extends TileEntitySignRenderer {
 		public void renderBaseTileEntityAt(final @Nullable TileEntitySign tile, final double x, final double y, final double z, final float partialTicks, final int destroy, final float alpha) {
+			#if MC_12_OR_LATER
 			super.render(tile, x, y, z, partialTicks, destroy, alpha);
+			#else
+			super.renderTileEntityAt(tile, x, y, z, partialTicks, destroy);
+			#endif
 		}
 
 		public abstract void renderTileEntityAtCompat(final @Nullable TileEntitySign tile, final double x, final double y, final double z, final float partialTicks, final int destroy, final float alpha);
 
 		@Override
+		#if MC_12_OR_LATER
 		public void render(final @Nullable TileEntitySign tile, final double x, final double y, final double z, final float partialTicks, final int destroy, final float alpha) {
 			renderTileEntityAtCompat(tile, x, y, z, partialTicks, destroy, alpha);
 		}
+		#else
+		public void renderTileEntityAt(final @Nullable TileEntitySign tile, final double x, final double y, final double z, final float partialTicks, final int destroy) {
+			renderTileEntityAtCompat(tile, x, y, z, partialTicks, destroy, 1f);
+		}
+		#endif
 	}
 
 	public static class CompatTileEntityRendererDispatcher {
 		public static void renderTileEntityAt(final @Nullable TileEntitySign tile, final double x, final double y, final double z, final float partialTicks, final int destroy, final float alpha) {
+			#if MC_12_OR_LATER
 			TileEntityRendererDispatcher.instance.render(tile, x, y, z, partialTicks, destroy, alpha);
+			#else
+			TileEntityRendererDispatcher.instance.renderTileEntityAt(tile, x, y, z, partialTicks, destroy);
+			#endif
 		}
 	}
 

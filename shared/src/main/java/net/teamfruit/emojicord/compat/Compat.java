@@ -56,18 +56,18 @@ public class Compat {
 		}
 
 		public @Nonnull CompatFontRenderer getFontRenderer() {
-			return new CompatFontRenderer(this.mc.fontRenderer);
+			return new CompatFontRenderer(this.mc. #if MC_12_OR_LATER fontRenderer #else fontRendererObj #endif );
 		}
 
 		public @Nullable CompatSign.CompatWorld getWorld() {
-			final World world = this.mc.world;
+			final World world = this.mc. #if MC_12_OR_LATER world #else theWorld #endif ;
 			if (world!=null)
 				return new CompatSign.CompatWorld(world);
 			return null;
 		}
 
 		public @Nullable CompatSign.CompatEntityPlayer getPlayer() {
-			final EntityPlayer player = this.mc.player;
+			final EntityPlayer player = this.mc. #if MC_12_OR_LATER player #else thePlayer #endif ;
 			if (player!=null)
 				return new CompatSign.CompatEntityPlayer(player);
 			return null;
@@ -175,11 +175,11 @@ public class Compat {
 
 	public static class CompatMathHelper {
 		public static int floor_float(final float value) {
-			return MathHelper.floor(value);
+			return MathHelper. #if MC_12_OR_LATER floor #else floor_float #endif (value);
 		}
 
 		public static int floor_double(final double value) {
-			return MathHelper.floor(value);
+			return MathHelper. #if MC_12_OR_LATER floor #else floor_double #endif (value);
 		}
 	}
 
