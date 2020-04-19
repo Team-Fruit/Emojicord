@@ -1,6 +1,11 @@
 package net.teamfruit.emojicord.gui.config;
 
+#if MC_7_LATER
+import net.minecraftforge.fml.client.IModGuiFactory;
+#else
 import cpw.mods.fml.client.IModGuiFactory;
+#endif
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 

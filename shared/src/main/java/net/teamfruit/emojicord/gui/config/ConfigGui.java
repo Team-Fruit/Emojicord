@@ -1,8 +1,14 @@
 package net.teamfruit.emojicord.gui.config;
 
-import com.google.common.collect.Lists;
+#if MC_7_LATER
+import net.minecraftforge.fml.client.config.GuiConfig;
+import net.minecraftforge.fml.client.config.IConfigElement;
+#else
 import cpw.mods.fml.client.config.GuiConfig;
 import cpw.mods.fml.client.config.IConfigElement;
+#endif
+
+import com.google.common.collect.Lists;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.ConfigElement;

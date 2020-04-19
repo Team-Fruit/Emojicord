@@ -1,25 +1,27 @@
 package net.teamfruit.emojicord;
 
 #if MC_7_LATER
+import net.minecraftforge.client.event.GuiScreenEvent.*;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 #else
+import net.teamfruit.emojicord.compat.KeyboardInputEvent;
+import net.teamfruit.emojicord.compat.MouseInputEvent;
 import cpw.mods.fml.client.event.ConfigChangedEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.teamfruit.emojicord.compat.CompatEvents.CompatGuiScreenEvent.*;
 #endif
+
+import net.teamfruit.emojicord.compat.CompatEvents.CompatGuiScreenEvent.*;
+import net.minecraftforge.common.MinecraftForge;
 
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.teamfruit.emojicord.compat.ClientChatEvent;
-import net.teamfruit.emojicord.compat.CompatEvents.CompatGuiScreenEvent;
-import net.teamfruit.emojicord.compat.KeyboardInputEvent;
-import net.teamfruit.emojicord.compat.MouseInputEvent;
 import net.teamfruit.emojicord.emoji.EmojiFrequently;
 import net.teamfruit.emojicord.emoji.EmojiText;
 import net.teamfruit.emojicord.emoji.PickerItem;
@@ -129,7 +131,7 @@ public class EventHandler {
 
 	@SubscribeEvent
 	public void onInitGui(final GuiScreenEvent.InitGuiEvent.Post event) {
-		final GuiScreen chatScreen = event.gui;
+		final GuiScreen chatScreen = event. #if MC_7_LATER getGui() #else gui #endif ;
 		if (chatScreen instanceof GuiChat)
 			this.overlays = this.overlayFactories.stream().map(e -> e.apply((GuiChat) chatScreen)).collect(Collectors.toList());
 		else
@@ -140,7 +142,7 @@ public class EventHandler {
 	public void onDraw(final GuiScreenEvent.DrawScreenEvent.Post event) {
 		for (final ListIterator<IChatOverlay> itr = this.overlays.listIterator(this.overlays.size()); itr.hasPrevious(); ) {
 			final IChatOverlay overlay = itr.previous();
-			overlay.onMouseInput(event.mouseX, event.mouseY);
+			overlay.onMouseInput(event. #if MC_7_LATER getMouseX() #else mosueX #endif , event. #if MC_7_LATER getMouseY() #else mouseY #endif );
 			if (overlay.onDraw())
 				event.setCanceled(true);
 		}
@@ -156,10 +158,10 @@ public class EventHandler {
 		final int button = Mouse.getEventButton();
 		if (button >= 0)
 			if (Mouse.getEventButtonState())
-				if (MinecraftForge.EVENT_BUS.post(new MouseClickedEvent.Pre(event.gui, button)))
+				if (MinecraftForge.EVENT_BUS.post(new MouseClickedEvent.Pre(event. #if MC_7_LATER getGui() #else gui #endif , button)))
 					event.setCanceled(true);
 			else
-				if (MinecraftForge.EVENT_BUS.post(new MouseReleasedEvent.Pre(event.gui, button)))
+				if (MinecraftForge.EVENT_BUS.post(new MouseReleasedEvent.Pre(event. #if MC_7_LATER getGui() #else gui #endif , button)))
 					event.setCanceled(true);
 	}
 
@@ -185,7 +187,7 @@ public class EventHandler {
 	public void onMouseScroll(final @Nonnull MouseInputEvent event) {
 		final int dwheel = Integer.valueOf(Mouse.getEventDWheel()).compareTo(0);
 		if (dwheel != 0)
-			if (MinecraftForge.EVENT_BUS.post(new CompatGuiScreenEvent.MouseScrollEvent.Pre(event.gui, dwheel)))
+			if (MinecraftForge.EVENT_BUS.post(new MouseScrollEvent.Pre(event. #if MC_7_LATER getGui() #else gui #endif , dwheel)))
 				event.setCanceled(true);
 	}
 
@@ -217,12 +219,12 @@ public class EventHandler {
 		if (Keyboard.getEventKeyState()) {
 			final char eventChar = Keyboard.getEventCharacter();
 			final int eventKey = Keyboard.getEventKey();
-			if (MinecraftForge.EVENT_BUS.post(new KeyboardCharTypedEvent.Pre(event.gui, eventChar, eventKey)))
+			if (MinecraftForge.EVENT_BUS.post(new KeyboardCharTypedEvent.Pre(event. #if MC_7_LATER getGui() #else gui #endif , eventChar, eventKey)))
 				event.setCanceled(true);
 			else {
 				final Integer key = this.lwjgl2glfwKeyMappings.get(eventKey);
 				if (key != null)
-					if (MinecraftForge.EVENT_BUS.post(new KeyboardKeyPressedEvent.Pre(event.gui, key)))
+					if (MinecraftForge.EVENT_BUS.post(new KeyboardKeyPressedEvent.Pre(event. #if MC_7_LATER getGui() #else gui #endif , key)))
 						event.setCanceled(true);
 			}
 		}

@@ -1,6 +1,5 @@
 package net.teamfruit.emojicord.compat;
 
-import cpw.mods.fml.client.FMLClientHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -23,16 +22,17 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 #if MC_7_LATER
+import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
 #else
+import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.ModContainer;
 #endif
 
 public class Compat {
-	public static @Nonnull
-	Minecraft getMinecraft() {
+	public static @Nonnull Minecraft getMinecraft() {
 		return FMLClientHandler.instance().getClient();
 	}
 
@@ -85,7 +85,7 @@ public class Compat {
 		public static void startVersionCheck(final String modId, final String modVersion, final String updateURL) {
 		}
 
-		public static VersionChecker.CheckResult getResult(final String modId) {
+		public static #if MC_7_LATER ForgeVersion.CheckResult #else VersionChecker.CheckResult #endif getResult(final String modId) {
 			#if MC_7_LATER
 			final ModContainer container = Loader.instance().getIndexedModList().get(modId);
 			return ForgeVersion.getResult(container);

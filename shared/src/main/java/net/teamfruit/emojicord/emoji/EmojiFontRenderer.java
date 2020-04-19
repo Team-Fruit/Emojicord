@@ -53,7 +53,7 @@ public class EmojiFontRenderer {
 	}
 	*/
 
-	#if MC_7_LATER
+	#if MC_12_LATER
 	public static abstract class CompatGlyph {
 		public CompatGlyph(final float width, final float height) {
 		}

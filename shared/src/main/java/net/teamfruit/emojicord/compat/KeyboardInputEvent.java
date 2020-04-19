@@ -2,6 +2,7 @@ package net.teamfruit.emojicord.compat;
 
 #if !MC_7_LATER
 import cpw.mods.fml.common.eventhandler.Cancelable;
+
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.common.MinecraftForge;

@@ -1,6 +1,11 @@
 package net.teamfruit.emojicord;
 
+#if MC_7_LATER
+import net.minecraftforge.fml.relauncher.Side;
+#else
 import cpw.mods.fml.relauncher.Side;
+#endif
+
 import net.teamfruit.emojicord.compat.Compat.CompatVersionChecker;
 import net.teamfruit.emojicord.emoji.DiscordEmojiIdDictionary;
 import net.teamfruit.emojicord.emoji.EmojiFrequently;
