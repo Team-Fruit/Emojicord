@@ -12,6 +12,12 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 #endif
 
+#if MC_7_LATER
+import net.minecraftforge.client.event.ClientChatEvent;
+#else
+import net.teamfruit.emojicord.compat.ClientChatEvent;
+#endif
+
 import net.teamfruit.emojicord.compat.CompatEvents.CompatGuiScreenEvent.*;
 import net.minecraftforge.common.MinecraftForge;
 
@@ -21,7 +27,6 @@ import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.teamfruit.emojicord.compat.ClientChatEvent;
 import net.teamfruit.emojicord.emoji.EmojiFrequently;
 import net.teamfruit.emojicord.emoji.EmojiText;
 import net.teamfruit.emojicord.emoji.PickerItem;

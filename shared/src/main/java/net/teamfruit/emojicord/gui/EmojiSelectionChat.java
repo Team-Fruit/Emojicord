@@ -44,7 +44,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 
 	public EmojiSelectionChat(final GuiChat chatScreen) {
 		this.chatScreen = chatScreen;
-		this.font = Compat.getMinecraft(). #if MC_7_LATER fontRendererObj #else fontRenderer #endif ;
+		this.font = Compat.getMinecraft(). #if MC_10 fontRendererObj #else fontRenderer #endif ;
 		this.inputField = chatScreen.inputField;
 		this.emojiButton = new Rectangle2d(this.chatScreen.width - 13, this.chatScreen.height - 13, 10, 10);
 
@@ -499,7 +499,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 
 		@Override
 		public boolean onKeyPressed(final int keycode) {
-			if (#if MC_10_LATER this.searchField.keyPressed(keycode, EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY) #else true #endif ) {
+			if (#if MC_12_LATER this.searchField.keyPressed(keycode, EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY) #else true #endif ) {
 				onTextChanged();
 				return true;
 			}
@@ -508,7 +508,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 
 		@Override
 		public void onTick() {
-			this.searchField. #if MC_10_LATER tick #else updateCursorCounter #endif ();
+			this.searchField. #if MC_12_LATER tick #else updateCursorCounter #endif ();
 		}
 
 		public void select(final int groupIndex, final int index) {

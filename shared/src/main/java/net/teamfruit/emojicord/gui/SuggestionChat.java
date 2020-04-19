@@ -36,7 +36,7 @@ public class SuggestionChat implements IChatOverlay {
 
 	public SuggestionChat(final GuiChat chatScreen) {
 		this.chatScreen = chatScreen;
-		this.font = Compat.getMinecraft(). #if MC_7_LATER fontRendererObj #else fontRenderer #endif ;
+		this.font = Compat.getMinecraft(). #if MC_10 fontRendererObj #else fontRenderer #endif ;
 		this.inputField = chatScreen.inputField;
 	}
 

@@ -55,7 +55,7 @@ public class EmojiSettings implements IChatOverlay {
 
 	public EmojiSettings(final GuiChat chatScreen) {
 		this.chatScreen = chatScreen;
-		this.font = Compat.getMinecraft(). #if MC_7_LATER fontRendererObj #else fontRenderer #endif;
+		this.font = Compat.getMinecraft(). #if MC_10 fontRendererObj #else fontRenderer #endif;
 		this.inputField = chatScreen.inputField;
 		this.rectScreen = new Rectangle2d(0, 0, this.chatScreen.width, this.chatScreen.height);
 
@@ -194,7 +194,7 @@ public class EmojiSettings implements IChatOverlay {
 			if (EmojiSettings.this.addGui == null) {
 				{
 					final Rectangle2d rectInner = this.rectMain.inner(2, 2, 2, 2);
-					#if MC_10_LATER float #else int #endif posY = rectInner.getY() + 2;
+					#if MC_12_LATER float #else int #endif posY = rectInner.getY() + 2;
 					EmojiSettings.this.font.drawString(CompatI18n.format("emojicord.gui.settings.menu.packs"), rectInner.getX() + 2, posY, 0xFF777777);
 					posY += 13;
 					for (final EmojiDiscordList group : DiscordEmojiIdDictionary.instance.groups)
@@ -238,7 +238,7 @@ public class EmojiSettings implements IChatOverlay {
 
 					{
 						final Rectangle2d rectInner = this.rectMain.inner(2, 10 * 5 + 2, 2, 2);
-						#if MC_10_LATER float #else int #endif posY = 0;
+						#if MC_12_LATER float #else int #endif posY = 0;
 						for (final String desc : EmojiSettings.this.font.wrapFormattedStringToWidth(EmojiSettings.this.addGui.getDescription(), rectInner.getWidth() - 2).split("\n")) {
 							EmojiSettings.this.font.drawString(desc, rectInner.getX() + 2, rectInner.getY() + 2 + posY, 0xFF777777);
 							posY += 12;
@@ -262,7 +262,7 @@ public class EmojiSettings implements IChatOverlay {
 
 					{
 						final Rectangle2d rectInner = this.rectMain.inner(2, 10 * 5 + 2, 2, 2);
-						#if MC_10_LATER float #else int #endif posY = 0;
+						#if MC_12_LATER float #else int #endif posY = 0;
 						for (final String desc : EmojiSettings.this.font.wrapFormattedStringToWidth(EmojiSettings.this.addGui.getApplyPreferredDescription(), rectInner.getWidth() - 2).split("\n")) {
 							EmojiSettings.this.font.drawString(desc, rectInner.getX() + 2, rectInner.getY() + 2 + posY, 0xFF777777);
 							posY += 12;
@@ -287,7 +287,7 @@ public class EmojiSettings implements IChatOverlay {
 
 				{
 					final Rectangle2d rectInner = this.rectMain.inner(2, 10 * 5 + 2, 2, 2);
-					#if MC_10_LATER float #else int #endif posY = 0;
+					#if MC_12_LATER float #else int #endif posY = 0;
 					for (final String desc : EmojiSettings.this.font.wrapFormattedStringToWidth(EmojiSettings.this.addGui.getClosingDescription(), rectInner.getWidth() - 2).split("\n")) {
 						EmojiSettings.this.font.drawString(desc, rectInner.getX() + 2, rectInner.getY() + 2 + posY, 0xFF777777);
 						posY += 12;

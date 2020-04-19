@@ -97,6 +97,7 @@ public class CompatEvents {
 			}
 		}
 
+		@Cancelable
 		public static class KeyboardKeyPressedEvent extends GuiScreenEvent {
 			private final int keycode;
 
