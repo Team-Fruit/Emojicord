@@ -4,10 +4,9 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import net.teamfruit.emojicord.Reference;
 
-public class EmojicordCorePlugin implements IFMLLoadingPlugin {
+public class EmojicordCorePlugin implements #if MC_7_LATER net.minecraftforge.fml.relauncher.IFMLLoadingPlugin #else cpw.mods.fml.relauncher.IFMLLoadingPlugin #endif {
 	@Override
 	public @Nullable String[] getASMTransformerClass() {
 		return new String[] {

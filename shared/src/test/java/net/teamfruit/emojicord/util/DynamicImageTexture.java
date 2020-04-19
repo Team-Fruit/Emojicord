@@ -9,6 +9,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import net.minecraft.client.renderer.texture.TextureUtil;
+import net.teamfruit.emojicord.compat.Compat;
 import net.teamfruit.emojicord.compat.Compat.CompatMinecraft;
 import net.teamfruit.emojicord.compat.Compat.CompatTextureUtil;
 import net.teamfruit.emojicord.compat.OpenGL;
@@ -154,8 +155,7 @@ public abstract class DynamicImageTexture implements ImageTexture {
 			if (mipdata!=null&&mipdata.length>=1) {
 				final int id = getId();
 				if (this.miplevel>=1) {
-					CompatTextureUtil.allocateTextureImpl(id, this.miplevel, this.width, this.height,
-							CompatMinecraft.getMinecraft().getSettings().getAnisotropicFiltering());
+					TextureUtil.allocateTextureImpl(id, this.miplevel, this.width, this.height, #if !MC_7_LATER Compat.getMinecraft().gameSettings.anisotropicFiltering #endif );
 					TextureUtil.uploadTextureMipmap(mipdata, this.width, this.height, 0, 0, false, false);
 				} else {
 					TextureUtil.allocateTexture(id, this.width, this.height);

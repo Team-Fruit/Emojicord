@@ -1,5 +1,32 @@
 package net.teamfruit.emojicord.emoji;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.cache.RemovalNotification;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.madgag.gif.fmsware.GifDecoder;
+import net.minecraft.client.renderer.texture.SimpleTexture;
+import net.minecraft.client.resources.IResourceManager;
+import net.minecraft.util.ResourceLocation;
+import net.teamfruit.emojicord.Log;
+import net.teamfruit.emojicord.compat.Compat;
+import net.teamfruit.emojicord.compat.Compat.CompatTexture;
+import net.teamfruit.emojicord.util.Downloader;
+import net.teamfruit.emojicord.util.Timer;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.message.BasicHeader;
+
+import javax.annotation.Nonnull;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -15,42 +42,12 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import javax.annotation.Nonnull;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.message.BasicHeader;
-
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.cache.RemovalNotification;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.madgag.gif.fmsware.GifDecoder;
-
-import net.minecraft.client.renderer.texture.SimpleTexture;
-import net.minecraft.util.ResourceLocation;
-import net.teamfruit.emojicord.Log;
-import net.teamfruit.emojicord.compat.Compat;
-import net.teamfruit.emojicord.compat.Compat.CompatResourceManager;
-import net.teamfruit.emojicord.compat.Compat.CompatSimpleTexture;
-import net.teamfruit.emojicord.compat.Compat.CompatTexture;
-import net.teamfruit.emojicord.util.Downloader;
-import net.teamfruit.emojicord.util.Timer;
-
 public class EmojiObject {
 	public static final ResourceLocation loading_texture = new ResourceLocation("emojicord", "textures/26a0.png");
 	public static final ResourceLocation error_texture = new ResourceLocation("emojicord", "textures/26d4.png");
 
-	private static final @Nonnull ExecutorService threadpool = Executors.newCachedThreadPool(
+	private static final @Nonnull
+	ExecutorService threadpool = Executors.newCachedThreadPool(
 			new ThreadFactoryBuilder().setNameFormat("emojicord-emoji-%d").setDaemon(true).build());
 
 	private final EmojiId id;
@@ -64,10 +61,10 @@ public class EmojiObject {
 	}
 
 	private void checkLoad() {
-		if (this.img==null) {
+		if (this.img == null) {
 			this.img = new DownloadImageData(this.id.getCache(), this.id.getRemote(), loading_texture);
 			this.resourceLocation = this.id.getResourceLocation();
-			Compat.CompatMinecraft.getMinecraft().getTextureManager().loadTexture(this.resourceLocation, this.img);
+			Compat.getMinecraft().getTextureManager().loadTexture(this.resourceLocation, this.img);
 		}
 	}
 
@@ -85,7 +82,7 @@ public class EmojiObject {
 	}
 
 	public void delete() {
-		if (this.img!=null) {
+		if (this.img != null) {
 			this.img.deleteGlTexture();
 			this.deleteOldTexture = false;
 		}
@@ -114,7 +111,7 @@ public class EmojiObject {
 		}
 	}
 
-	public class DownloadImageData extends CompatSimpleTexture {
+	public class DownloadImageData extends SimpleTexture {
 		private final File cacheFile;
 		private final String imageUrl;
 		private final ResourceLocation textureResourceLocation;
@@ -126,12 +123,11 @@ public class EmojiObject {
 		private BufferedImage imageData;
 		private List<Pair<Integer, BufferedImage>> animationData;
 
-		private final CompatTexture texture;
-		private List<Pair<Integer, CompatTexture>> animation;
+		private List<Pair<Integer, SimpleTexture>> animation;
 
 		private Timer timer = new Timer();
-		private Iterator<Pair<Integer, CompatTexture>> animationIterator;
-		private Pair<Integer, CompatTexture> current;
+		private Iterator<Pair<Integer, SimpleTexture>> animationIterator;
+		private Pair<Integer, SimpleTexture> current;
 
 		public DownloadImageData(
 				final File cacheFileIn, final String imageUrlIn,
@@ -141,39 +137,38 @@ public class EmojiObject {
 			this.cacheFile = cacheFileIn;
 			this.imageUrl = imageUrlIn;
 			this.textureResourceLocation = textureResourceLocation;
-			this.texture = CompatTexture.getTexture(this);
 		}
 
 		private void checkTextureUploaded() {
 			if (!this.textureUploaded)
-				if (this.imageData!=null&&this.animationData!=null) {
-					if (this.textureLocation!=null)
+				if (this.imageData != null && this.animationData != null) {
+					if (this.textureLocation != null)
 						deleteGlTexture();
 
 					try {
-						this.texture.uploadTexture(this.imageData);
+						CompatTexture.uploadTexture(this, super::getGlTextureId, this.imageData);
 						this.animation = this.animationData.stream().map(e -> {
-							final CompatTexture t = CompatTexture.getTexture(new CompatSimpleTexture(this.textureResourceLocation));
+							final SimpleTexture t = new SimpleTexture(this.textureResourceLocation);
 							try {
-								t.uploadTexture(e.getRight());
+								CompatTexture.uploadTexture(t, t::getGlTextureId, e.getRight());
 							} catch (final IOException e1) {
 								throw new UncheckedIOException(e1);
 							}
 							return Pair.of(e.getLeft(), t);
 						}).collect(Collectors.toList());
 						this.animationIterator = new InfinityIterator<>(this.animation);
-					} catch (final IOException|UncheckedIOException e) {
+					} catch (final IOException | UncheckedIOException e) {
 						Log.log.warn("Failed to load texture: ", e);
 					}
 					this.imageData = null;
 					this.animationData = null;
 					this.textureUploaded = true;
-				} else if (this.rawData!=null) {
-					if (this.textureLocation!=null)
+				} else if (this.rawData != null) {
+					if (this.textureLocation != null)
 						deleteGlTexture();
 
 					try {
-						this.texture.uploadTexture(new ByteArrayInputStream(this.rawData));
+						CompatTexture.uploadTexture(this, super::getGlTextureId, new ByteArrayInputStream(this.rawData));
 					} catch (final IOException e) {
 						Log.log.warn("Failed to load texture: ", e);
 					}
@@ -185,30 +180,30 @@ public class EmojiObject {
 		@Override
 		public int getGlTextureId() {
 			checkTextureUploaded();
-			if (this.animationIterator!=null&&this.animationIterator.hasNext()) {
-				if (this.current==null)
+			if (this.animationIterator != null && this.animationIterator.hasNext()) {
+				if (this.current == null)
 					this.current = this.animationIterator.next();
 				Timer.tick();
-				final int currentId = this.current.getRight().getTextureObj().getRawGlTextureId();
-				final float t = this.timer.getTime()-this.current.getLeft()/1e+3f;
-				if (t>0) {
+				final int currentId = this.current.getRight().getGlTextureId();
+				final float t = this.timer.getTime() - this.current.getLeft() / 1e+3f;
+				if (t > 0) {
 					this.current = null;
 					this.timer.set(t);
 				}
 				return currentId;
 			}
-			return super.getRawGlTextureId();
+			return super.getGlTextureId();
 		}
 
 		@Override
-		public void loadTexture(final CompatResourceManager resourceManager) throws IOException {
+		public void loadTexture(final IResourceManager resourceManager) throws IOException {
 			if (this.textureUploaded)
 				return;
-			if (this.textureLocation!=null)
+			if (this.textureLocation != null)
 				super.loadTexture(resourceManager);
-			if (this.downloading==null) {
+			if (this.downloading == null) {
 				CompletableFuture<byte[]> dataFuture;
-				if (this.cacheFile==null)
+				if (this.cacheFile == null)
 					dataFuture = CompletableFuture.completedFuture(null);
 				else {
 					final CompletableFuture<File> cacheFuture = this.cacheFile.isFile()
@@ -227,12 +222,12 @@ public class EmojiObject {
 					return null;
 				});
 				statusFuture.thenAcceptAsync(data -> {
-					if (data==null) {
+					if (data == null) {
 						EmojiObject.this.resourceLocation = EmojiObject.error_texture;
 						EmojiObject.this.deleteOldTexture = true;
 					} else {
 						final GifDecoder d = new GifDecoder();
-						if (d.read(new ByteArrayInputStream(data))==GifDecoder.STATUS_OK) {
+						if (d.read(new ByteArrayInputStream(data)) == GifDecoder.STATUS_OK) {
 							this.imageData = d.getImage();
 							this.animationData = IntStream.range(0, d.getFrameCount()).mapToObj(i -> Pair.of(d.getDelay(i), d.getFrame(i))).collect(Collectors.toList());
 						} else
@@ -247,7 +242,7 @@ public class EmojiObject {
 				CloseableHttpResponse response = null;
 				try {
 					final HttpUriRequest req = new HttpGet(DownloadImageData.this.imageUrl);
-					req.setHeaders(new Header[] {
+					req.setHeaders(new Header[]{
 							new BasicHeader("User-Agent",
 									"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36"),
 							new BasicHeader("Accept", "*/*"),
@@ -259,8 +254,8 @@ public class EmojiObject {
 					final HttpEntity entity = response.getEntity();
 
 					final int statusCode = response.getStatusLine().getStatusCode();
-					if (statusCode!=HttpStatus.SC_OK)
-						throw new IOException("Invalid Status Code: "+statusCode);
+					if (statusCode != HttpStatus.SC_OK)
+						throw new IOException("Invalid Status Code: " + statusCode);
 
 					FileUtils.copyInputStreamToFile(entity.getContent(),
 							DownloadImageData.this.cacheFile);
@@ -288,7 +283,7 @@ public class EmojiObject {
 						(final RemovalNotification<EmojiId, EmojiObject> notification) -> {
 							//Log.log.info("deleted");
 							final EmojiObject nvalue = notification.getValue();
-							if (nvalue!=null)
+							if (nvalue != null)
 								nvalue.delete();
 						})
 				.build(new CacheLoader<EmojiId, EmojiObject>() {
@@ -298,7 +293,8 @@ public class EmojiObject {
 					}
 				});
 
-		public @Nonnull EmojiObject getEmojiObject(final @Nonnull EmojiId name) {
+		public @Nonnull
+		EmojiObject getEmojiObject(final @Nonnull EmojiId name) {
 			return this.EMOJI_ID_MAP.getUnchecked(name);
 		}
 	}

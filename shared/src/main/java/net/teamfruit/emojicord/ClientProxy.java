@@ -1,12 +1,12 @@
 package net.teamfruit.emojicord;
 
-import javax.annotation.Nonnull;
-
-import net.teamfruit.emojicord.compat.Compat.CompatSide;
+import cpw.mods.fml.relauncher.Side;
 import net.teamfruit.emojicord.compat.Compat.CompatVersionChecker;
 import net.teamfruit.emojicord.emoji.DiscordEmojiIdDictionary;
 import net.teamfruit.emojicord.emoji.EmojiFrequently;
 import net.teamfruit.emojicord.emoji.Endpoint;
+
+import javax.annotation.Nonnull;
 
 public class ClientProxy extends CommonProxy {
 	public static EventHandler eventHandler;
@@ -15,8 +15,8 @@ public class ClientProxy extends CommonProxy {
 	public void preInit(final @Nonnull CompatFMLPreInitializationEvent event) {
 		super.preInit(event);
 
-		EmojicordConfig.spec.registerConfigDefine(CompatSide.CLIENT);
-		EmojicordConfig.spec.registerConfigHandler(CompatSide.CLIENT, event.getSuggestedConfigurationFile());
+		EmojicordConfig.spec.registerConfigDefine(Side.CLIENT);
+		EmojicordConfig.spec.registerConfigHandler(Side.CLIENT, event.getSuggestedConfigurationFile());
 
 		CompatVersionChecker.startVersionCheck(Reference.MODID, VersionReference.VERSION, Reference.UPDATE_JSON);
 	}

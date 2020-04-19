@@ -8,7 +8,7 @@ public class Locations {
 	public static final Locations instance = new Locations();
 
 	public File getMinecraftDirectory() {
-		final File gameDir = Compat.CompatMinecraft.getMinecraft().getGameDir();
+		final File gameDir = Compat.getMinecraft().mcDataDir;
 		//try {
 		//	gameDir = gameDir.getCanonicalFile();
 		//} catch (final IOException e) {

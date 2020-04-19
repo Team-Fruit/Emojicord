@@ -3,7 +3,12 @@ package net.teamfruit.emojicord.compat;
 import javax.annotation.Nonnull;
 
 import net.minecraft.launchwrapper.Launch;
+
+#if MC_7_LATER
 import net.minecraftforge.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper;
+#else
+import cpw.mods.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper;
+#endif
 
 public class CompatFMLDeobfuscatingRemapper {
 	public static @Nonnull String mapDesc(@Nonnull final String desc) {

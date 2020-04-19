@@ -1,24 +1,17 @@
 package net.teamfruit.emojicord.emoji;
 
-import java.util.EnumSet;
-
-import javax.annotation.Nullable;
-
-import org.lwjgl.opengl.GL11;
-
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.teamfruit.emojicord.CoreInvoke;
 import net.teamfruit.emojicord.EmojicordConfig;
 import net.teamfruit.emojicord.EmojicordScope;
 import net.teamfruit.emojicord.compat.Compat;
-import net.teamfruit.emojicord.compat.Compat.CompatBufferBuilder;
-import net.teamfruit.emojicord.compat.Compat.CompatGlyph;
-import net.teamfruit.emojicord.compat.Compat.CompatTexturedGlyph;
 import net.teamfruit.emojicord.compat.CompatBaseVertex;
 import net.teamfruit.emojicord.compat.CompatVertex;
 import net.teamfruit.emojicord.compat.OpenGL;
 import net.teamfruit.emojicord.emoji.EmojiContext.EmojiContextAttribute;
 import net.teamfruit.emojicord.emoji.EmojiText.EmojiTextElement;
+import org.lwjgl.opengl.GL11;
+
+import java.util.EnumSet;
 
 @CoreInvoke
 public class EmojiFontRenderer {
@@ -31,7 +24,7 @@ public class EmojiFontRenderer {
 
 	@CoreInvoke
 	public static String updateEmojiContext(final String text) {
-		if (EmojicordConfig.spec.isAvailable()&&EmojicordConfig.RENDER.renderEnabled.get()) {
+		if (EmojicordConfig.spec.isAvailable() && EmojicordConfig.RENDER.renderEnabled.get()) {
 			final EnumSet<EmojiContextAttribute> attributes = EnumSet.noneOf(EmojiContextAttribute.class);
 			final StackTraceElement[] stacks = Thread.currentThread().getStackTrace();
 			if (EmojicordScope.instance.checkIsInput(stacks))
@@ -60,23 +53,18 @@ public class EmojiFontRenderer {
 	}
 	*/
 
-	@CoreInvoke
-	public static boolean renderEmojiChar(final char c, final boolean italic, final float x, final float y, final float red, final float green, final float blue, final float alpha) {
-		if (CurrentContext!=null) {
-			final EmojiTextElement emojiElement = CurrentContext.emojis.get(index);
-			if (emojiElement!=null) {
-				final EmojiId emojiId = emojiElement.id;
-				if (emojiId!=null) {
-					final EmojiObject emoji = EmojiObject.EmojiObjectCache.instance.getEmojiObject(emojiId);
-					if (!shadow) {
-						Compat.CompatMinecraft.getMinecraft().getTextureManager().bindTexture(emoji.loadAndGetResourceLocation());
-						renderEmoji(emoji, x, y, red, green, blue, alpha);
-					}
-					return c==EmojiContext.EMOJI_REPLACE_CHARACTOR;
-				}
-			}
+	#if MC_7_LATER
+	public static abstract class CompatGlyph {
+		public CompatGlyph(final float width, final float height) {
 		}
-		return false;
+	}
+
+	public static abstract class CompatTexturedGlyph {
+		public CompatTexturedGlyph(final ResourceLocation texture, final float width, final float height) {
+		}
+
+		public void onRender(final TextureManager textureManager, final boolean hasShadow, final float x, final float y, final CompatBufferBuilder vbuilder, final float red, final float green, final float blue, final float alpha) {
+		}
 	}
 
 	@CoreInvoke
@@ -111,7 +99,7 @@ public class EmojiFontRenderer {
 	}
 
 	@CoreInvoke
-	public static class EmojiTexturedGlyph extends CompatTexturedGlyph {
+	public static class EmojiTexturedGlyph extends TexturedGlyph {
 		public EmojiTexturedGlyph(final EmojiId emojiId) {
 			super(EmojiObject.EmojiObjectCache.instance.getEmojiObject(emojiId).loadAndGetResourceLocation(), EmojiGlyph.GlyphWidth, EmojiGlyph.GlyphHeight);
 		}
@@ -122,12 +110,31 @@ public class EmojiFontRenderer {
 				super.onRender(textureManager, hasShadow, x, y, vbuilder, 1, 1, 1, alpha);
 		}
 	}
+	#else
+	@CoreInvoke
+	public static boolean renderEmojiChar(final char c, final boolean italic, final float x, final float y, final float red, final float green, final float blue, final float alpha) {
+		if (CurrentContext != null) {
+			final EmojiTextElement emojiElement = CurrentContext.emojis.get(index);
+			if (emojiElement != null) {
+				final EmojiId emojiId = emojiElement.id;
+				if (emojiId != null) {
+					final EmojiObject emoji = EmojiObject.EmojiObjectCache.instance.getEmojiObject(emojiId);
+					if (!shadow) {
+						Compat.getMinecraft().getTextureManager().bindTexture(emoji.loadAndGetResourceLocation());
+						renderEmoji(emoji, x, y, red, green, blue, alpha);
+					}
+					return c == EmojiContext.EMOJI_REPLACE_CHARACTOR;
+				}
+			}
+		}
+		return false;
+	}
 
 	public static void renderEmoji(final EmojiObject emoji, final float x, final float y, final float red, final float green, final float blue, final float alpha) {
 		final float textureSize = 16.0F;
-		final float textureX = 0.0F/textureSize;
-		final float textureY = 0.0F/textureSize;
-		final float textureOffset = 16.0F/textureSize;
+		final float textureX = 0.0F / textureSize;
+		final float textureY = 0.0F / textureSize;
+		final float textureOffset = 16.0F / textureSize;
 		final float size = 10.0F;
 		final float offsetY = 1.0F;
 		final float offsetX = 0.0F;
@@ -135,7 +142,7 @@ public class EmojiFontRenderer {
 		OpenGL.glPushAttrib();
 
 		final int rgba = OpenGL.glGetColorRGBA();
-		OpenGL.glColor4f(1.0F, 1.0F, 1.0F, (OpenGL.glGetColorRGBA()>>24&0xff)/256f);
+		OpenGL.glColor4f(1.0F, 1.0F, 1.0F, (OpenGL.glGetColorRGBA() >> 24 & 0xff) / 256f);
 
 		//OpenGL.glEnable(GL11.GL_BLEND);
 		//OpenGL.glEnable(GL11.GL_ALPHA_TEST);
@@ -146,10 +153,10 @@ public class EmojiFontRenderer {
 		//OpenGL.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
 		final CompatBaseVertex bufferbuilder = CompatVertex.getTessellator();
 		bufferbuilder.beginTexture(GL11.GL_QUADS);
-		bufferbuilder.pos(x-offsetX, y-offsetY, 0.0F).tex(textureX, textureY);
-		bufferbuilder.pos(x-offsetX, y+size-offsetY, 0.0F).tex(textureX, textureY+textureOffset);
-		bufferbuilder.pos(x-offsetX+size, y+size-offsetY, 0.0F).tex(textureX+textureOffset, textureY+textureOffset);
-		bufferbuilder.pos(x-offsetX+size, y-offsetY, 0.0F).tex(textureX+textureOffset, textureY);
+		bufferbuilder.pos(x - offsetX, y - offsetY, 0.0F).tex(textureX, textureY);
+		bufferbuilder.pos(x - offsetX, y + size - offsetY, 0.0F).tex(textureX, textureY + textureOffset);
+		bufferbuilder.pos(x - offsetX + size, y + size - offsetY, 0.0F).tex(textureX + textureOffset, textureY + textureOffset);
+		bufferbuilder.pos(x - offsetX + size, y - offsetY, 0.0F).tex(textureX + textureOffset, textureY);
 		bufferbuilder.draw();
 		//OpenGL.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
 		//OpenGL.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
@@ -161,4 +168,5 @@ public class EmojiFontRenderer {
 
 		OpenGL.glPopAttrib();
 	}
+	#endif
 }

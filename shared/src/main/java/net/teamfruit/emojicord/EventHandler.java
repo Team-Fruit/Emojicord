@@ -1,39 +1,25 @@
 package net.teamfruit.emojicord;
 
-import static java.nio.file.StandardWatchEventKinds.*;
-import static net.teamfruit.emojicord.emoji.EmojiText.ParseFlag.*;
+#if MC_7_LATER
+import net.minecraftforge.fml.client.event.ConfigChangedEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+#else
+import cpw.mods.fml.client.event.ConfigChangedEvent;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.TickEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.teamfruit.emojicord.compat.CompatEvents.CompatGuiScreenEvent.*;
+#endif
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.nio.file.WatchEvent;
-import java.nio.file.WatchKey;
-import java.nio.file.WatchService;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nonnull;
-
+import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-
-import net.teamfruit.emojicord.compat.CompatEvents.CompatClientChatEvent;
-import net.teamfruit.emojicord.compat.CompatEvents.CompatClientTickEvent;
-import net.teamfruit.emojicord.compat.CompatEvents.CompatConfigChangedEvent.CompatOnConfigChangedEvent;
+import net.minecraft.client.gui.GuiChat;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraftforge.client.event.GuiScreenEvent;
+import net.teamfruit.emojicord.compat.ClientChatEvent;
 import net.teamfruit.emojicord.compat.CompatEvents.CompatGuiScreenEvent;
-import net.teamfruit.emojicord.compat.CompatEvents.CompatGuiScreenEvent.CompatMouseReleasedEvent.CompatPre;
-import net.teamfruit.emojicord.compat.CompatEvents.CompatHandler;
-import net.teamfruit.emojicord.compat.CompatEvents.CompatRenderGameOverlayEvent;
-import net.teamfruit.emojicord.compat.CompatGui;
+import net.teamfruit.emojicord.compat.KeyboardInputEvent;
+import net.teamfruit.emojicord.compat.MouseInputEvent;
 import net.teamfruit.emojicord.emoji.EmojiFrequently;
 import net.teamfruit.emojicord.emoji.EmojiText;
 import net.teamfruit.emojicord.emoji.PickerItem;
@@ -41,11 +27,37 @@ import net.teamfruit.emojicord.gui.EmojiSelectionChat;
 import net.teamfruit.emojicord.gui.EmojiSettings;
 import net.teamfruit.emojicord.gui.IChatOverlay;
 import net.teamfruit.emojicord.gui.SuggestionChat;
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 
-public class EventHandler extends CompatHandler {
-	static final @Nonnull Pattern skintonePattern = Pattern.compile("\\:skin-tone-(\\d)\\:");
+import javax.annotation.Nonnull;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.*;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
-	private final List<Function<CompatGui.CompatChatScreen, IChatOverlay>> overlayFactories = Arrays.asList(
+import static java.nio.file.StandardWatchEventKinds.*;
+import static net.teamfruit.emojicord.emoji.EmojiText.ParseFlag.*;
+
+public class EventHandler {
+	public void registerHandler() {
+		#if !MC_7_LATER
+		cpw.mods.fml.common.FMLCommonHandler.instance().bus().register(this);
+		#endif
+		MinecraftForge.EVENT_BUS.register(this);
+	}
+
+	static final @Nonnull
+	Pattern skintonePattern = Pattern.compile("\\:skin-tone-(\\d)\\:");
+
+	private final List<Function<GuiChat, IChatOverlay>> overlayFactories = Arrays.asList(
 			EmojiSettings::new,
 			EmojiSelectionChat::new,
 			SuggestionChat::new);
@@ -63,14 +75,14 @@ public class EventHandler extends CompatHandler {
 		} catch (final IOException e) {
 			Log.log.warn("Could not watch the dictionary directory: ", e);
 		}
-		if (this.watcher!=null) {
-			final ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setDaemon(true).setNameFormat(Reference.MODID+"-directory-watch-%d").build());
+		if (this.watcher != null) {
+			final ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setDaemon(true).setNameFormat(Reference.MODID + "-directory-watch-%d").build());
 			executor.submit(() -> {
 				while (true)
 					try {
 						final WatchKey watchKey = this.watcher.take();
 						for (final WatchEvent<?> event : watchKey.pollEvents()) {
-							if (event.kind()==OVERFLOW)
+							if (event.kind() == OVERFLOW)
 								continue;
 							this.changed.set(true);
 						}
@@ -84,14 +96,14 @@ public class EventHandler extends CompatHandler {
 	}
 
 	public boolean hasDictionaryDirectoryChanged() {
-		if (this.watcher==null)
+		if (this.watcher == null)
 			return true;
 		else
 			return this.changed.getAndSet(false);
 	}
 
-	@Override
-	public void onChat(final CompatClientChatEvent event) {
+	@SubscribeEvent
+	public void onChat(final ClientChatEvent event) {
 		final String message = event.getMessage();
 		if (!message.startsWith("/")) {
 			{
@@ -108,46 +120,51 @@ public class EventHandler extends CompatHandler {
 		}
 	}
 
-	@Override
-	public void onTick(final CompatClientTickEvent event) {
-		if (event.getPhase()==CompatClientTickEvent.CompatPhase.START)
+	@SubscribeEvent
+	public void onTick(final TickEvent.ClientTickEvent event) {
+		if (event.phase == TickEvent.ClientTickEvent.Phase.START)
 			for (final IChatOverlay overlay : this.overlays)
 				overlay.onTick();
 	}
 
-	@Override
-	public void onDraw(final CompatRenderGameOverlayEvent.CompatPost event) {
-	}
-
-	@Override
-	public void onText(final CompatRenderGameOverlayEvent.CompatText event) {
-	}
-
-	@Override
-	public void onConfigChanged(final CompatOnConfigChangedEvent event) {
-	}
-
-	@Override
-	public void onInitGui(final CompatGuiScreenEvent.CompatInitGuiEvent.CompatPost event) {
-		final CompatGui.CompatChatScreen chatScreen = CompatGui.CompatChatScreen.cast(event.getGui());
-		if (chatScreen!=null)
-			this.overlays = this.overlayFactories.stream().map(e -> e.apply(chatScreen)).collect(Collectors.toList());
+	@SubscribeEvent
+	public void onInitGui(final GuiScreenEvent.InitGuiEvent.Post event) {
+		final GuiScreen chatScreen = event.gui;
+		if (chatScreen instanceof GuiChat)
+			this.overlays = this.overlayFactories.stream().map(e -> e.apply((GuiChat) chatScreen)).collect(Collectors.toList());
 		else
 			this.overlays = Collections.emptyList();
 	}
 
-	@Override
-	public void onDraw(final CompatGuiScreenEvent.CompatDrawScreenEvent.CompatPost event) {
-		for (final ListIterator<IChatOverlay> itr = this.overlays.listIterator(this.overlays.size()); itr.hasPrevious();) {
+	@SubscribeEvent
+	public void onDraw(final GuiScreenEvent.DrawScreenEvent.Post event) {
+		for (final ListIterator<IChatOverlay> itr = this.overlays.listIterator(this.overlays.size()); itr.hasPrevious(); ) {
 			final IChatOverlay overlay = itr.previous();
-			overlay.onMouseInput(event.getMouseX(), event.getMouseY());
+			overlay.onMouseInput(event.mouseX, event.mouseY);
 			if (overlay.onDraw())
 				event.setCanceled(true);
 		}
 	}
 
-	@Override
-	public void onMouseClicked(final CompatGuiScreenEvent.CompatMouseClickedEvent.CompatPre event) {
+	@SubscribeEvent
+	public void onConfigChanged(final @Nonnull ConfigChangedEvent.OnConfigChangedEvent event) {
+		// EmojicordConfig.spec.onConfigChanged();
+	}
+
+	@SubscribeEvent
+	public void onMouseClicked(final @Nonnull MouseInputEvent event) {
+		final int button = Mouse.getEventButton();
+		if (button >= 0)
+			if (Mouse.getEventButtonState())
+				if (MinecraftForge.EVENT_BUS.post(new MouseClickedEvent.Pre(event.gui, button)))
+					event.setCanceled(true);
+			else
+				if (MinecraftForge.EVENT_BUS.post(new MouseReleasedEvent.Pre(event.gui, button)))
+					event.setCanceled(true);
+	}
+
+	@SubscribeEvent
+	public void onMouseClicked(final MouseClickedEvent.Pre event) {
 		for (final IChatOverlay overlay : this.overlays)
 			if (overlay.onMouseClicked(event.getButton())) {
 				event.setCanceled(true);
@@ -155,8 +172,8 @@ public class EventHandler extends CompatHandler {
 			}
 	}
 
-	@Override
-	public void onMouseReleased(final CompatPre event) {
+	@SubscribeEvent
+	public void onMouseReleased(final MouseReleasedEvent.Pre event) {
 		for (final IChatOverlay overlay : this.overlays)
 			if (overlay.onMouseReleased(event.getButton())) {
 				event.setCanceled(true);
@@ -164,8 +181,16 @@ public class EventHandler extends CompatHandler {
 			}
 	}
 
-	@Override
-	public void onMouseScroll(final CompatGuiScreenEvent.CompatMouseScrollEvent.CompatPre event) {
+	@SubscribeEvent
+	public void onMouseScroll(final @Nonnull MouseInputEvent event) {
+		final int dwheel = Integer.valueOf(Mouse.getEventDWheel()).compareTo(0);
+		if (dwheel != 0)
+			if (MinecraftForge.EVENT_BUS.post(new CompatGuiScreenEvent.MouseScrollEvent.Pre(event.gui, dwheel)))
+				event.setCanceled(true);
+	}
+
+	@SubscribeEvent
+	public void onMouseScroll(final MouseScrollEvent.Pre event) {
 		for (final IChatOverlay overlay : this.overlays)
 			if (overlay.onMouseScroll(event.getScrollDelta())) {
 				event.setCanceled(true);
@@ -173,8 +198,39 @@ public class EventHandler extends CompatHandler {
 			}
 	}
 
-	@Override
-	public void onCharTyped(final CompatGuiScreenEvent.CompatKeyboardCharTypedEvent.CompatPre event) {
+	private final Map<Integer, Integer> lwjgl2glfwKeyMappings = ((Supplier<Map<Integer, Integer>>) () -> {
+		final Map<Integer, Integer> map = Maps.newHashMap();
+		map.put(205, 262); //	KEY_RIGHT		205	262
+		map.put(203, 263); //	KEY_LEFT		203	263
+		map.put(208, 264); //	KEY_DOWN		208	264
+		map.put(200, 265); //	KEY_UP			200	265
+		map.put(15, 258); //	KEY_TAB			15	258
+		map.put(28, 257); //	KEY_ENTER		28	257
+		map.put(156, 335); //	KEY_KP_ENTER	156	335
+		map.put(1, 256); //		KEY_ESC			1	256
+		return map;
+	}).get();
+
+	#if !MC_12_LATER
+	@SubscribeEvent
+	public void onKeyPressed(final @Nonnull KeyboardInputEvent.Pre event) {
+		if (Keyboard.getEventKeyState()) {
+			final char eventChar = Keyboard.getEventCharacter();
+			final int eventKey = Keyboard.getEventKey();
+			if (MinecraftForge.EVENT_BUS.post(new KeyboardCharTypedEvent.Pre(event.gui, eventChar, eventKey)))
+				event.setCanceled(true);
+			else {
+				final Integer key = this.lwjgl2glfwKeyMappings.get(eventKey);
+				if (key != null)
+					if (MinecraftForge.EVENT_BUS.post(new KeyboardKeyPressedEvent.Pre(event.gui, key)))
+						event.setCanceled(true);
+			}
+		}
+	}
+	#endif
+
+	@SubscribeEvent
+	public void onCharTyped(final KeyboardCharTypedEvent.Pre event) {
 		for (final IChatOverlay overlay : this.overlays)
 			if (overlay.onCharTyped(event.getCodePoint(), event.getModifiers())) {
 				event.setCanceled(true);
@@ -182,8 +238,8 @@ public class EventHandler extends CompatHandler {
 			}
 	}
 
-	@Override
-	public void onKeyPressed(final CompatGuiScreenEvent.CompatKeyboardKeyPressedEvent.CompatPre event) {
+	@SubscribeEvent
+	public void onKeyPressed(final KeyboardKeyPressedEvent.Pre event) {
 		for (final IChatOverlay overlay : this.overlays)
 			if (overlay.onKeyPressed(event.getKeyCode())) {
 				event.setCanceled(true);

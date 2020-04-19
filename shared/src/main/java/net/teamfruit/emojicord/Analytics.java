@@ -1,13 +1,12 @@
 package net.teamfruit.emojicord;
 
-import java.lang.reflect.Method;
-import java.util.Locale;
-import java.util.prefs.BackingStoreException;
-import java.util.prefs.Preferences;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.Session;
+import net.teamfruit.emojicord.compat.Compat;
+import net.teamfruit.emojicord.compat.Compat.CompatMinecraftVersion;
+import net.teamfruit.emojicord.emoji.Endpoint;
+import net.teamfruit.emojicord.util.DataUtils;
+import net.teamfruit.emojicord.util.Downloader;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -17,15 +16,16 @@ import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 
-import net.teamfruit.emojicord.compat.Compat.CompatMinecraft;
-import net.teamfruit.emojicord.compat.Compat.CompatMinecraftVersion;
-import net.teamfruit.emojicord.compat.Compat.CompatSession;
-import net.teamfruit.emojicord.emoji.Endpoint;
-import net.teamfruit.emojicord.util.DataUtils;
-import net.teamfruit.emojicord.util.Downloader;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.lang.reflect.Method;
+import java.util.Locale;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 
 public class Analytics {
-	public static final @Nonnull Analytics instance = new Analytics();
+	public static final @Nonnull
+	Analytics instance = new Analytics();
 
 	private final AnalyticsPreferences preferences = new AnalyticsPreferences();
 
@@ -46,8 +46,8 @@ public class Analytics {
 	private AnalyticsRequest gatherRequest() {
 		final AnalyticsRequest request = new AnalyticsRequest();
 
-		final CompatMinecraft minecraft = CompatMinecraft.getMinecraft();
-		final CompatSession session = minecraft.getSession();
+		final Minecraft minecraft = Compat.getMinecraft();
+		final Session session = minecraft.getSession();
 
 		request.identifier.userid = session.getPlayerID();
 		request.identifier.username = session.getUsername();
@@ -61,7 +61,7 @@ public class Analytics {
 		request.version.mod.forge = VersionReference.FORGE;
 		request.version.mod.mod = VersionReference.VERSION;
 
-		request.environment.lang = minecraft.getSettings().getLanguage();
+		request.environment.lang = minecraft.gameSettings.language;
 		request.environment.locale = Locale.getDefault().toString();
 
 		return request;
@@ -69,18 +69,18 @@ public class Analytics {
 
 	private boolean collectResponse(final AnalyticsResponse response) {
 		final AnalyticsResponse.Identifier identifier = response.identifier;
-		if (identifier!=null) {
+		if (identifier != null) {
 			boolean hasChanged = false;
-			if (identifier.clientid!=null) {
+			if (identifier.clientid != null) {
 				this.preferences.setClientId(identifier.clientid);
 				hasChanged = true;
 			}
-			final CompatMinecraft minecraft = CompatMinecraft.getMinecraft();
-			final CompatSession session = minecraft.getSession();
-			if (session!=null) {
+			final Minecraft minecraft = Compat.getMinecraft();
+			final Session session = minecraft.getSession();
+			if (session != null) {
 				final String userid = session.getPlayerID();
 				if (!StringUtils.isEmpty(userid))
-					if (identifier.token!=null) {
+					if (identifier.token != null) {
 						this.preferences.setToken(userid, identifier.token);
 						hasChanged = true;
 					}
@@ -93,12 +93,12 @@ public class Analytics {
 
 	private boolean process() throws Exception {
 		final String url = Endpoint.EMOJI_API.api.analytics;
-		if (url==null)
+		if (url == null)
 			return false;
 
 		final AnalyticsRequest sendData = gatherRequest();
 		final String sendJson = DataUtils.saveString(AnalyticsRequest.class, sendData, "Analytics Request");
-		if (sendJson==null)
+		if (sendJson == null)
 			return false;
 
 		final HttpPost req = new HttpPost(url);
@@ -107,15 +107,15 @@ public class Analytics {
 		final HttpResponse response = Downloader.downloader.client.execute(req, context);
 
 		final int statusCode = response.getStatusLine().getStatusCode();
-		if (statusCode!=HttpStatus.SC_OK) {
-			Log.log.debug("Failed to send Analytics: "+statusCode);
+		if (statusCode != HttpStatus.SC_OK) {
+			Log.log.debug("Failed to send Analytics: " + statusCode);
 			return false;
 		}
 
 		final HttpEntity resultEntity = response.getEntity();
 		final AnalyticsResponse resultData = DataUtils.loadStream(resultEntity.getContent(), AnalyticsResponse.class, "Analytics Response");
 
-		if (resultData==null)
+		if (resultData == null)
 			return false;
 
 		return collectResponse(resultData);
@@ -221,11 +221,14 @@ public class Analytics {
 	}
 
 	public static class AnalyticsResponse {
-		public @Nullable Identifier identifier = new Identifier();
+		public @Nullable
+		Identifier identifier = new Identifier();
 
 		public static class Identifier {
-			public @Nullable String clientid;
-			public @Nullable String token;
+			public @Nullable
+			String clientid;
+			public @Nullable
+			String token;
 		}
 	}
 }

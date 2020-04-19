@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+#if MC_7_LATER
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
@@ -15,12 +16,24 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.network.NetworkCheckHandler;
 import net.minecraftforge.fml.relauncher.Side;
+#else
+import cpw.mods.fml.common.Mod;
+import cpw.mods.fml.common.Mod.EventHandler;
+import cpw.mods.fml.common.Mod.Instance;
+import cpw.mods.fml.common.SidedProxy;
+import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLPostInitializationEvent;
+import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.network.NetworkCheckHandler;
+import cpw.mods.fml.relauncher.Side;
+#endif
+
 import net.teamfruit.emojicord.compat.CompatBaseProxy;
 import net.teamfruit.emojicord.compat.CompatBaseProxy.CompatFMLInitializationEvent;
 import net.teamfruit.emojicord.compat.CompatBaseProxy.CompatFMLPostInitializationEvent;
 import net.teamfruit.emojicord.compat.CompatBaseProxy.CompatFMLPreInitializationEvent;
 
-@Mod(modid = Reference.MODID, name = Reference.NAME, version = VersionReference.VERSION, guiFactory = Reference.GUI_FACTORY, updateJSON = Reference.UPDATE_JSON)
+@Mod(modid = Reference.MODID, name = Reference.NAME, version = VersionReference.VERSION, guiFactory = Reference.GUI_FACTORY #if MC_7_LATER , updateJSON = Reference.UPDATE_JSON #endif )
 public class Emojicord {
 	@Instance(Reference.MODID)
 	public static @Nullable Emojicord instance;

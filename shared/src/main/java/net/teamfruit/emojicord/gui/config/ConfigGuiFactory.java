@@ -1,36 +1,44 @@
 package net.teamfruit.emojicord.gui.config;
 
-import javax.annotation.Nullable;
-
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
-
+import cpw.mods.fml.client.IModGuiFactory;
 import net.minecraft.client.Minecraft;
-import net.teamfruit.emojicord.Log;
-import net.teamfruit.emojicord.compat.CompatGui;
-import net.teamfruit.emojicord.util.DynamicClassUtils;
+import net.minecraft.client.gui.GuiScreen;
 
-public class ConfigGuiFactory extends CompatGui.CompatModGuiFactory {
-	private final Supplier<Class<?>> configGuiClassSupplier = Suppliers.memoize(() -> {
-		try {
-			return DynamicClassUtils.instance.createConstructorWrappedClass(ConfigGui.class, Class.forName("net.minecraft.client.gui.GuiScreen"), CompatGui.CompatScreen.class);
-		} catch (final Throwable e) {
-			Log.log.error("Failed to create ASM wrapped class", e);
-		}
+import javax.annotation.Nullable;
+import java.util.Set;
+
+public class ConfigGuiFactory implements IModGuiFactory {
+	@Override
+	public Set<RuntimeOptionCategoryElement> runtimeGuiCategories() {
 		return null;
-	});
+	}
+
+	#if MC_12_OR_LATER
+	@Override
+	public boolean hasConfigGui() {
+		return true;
+	}
+
+	@Override
+	public GuiScreen createConfigGui(final GuiScreen parentScreen) {
+		return new ConfigGui(parentScreen);
+	}
+	#else
+	@SuppressWarnings("deprecation")
+	@Override
+	public RuntimeOptionGuiHandler getHandlerFor(final RuntimeOptionCategoryElement element) {
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public @Nullable
+	Class<? extends GuiScreen> mainConfigGuiClass() {
+		return ConfigGui.class;
+	}
+	#endif
 
 	@Override
 	public void initialize(final @Nullable Minecraft minecraftInstance) {
-	}
-
-	@Override
-	public @Nullable Class<?> mainConfigGuiClassCompat() {
-		return this.configGuiClassSupplier.get();
-	}
-
-	@Override
-	public CompatGui.CompatScreen createConfigGuiCompat(final CompatGui.CompatScreen parentScreen) {
-		return new CompatGui.CompatScreen(new ConfigGui(parentScreen));
 	}
 }

@@ -1,32 +1,34 @@
 package net.teamfruit.emojicord.gui.config;
 
-import java.util.List;
+import com.google.common.collect.Lists;
+import cpw.mods.fml.client.config.GuiConfig;
+import cpw.mods.fml.client.config.IConfigElement;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraftforge.common.config.ConfigCategory;
+import net.minecraftforge.common.config.ConfigElement;
+import net.teamfruit.emojicord.EmojicordConfig;
+import net.teamfruit.emojicord.Reference;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
 
-import com.google.common.collect.Lists;
-
-import net.teamfruit.emojicord.EmojicordConfig;
-import net.teamfruit.emojicord.Reference;
-import net.teamfruit.emojicord.compat.CompatConfig;
-import net.teamfruit.emojicord.compat.CompatGui;
-
-public class ConfigGui extends CompatGui.CompatGuiConfig {
-	public ConfigGui(final @Nullable CompatGui.CompatScreen parent) {
-		super(parent, getConfigElements(), Reference.MODID, false, false, EmojicordConfig.spec.getConfigFile().getName());
+public class ConfigGui extends GuiConfig {
+	public ConfigGui(final @Nullable GuiScreen parent) {
+		super(parent, getConfigElements(), Reference.MODID, false, false, GuiConfig.getAbridgedConfigPath(EmojicordConfig.spec.getConfigFile().getName()));
 	}
 
-	private static @Nonnull List<CompatConfig.CompatConfigElement> getConfigElements() {
-		final List<CompatConfig.CompatConfigElement> list = Lists.newArrayList();
+	private static @Nonnull
+	List<IConfigElement> getConfigElements() {
+		final List<IConfigElement> list = Lists.newArrayList();
 
 		for (final String cat : EmojicordConfig.spec.getConfiguration().getCategoryNames()) {
-			final CompatConfig.CompatConfigCategory cc = EmojicordConfig.spec.getConfiguration().getCategory(cat);
+			final ConfigCategory cc = EmojicordConfig.spec.getConfiguration().getCategory(cat);
 
 			if (cc.isChild())
 				continue;
 
-			list.add(CompatConfig.CompatConfigElement.fromCategory(cc));
+			list.add(new ConfigElement(cc));
 		}
 
 		return list;

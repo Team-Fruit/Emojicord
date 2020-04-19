@@ -96,7 +96,7 @@ public class Downloader {
 			requestConfig.setSocketTimeout(timeout);
 		}
 
-		final Proxy proxy = Compat.CompatMinecraft.getMinecraft().getMinecraftObj().getProxy();
+		final Proxy proxy = Compat.getMinecraft().getProxy();
 		if (proxy!=null&&!Proxy.NO_PROXY.equals(proxy)) {
 			final SocketAddress saddr = proxy.address();
 			if (saddr instanceof InetSocketAddress) {

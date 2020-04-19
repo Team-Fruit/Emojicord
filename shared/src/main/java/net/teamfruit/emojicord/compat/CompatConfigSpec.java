@@ -16,8 +16,14 @@ import com.google.common.collect.Lists;
 import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
+
+#if MC_7_LATER
 import net.minecraftforge.fml.common.FMLCommonHandler;
-import net.teamfruit.emojicord.compat.Compat.CompatSide;
+import net.minecraftforge.fml.relauncher.Side;
+#else
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.relauncher.Side;
+#endif
 
 /*
  * Like {@link com.electronwill.nightconfig.core.ConfigSpec} except in builder format, and extended to acept comments, language keys,
@@ -26,7 +32,7 @@ import net.teamfruit.emojicord.compat.Compat.CompatSide;
 
 public class CompatConfigSpec {
 	private final List<ConfigValue<?>> values;
-	private CompatConfig.CompatConfiguration config;
+	private Configuration config;
 
 	private CompatConfigSpec(final List<ConfigValue<?>> values) {
 		this.values = values;
@@ -36,39 +42,39 @@ public class CompatConfigSpec {
 		return this.config!=null;
 	}
 
-	public CompatConfig.CompatConfiguration configure(final CompatConfig.CompatConfiguration config) {
+	public Configuration configure(final Configuration config) {
 		this.values.forEach(v -> v.apply(config));
 		return this.config = config;
 	}
 
-	public CompatConfig.CompatConfiguration getConfiguration() {
+	public Configuration getConfiguration() {
 		return this.config;
 	}
 
 	public File getConfigFile() {
-		return this.config.config.getConfigFile();
+		return this.config.getConfigFile();
 	}
 
-	public void registerConfigDefine(final CompatSide side) {
+	public void registerConfigDefine(final Side side) {
 	}
 
 	public static interface CompatConfigHandler {
 		void onConfigChanged();
 	}
 
-	public CompatConfigHandler registerConfigHandler(final CompatSide side, final File location) {
-		if (FMLCommonHandler.instance().getEffectiveSide()==side.toSide()) {
-			final CompatConfig.CompatConfiguration config = new CompatConfig.CompatConfiguration(new Configuration(location, null, true));
+	public CompatConfigHandler registerConfigHandler(final Side side, final File location) {
+		if (FMLCommonHandler.instance().getEffectiveSide()==side) {
+			final Configuration config = new Configuration(location, null, true);
 			configure(config);
-			config.config.save();
-			return config.config::save;
+			config.save();
+			return config::save;
 		} else
 			return () -> {
 			};
 	}
 
 	public void save() {
-		this.config.config.save();
+		this.config.save();
 	}
 
 	public static class Builder {
@@ -235,7 +241,7 @@ public class CompatConfigSpec {
 
 		public void apply(final Property builder) {
 			if (this.comment!=null)
-				builder.setComment(LINE_JOINER.join(this.comment));
+				builder. #if MC_7_LATER setComment #else comment = #endif (LINE_JOINER.join(this.comment));
 			if (this.langKey!=null)
 				builder.setLanguageKey(this.langKey);
 			if (this.worldRestart)
@@ -290,9 +296,9 @@ public class CompatConfigSpec {
 			return this.parent;
 		}
 
-		protected abstract Property applyDefine(CompatConfig.CompatConfiguration builder);
+		protected abstract Property applyDefine(Configuration builder);
 
-		public void apply(final CompatConfig.CompatConfiguration builder) {
+		public void apply(final Configuration builder) {
 			this.value = applyDefine(builder);
 		}
 	}
@@ -303,8 +309,8 @@ public class CompatConfigSpec {
 		}
 
 		@Override
-		protected Property applyDefine(final CompatConfig.CompatConfiguration builder) {
-			final ConfigCategory ret = builder.getCategory(DOT_JOINER.join(this.path)).category;
+		protected Property applyDefine(final Configuration builder) {
+			final ConfigCategory ret = builder.getCategory(DOT_JOINER.join(this.path));
 			this.builderContext.apply(ret);
 			return null;
 		}
@@ -325,8 +331,8 @@ public class CompatConfigSpec {
 		}
 
 		@Override
-		protected Property applyDefine(final CompatConfig.CompatConfiguration builder) {
-			final Property ret = builder.config.get(DOT_JOINER.join(this.path.subList(0, this.path.size()-1)), this.path.get(this.path.size()-1), this.defaultSupplier.get());
+		protected Property applyDefine(final Configuration builder) {
+			final Property ret = builder.get(DOT_JOINER.join(this.path.subList(0, this.path.size()-1)), this.path.get(this.path.size()-1), this.defaultSupplier.get());
 			this.builderContext.apply(ret);
 			return ret;
 		}
@@ -348,8 +354,8 @@ public class CompatConfigSpec {
 		}
 
 		@Override
-		protected Property applyDefine(final CompatConfig.CompatConfiguration builder) {
-			final Property ret = builder.config.get(DOT_JOINER.join(this.path.subList(0, this.path.size()-1)), this.path.get(this.path.size()-1), this.defaultSupplier.get());
+		protected Property applyDefine(final Configuration builder) {
+			final Property ret = builder.get(DOT_JOINER.join(this.path.subList(0, this.path.size()-1)), this.path.get(this.path.size()-1), this.defaultSupplier.get());
 			this.builderContext.apply(ret);
 			return ret;
 		}
@@ -371,8 +377,8 @@ public class CompatConfigSpec {
 		}
 
 		@Override
-		protected Property applyDefine(final CompatConfig.CompatConfiguration builder) {
-			final Property ret = builder.config.get(DOT_JOINER.join(this.path.subList(0, this.path.size()-1)), this.path.get(this.path.size()-1), this.defaultSupplier.get());
+		protected Property applyDefine(final Configuration builder) {
+			final Property ret = builder.get(DOT_JOINER.join(this.path.subList(0, this.path.size()-1)), this.path.get(this.path.size()-1), this.defaultSupplier.get());
 			this.builderContext.apply(ret);
 			return ret;
 		}
@@ -394,8 +400,8 @@ public class CompatConfigSpec {
 		}
 
 		@Override
-		protected Property applyDefine(final CompatConfig.CompatConfiguration builder) {
-			final Property ret = builder.config.get(DOT_JOINER.join(this.path.subList(0, this.path.size()-1)), this.path.get(this.path.size()-1), this.defaultSupplier.get());
+		protected Property applyDefine(final Configuration builder) {
+			final Property ret = builder.get(DOT_JOINER.join(this.path.subList(0, this.path.size()-1)), this.path.get(this.path.size()-1), this.defaultSupplier.get());
 			this.builderContext.apply(ret);
 			return ret;
 		}

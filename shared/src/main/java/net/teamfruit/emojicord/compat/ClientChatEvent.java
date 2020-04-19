@@ -6,8 +6,15 @@ import javax.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 
 import net.minecraftforge.common.MinecraftForge;
+
+#if MC_7_LATER
 import net.minecraftforge.fml.common.eventhandler.Cancelable;
 import net.minecraftforge.fml.common.eventhandler.Event;
+#else
+import cpw.mods.fml.common.eventhandler.Cancelable;
+import cpw.mods.fml.common.eventhandler.Event;
+#endif
+
 import net.teamfruit.emojicord.CoreInvoke;
 
 @Cancelable
