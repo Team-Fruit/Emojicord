@@ -13,9 +13,20 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.tree.ClassNode;
 
-import net.minecraft.launchwrapper.IClassTransformer;
+#if MC_12_LATER
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
 
-public abstract class CompatTransformer implements IClassTransformer {
+import cpw.mods.modlauncher.api.ITransformer;
+import cpw.mods.modlauncher.api.ITransformerVotingContext;
+import cpw.mods.modlauncher.api.TransformerVoteResult;
+import java.util.Arrays;
+import java.util.stream.Collectors;
+#else
+import net.minecraft.launchwrapper.IClassTransformer;
+#endif
+
+public abstract class CompatTransformer implements #if MC_12_LATER ITransformer<ClassNode> #else IClassTransformer #endif {
 	private static final Logger LOGGER = LogManager.getLogger();
 
 	public abstract ClassNode read(@Nonnull byte[] bytes);
@@ -34,19 +45,37 @@ public abstract class CompatTransformer implements IClassTransformer {
 	public static class DeferredTransform {
 		private final String thisname;
 		private final String targetname;
+		#if MC_12_LATER
+		private Supplier<Boolean> shouldDeferSupplier;
+		#endif
 
 		public DeferredTransform(final String thisname, final String targetname) {
 			this.thisname = thisname;
 			this.targetname = targetname;
+			#if MC_12_LATER
+			this.shouldDeferSupplier = Suppliers.memoize(() -> {
+				try {
+					Class.forName(this.targetname, false, getClass().getClassLoader());
+					return true;
+				} catch (final ClassNotFoundException e) {
+				}
+				return false;
+			});
+			#endif
 		}
 
+		public boolean hasTarget() {
+			return this. #if MC_12_LATER shouldDeferSupplier.get() #else targetfound #endif ;
+		}
+
+		#if MC_12_LATER
+		public boolean shouldDefer() {
+			return this.shouldDeferSupplier.get();
+		}
+		#else
 		private boolean targetloaded;
 		private boolean targetinitialized;
 		private boolean targetfound;
-
-		public boolean hasTarget() {
-			return this.targetfound;
-		}
 
 		public void transform(final String name, final String transformedName) {
 			if (StringUtils.equals(transformedName, "$wrapper."+this.targetname))
@@ -80,8 +109,30 @@ public abstract class CompatTransformer implements IClassTransformer {
 				}
 			}
 		}
+		#endif
 	}
 
+	#if MC_12_LATER
+	private boolean deferred = false;
+
+	@Override
+	public TransformerVoteResult castVote(final ITransformerVotingContext context) {
+		if (this.deferred)
+			return TransformerVoteResult.YES;
+		this.deferred = true;
+		return Arrays.stream(deferredTransforms()).anyMatch(DeferredTransform::shouldDefer) ? TransformerVoteResult.DEFER : TransformerVoteResult.YES;
+	}
+
+	@Override
+	public Set<Target> targets() {
+		return targetNames().stream().map(Target::targetClass).collect(Collectors.toSet());
+	}
+
+	@Override
+	public ClassNode transform(final ClassNode input, final ITransformerVotingContext context) {
+		return transform(input, new CompatTransformerVotingContext());
+	}
+	#else
 	@Override
 	public byte[] transform(final String name, final String transformedName, byte[] bytes) {
 		if (bytes==null||name==null||transformedName==null)
@@ -103,4 +154,5 @@ public abstract class CompatTransformer implements IClassTransformer {
 
 		return bytes;
 	}
+	#endif
 }

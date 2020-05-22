@@ -2,13 +2,17 @@ package net.teamfruit.emojicord;
 
 import java.io.File;
 
-import net.teamfruit.emojicord.compat.Compat;
-
 public class Locations {
 	public static final Locations instance = new Locations();
 
 	public File getMinecraftDirectory() {
-		final File gameDir = Compat.getMinecraft().mcDataDir;
+		final File gameDir =
+				#if MC_12_LATER
+				net.minecraftforge.fml.loading.FMLPaths.GAMEDIR.get().toFile()
+				#else
+				net.teamfruit.emojicord.compat.Compat.getMinecraft().mcDataDir
+				#endif
+				;
 		//try {
 		//	gameDir = gameDir.getCanonicalFile();
 		//} catch (final IOException e) {

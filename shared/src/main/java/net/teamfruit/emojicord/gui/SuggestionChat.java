@@ -1,5 +1,13 @@
 package net.teamfruit.emojicord.gui;
 
+#if MC_12_LATER
+import net.minecraft.client.gui.screen.ChatScreen;
+import net.minecraft.client.gui.widget.TextFieldWidget;
+#else
+import net.minecraft.client.gui.GuiChat;
+import net.minecraft.client.gui.GuiTextField;
+#endif
+
 import com.google.common.collect.Iterables;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.StringReader;
@@ -7,8 +15,6 @@ import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.GuiChat;
-import net.minecraft.client.gui.GuiTextField;
 import net.teamfruit.emojicord.EmojicordConfig;
 import net.teamfruit.emojicord.compat.Compat;
 import net.teamfruit.emojicord.compat.CompatBaseVersion;
@@ -25,8 +31,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SuggestionChat implements IChatOverlay {
-	public final GuiChat chatScreen;
-	public final GuiTextField inputField;
+	public final #if MC_12_LATER ChatScreen #else GuiChat #endif chatScreen;
+	public final #if MC_12_LATER TextFieldWidget #else GuiTextField #endif inputField;
 	public final FontRenderer font;
 	public int mouseX, mouseY;
 	private SuggestionsList suggestions;
@@ -34,7 +40,7 @@ public class SuggestionChat implements IChatOverlay {
 	private boolean applyingSuggestion;
 	private String inputFieldTextLast;
 
-	public SuggestionChat(final GuiChat chatScreen) {
+	public SuggestionChat(final #if MC_12_LATER ChatScreen #else GuiChat #endif chatScreen) {
 		this.chatScreen = chatScreen;
 		this.font = Compat.getMinecraft(). #if MC_10 fontRendererObj #else fontRenderer #endif ;
 		this.inputField = chatScreen.inputField;

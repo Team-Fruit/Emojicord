@@ -1,6 +1,8 @@
 package net.teamfruit.emojicord;
 
-#if MC_7_LATER
+#if MC_12_LATER
+import net.minecraftforge.api.distmarker.Dist;
+#elif MC_7_LATER
 import net.minecraftforge.fml.relauncher.Side;
 #else
 import cpw.mods.fml.relauncher.Side;
@@ -20,8 +22,8 @@ public class ClientProxy extends CommonProxy {
 	public void preInit(final @Nonnull CompatFMLPreInitializationEvent event) {
 		super.preInit(event);
 
-		EmojicordConfig.spec.registerConfigDefine(Side.CLIENT);
-		EmojicordConfig.spec.registerConfigHandler(Side.CLIENT, event.getSuggestedConfigurationFile());
+		EmojicordConfig.spec.registerConfigDefine( #if MC_12_LATER Dist #else Side #endif .CLIENT);
+		EmojicordConfig.spec.registerConfigHandler( #if MC_12_LATER Dist #else Side #endif .CLIENT, event.getSuggestedConfigurationFile());
 
 		CompatVersionChecker.startVersionCheck(Reference.MODID, VersionReference.VERSION, Reference.UPDATE_JSON);
 	}

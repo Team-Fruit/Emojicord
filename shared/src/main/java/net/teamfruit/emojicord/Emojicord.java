@@ -6,7 +6,14 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-#if MC_7_LATER
+#if MC_12_LATER
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+#elif MC_7_LATER
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
@@ -33,57 +40,100 @@ import net.teamfruit.emojicord.compat.CompatBaseProxy.CompatFMLInitializationEve
 import net.teamfruit.emojicord.compat.CompatBaseProxy.CompatFMLPostInitializationEvent;
 import net.teamfruit.emojicord.compat.CompatBaseProxy.CompatFMLPreInitializationEvent;
 
-@Mod(modid = Reference.MODID, name = Reference.NAME, version = VersionReference.VERSION, guiFactory = Reference.GUI_FACTORY #if MC_7_LATER , updateJSON = Reference.UPDATE_JSON #endif )
+@Mod(
+		#if MC_12_LATER
+		value = Reference.MODID
+		#else
+		modid = Reference.MODID,
+		name = Reference.NAME,
+		version = VersionReference.VERSION,
+		guiFactory = Reference.GUI_FACTORY
+		#if MC_7_LATER , updateJSON = Reference.UPDATE_JSON #endif
+		#endif
+)
 public class Emojicord {
+	#if !MC_12_LATER
 	@Instance(Reference.MODID)
+	#endif
 	public static @Nullable Emojicord instance;
 
+	#if !MC_12_LATER
 	@SidedProxy(serverSide = Reference.PROXY_SERVER, clientSide = Reference.PROXY_CLIENT)
-	public static @Nullable CompatBaseProxy proxy;
+	#endif
+	public static @Nullable CompatBaseProxy proxy
+	#if MC_12_LATER
+	= DistExecutor.<CompatBaseProxy> runForDist(() -> () -> {
+		try {
+			return (CompatBaseProxy) Class.forName(Reference.PROXY_CLIENT).newInstance();
+		} catch (InstantiationException|IllegalAccessException|ClassNotFoundException e) {
+			throw new RuntimeException("Could not load proxy class: ", e);
+		}
+	}, () -> () -> {
+		try {
+			return (CompatBaseProxy) Class.forName(Reference.PROXY_SERVER).newInstance();
+		} catch (InstantiationException|IllegalAccessException|ClassNotFoundException e) {
+			throw new RuntimeException("Could not load proxy class: ", e);
+		}
+	})
+	#endif
+	;
 
+	#if MC_12_LATER
+	public Emojicord() {
+		instance = this;
+
+		// FMLJavaModLoadingContext.get().getModEventBus().addListener(this::preInit);
+		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::init);
+		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::postInit);
+
+		if (proxy!=null)
+			proxy.preInit(new CompatFMLPreInitializationEventImpl());
+	}
+	#else
 	@NetworkCheckHandler
 	public boolean checkModList(final @Nonnull Map<String, String> versions, final @Nonnull Side side) {
 		return true;
 	}
+	#endif
 
+	#if !MC_12_LATER
 	@EventHandler
 	public void preInit(final @Nonnull FMLPreInitializationEvent event) {
 		if (proxy!=null)
 			proxy.preInit(new CompatFMLPreInitializationEventImpl(event));
 	}
+	#endif
 
-	@EventHandler
-	public void init(final @Nonnull FMLInitializationEvent event) {
+	#if MC_12_LATER @SubscribeEvent #else @EventHandler #endif
+	public void init(final @Nonnull #if MC_12_LATER FMLClientSetupEvent #else FMLInitializationEvent #endif event) {
 		if (proxy!=null)
-			proxy.init(new CompatFMLInitializationEventImpl(event));
+			proxy.init(new CompatFMLInitializationEventImpl());
 	}
 
-	@EventHandler
-	public void postInit(final @Nonnull FMLPostInitializationEvent event) {
+	#if MC_12_LATER @SubscribeEvent #else @EventHandler #endif
+	public void postInit(final @Nonnull #if MC_12_LATER FMLLoadCompleteEvent #else FMLPostInitializationEvent #endif event) {
 		if (proxy!=null)
-			proxy.postInit(new CompatFMLPostInitializationEventImpl(event));
+			proxy.postInit(new CompatFMLPostInitializationEventImpl());
 	}
 
 	private static class CompatFMLPreInitializationEventImpl implements CompatFMLPreInitializationEvent {
+		#if !MC_12_LATER
 		private final @Nonnull FMLPreInitializationEvent event;
 
 		public CompatFMLPreInitializationEventImpl(final FMLPreInitializationEvent event) {
 			this.event = event;
 		}
+		#endif
 
 		@Override
 		public File getSuggestedConfigurationFile() {
-			return this.event.getSuggestedConfigurationFile();
+			return #if MC_12_LATER null #else this.event.getSuggestedConfigurationFile() #endif ;
 		}
 	}
 
 	private static class CompatFMLInitializationEventImpl implements CompatFMLInitializationEvent {
-		public CompatFMLInitializationEventImpl(final FMLInitializationEvent event) {
-		}
 	}
 
 	private static class CompatFMLPostInitializationEventImpl implements CompatFMLPostInitializationEvent {
-		public CompatFMLPostInitializationEventImpl(final FMLPostInitializationEvent event) {
-		}
 	}
 }

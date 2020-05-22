@@ -13,11 +13,19 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
+#if MC_12_LATER
+import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.config.ModConfig;
+#else
 import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
+#endif
 
-#if MC_7_LATER
+#if MC_12_LATER
+#elif MC_7_LATER
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 #else
@@ -31,17 +39,33 @@ import cpw.mods.fml.relauncher.Side;
  */
 
 public class CompatConfigSpec {
+	#if MC_12_LATER
+	private final ForgeConfigSpec spec;
+	private File location;
+	#else
 	private final List<ConfigValue<?>> values;
 	private Configuration config;
+	#endif
 
+	#if MC_12_LATER
+	private CompatConfigSpec(final ForgeConfigSpec spec) {
+		this.spec = spec;
+	}
+	#else
 	private CompatConfigSpec(final List<ConfigValue<?>> values) {
 		this.values = values;
 	}
+	#endif
 
 	public boolean isAvailable() {
-		return this.config!=null;
+		return #if MC_12_LATER true #else this.config!=null #endif ;
 	}
 
+	#if MC_12_LATER
+	public ForgeConfigSpec getSpec() {
+		return this.spec;
+	}
+	#else
 	public Configuration configure(final Configuration config) {
 		this.values.forEach(v -> v.apply(config));
 		return this.config = config;
@@ -50,18 +74,47 @@ public class CompatConfigSpec {
 	public Configuration getConfiguration() {
 		return this.config;
 	}
+	#endif
 
 	public File getConfigFile() {
+		#if MC_12_LATER
+		return this.location;
+		#else
 		return this.config.getConfigFile();
+		#endif
 	}
 
+	#if MC_12_LATER
+	private ModConfig.Type toModConfigType(Dist side) {
+		switch (side) {
+			case CLIENT:
+				return ModConfig.Type.CLIENT;
+			case DEDICATED_SERVER:
+				return ModConfig.Type.SERVER;
+			default:
+				return ModConfig.Type.COMMON;
+		}
+	}
+
+	public void registerConfigDefine(final Dist side) {
+		ModLoadingContext.get().registerConfig(toModConfigType(side), this.spec);
+	}
+	#else
 	public void registerConfigDefine(final Side side) {
 	}
+	#endif
 
 	public static interface CompatConfigHandler {
 		void onConfigChanged();
 	}
 
+	#if MC_12_LATER
+	public CompatConfigHandler registerConfigHandler(final Dist side, final File location) {
+		this.location = location;
+		return () -> {
+		};
+	}
+	#else
 	public CompatConfigHandler registerConfigHandler(final Side side, final File location) {
 		if (FMLCommonHandler.instance().getEffectiveSide()==side) {
 			final Configuration config = new Configuration(location, null, true);
@@ -72,13 +125,21 @@ public class CompatConfigSpec {
 			return () -> {
 			};
 	}
+	#endif
 
 	public void save() {
+		#if MC_12_LATER
+		this.spec.save();
+		#else
 		this.config.save();
+		#endif
 	}
 
 	public static class Builder {
 		private BuilderContext context = new BuilderContext();
+		#if MC_12_LATER
+		private ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+		#else
 		private List<String> currentPath = new ArrayList<>();
 		private List<ConfigValue<?>> values = new ArrayList<>();
 
@@ -88,6 +149,7 @@ public class CompatConfigSpec {
 			list.addAll(rhs);
 			return list;
 		}
+		#endif
 
 		//string
 		public StringValue define(final String path, final String defaultValue) {
@@ -95,9 +157,14 @@ public class CompatConfigSpec {
 		}
 
 		public StringValue defineString(final List<String> path, final Supplier<String> defaultSupplier) {
+			#if MC_12_LATER
+			final StringValue ret = new StringValue(this, path, defaultSupplier, this.context);
+			ret.apply(this.builder);
+			#else
 			final List<String> newpath = concat(this.currentPath, path);
 			final StringValue ret = new StringValue(this, newpath, defaultSupplier, this.context);
 			this.values.add(ret);
+			#endif
 			this.context = new BuilderContext();
 			return ret;
 		}
@@ -108,9 +175,14 @@ public class CompatConfigSpec {
 		}
 
 		private BooleanValue defineBoolean(final List<String> path, final Supplier<Boolean> defaultSupplier) {
+			#if MC_12_LATER
+			final BooleanValue ret = new BooleanValue(this, path, defaultSupplier, this.context);
+			ret.apply(this.builder);
+			#else
 			final List<String> newpath = concat(this.currentPath, path);
 			final BooleanValue ret = new BooleanValue(this, newpath, defaultSupplier, this.context);
 			this.values.add(ret);
+			#endif
 			this.context = new BuilderContext();
 			return ret;
 		}
@@ -121,9 +193,14 @@ public class CompatConfigSpec {
 		}
 
 		private IntValue defineInt(final List<String> path, final Supplier<Integer> defaultSupplier) {
+			#if MC_12_LATER
+			final IntValue ret = new IntValue(this, path, defaultSupplier, this.context);
+			ret.apply(this.builder);
+			#else
 			final List<String> newpath = concat(this.currentPath, path);
 			final IntValue ret = new IntValue(this, newpath, defaultSupplier, this.context);
 			this.values.add(ret);
+			#endif
 			this.context = new BuilderContext();
 			return ret;
 		}
@@ -134,13 +211,19 @@ public class CompatConfigSpec {
 		}
 
 		private DoubleValue defineDouble(final List<String> path, final Supplier<Double> defaultSupplier) {
+			#if MC_12_LATER
+			final DoubleValue ret = new DoubleValue(this, path, defaultSupplier, this.context);
+			ret.apply(this.builder);
+			#else
 			final List<String> newpath = concat(this.currentPath, path);
 			final DoubleValue ret = new DoubleValue(this, newpath, defaultSupplier, this.context);
 			this.values.add(ret);
+			#endif
 			this.context = new BuilderContext();
 			return ret;
 		}
 
+		#if !MC_12_LATER
 		private CategoryValue defineCategory(final List<String> path, final Supplier<Void> defaultSupplier) {
 			final List<String> newpath = concat(this.currentPath, path);
 			final CategoryValue ret = new CategoryValue(this, newpath, defaultSupplier, this.context);
@@ -148,6 +231,7 @@ public class CompatConfigSpec {
 			this.context = new BuilderContext();
 			return ret;
 		}
+		#endif
 
 		public Builder comment(final String comment) {
 			this.context.setComment(comment);
@@ -174,8 +258,16 @@ public class CompatConfigSpec {
 		}
 
 		public Builder push(final List<String> path) {
+			#if MC_12_LATER
+			final String[] comment = this.context.getComment();
+			if (comment!=null)
+				this.builder.comment(comment);
+			this.builder.push(path);
+			this.context = new BuilderContext();
+			#else
 			defineCategory(path, () -> null);
 			this.currentPath.addAll(path);
+			#endif
 			return this;
 		}
 
@@ -184,10 +276,14 @@ public class CompatConfigSpec {
 		}
 
 		public Builder pop(final int count) {
+			#if MC_12_LATER
+			this.builder.pop(count);
+			#else
 			if (count>this.currentPath.size())
 				throw new IllegalArgumentException("Attempted to pop "+count+" elements when we only had: "+this.currentPath);
 			for (int x = 0; x<count; x++)
 				this.currentPath.remove(this.currentPath.size()-1);
+			#endif
 			return this;
 		}
 
@@ -198,7 +294,7 @@ public class CompatConfigSpec {
 
 		public CompatConfigSpec build() {
 			this.context.ensureEmpty();
-			return new CompatConfigSpec(Lists.newArrayList(this.values));
+			return new CompatConfigSpec( #if MC_12_LATER this.builder.build() #else Lists.newArrayList(this.values) #endif );
 		}
 
 		public interface BuilderConsumer {
@@ -213,6 +309,10 @@ public class CompatConfigSpec {
 
 		public void setComment(final String... value) {
 			this.comment = value;
+		}
+
+		public String[] getComment() {
+			return this.comment;
 		}
 
 		public void setTranslationKey(final String value) {
@@ -239,6 +339,16 @@ public class CompatConfigSpec {
 				throw new IllegalStateException(message);
 		}
 
+		#if MC_12_LATER
+		public void apply(final ForgeConfigSpec.Builder builder) {
+			if (this.comment!=null)
+				builder.comment(this.comment);
+			if (this.langKey!=null)
+				builder.translation(this.langKey);
+			if (this.worldRestart)
+				builder.worldRestart();
+		}
+		#else
 		public void apply(final Property builder) {
 			if (this.comment!=null)
 				builder. #if MC_7_LATER setComment #else comment = #endif (LINE_JOINER.join(this.comment));
@@ -256,6 +366,7 @@ public class CompatConfigSpec {
 			if (this.worldRestart)
 				builder.setRequiresWorldRestart(true);
 		}
+		#endif
 	}
 
 	public static abstract class ConfigValue<T> {
@@ -264,13 +375,15 @@ public class CompatConfigSpec {
 		protected final Supplier<T> defaultSupplier;
 		protected final BuilderContext builderContext;
 
-		protected Property value;
+		protected #if MC_12_LATER ForgeConfigSpec.ConfigValue<T> #else Property #endif value;
 
 		ConfigValue(final Builder parent, final List<String> path, final Supplier<T> defaultSupplier, final BuilderContext builderContext) {
 			this.parent = parent;
 			this.path = path;
 			this.defaultSupplier = defaultSupplier;
+			#if !MC_12_LATER
 			this.parent.values.add(this);
+			#endif
 			this.builderContext = builderContext;
 		}
 
@@ -278,31 +391,52 @@ public class CompatConfigSpec {
 			return Lists.newArrayList(this.path);
 		}
 
+		#if !MC_12_LATER
 		protected abstract T getPropertyValue();
+		protected abstract void setPropertyValue(T value);
+		#endif
 
 		public T get() {
 			Preconditions.checkNotNull(this.value, "Cannot get config value without assigned Config object present");
+			#if MC_12_LATER
+			return this.value.get();
+			#else
 			return getPropertyValue();
+			#endif
 		}
-
-		protected abstract void setPropertyValue(T value);
 
 		public void set(final T value) {
 			Preconditions.checkNotNull(this.value, "Cannot set config value without assigned Config object present");
+			#if MC_12_LATER
+			this.value.set(value);
+			#else
 			setPropertyValue(value);
+			#endif
 		}
 
 		public Builder next() {
 			return this.parent;
 		}
 
+		#if MC_12_LATER
+		protected abstract ForgeConfigSpec.ConfigValue<T> applyDefine(ForgeConfigSpec.Builder builder);
+		#else
 		protected abstract Property applyDefine(Configuration builder);
+		#endif
 
+		#if MC_12_LATER
+		public void apply(final ForgeConfigSpec.Builder builder) {
+			this.builderContext.apply(builder);
+			this.value = applyDefine(builder);
+		}
+		#else
 		public void apply(final Configuration builder) {
 			this.value = applyDefine(builder);
 		}
+		#endif
 	}
 
+	#if !MC_12_LATER
 	public static class CategoryValue extends ConfigValue<Void> {
 		CategoryValue(final Builder parent, final List<String> path, final Supplier<Void> defaultSupplier, final BuilderContext builderContext) {
 			super(parent, path, defaultSupplier, builderContext);
@@ -324,12 +458,19 @@ public class CompatConfigSpec {
 		protected void setPropertyValue(final Void value) {
 		}
 	}
+	#endif
 
 	public static class StringValue extends ConfigValue<String> {
 		StringValue(final Builder parent, final List<String> path, final Supplier<String> defaultSupplier, final BuilderContext builderContext) {
 			super(parent, path, defaultSupplier, builderContext);
 		}
 
+		#if MC_12_LATER
+		@Override
+		protected ForgeConfigSpec.ConfigValue<String> applyDefine(final ForgeConfigSpec.Builder builder) {
+			return builder.define(this.path, this.defaultSupplier, v -> v instanceof String);
+		}
+		#else
 		@Override
 		protected Property applyDefine(final Configuration builder) {
 			final Property ret = builder.get(DOT_JOINER.join(this.path.subList(0, this.path.size()-1)), this.path.get(this.path.size()-1), this.defaultSupplier.get());
@@ -346,6 +487,7 @@ public class CompatConfigSpec {
 		protected void setPropertyValue(final String value) {
 			this.value.set(value);
 		}
+		#endif
 	}
 
 	public static class BooleanValue extends ConfigValue<Boolean> {
@@ -353,6 +495,12 @@ public class CompatConfigSpec {
 			super(parent, path, defaultSupplier, builderContext);
 		}
 
+		#if MC_12_LATER
+		@Override
+		protected ForgeConfigSpec.ConfigValue<Boolean> applyDefine(final ForgeConfigSpec.Builder builder) {
+			return builder.define(this.path, this.defaultSupplier);
+		}
+		#else
 		@Override
 		protected Property applyDefine(final Configuration builder) {
 			final Property ret = builder.get(DOT_JOINER.join(this.path.subList(0, this.path.size()-1)), this.path.get(this.path.size()-1), this.defaultSupplier.get());
@@ -369,6 +517,7 @@ public class CompatConfigSpec {
 		protected void setPropertyValue(final Boolean value) {
 			this.value.set(value);
 		}
+		#endif
 	}
 
 	public static class IntValue extends ConfigValue<Integer> {
@@ -376,6 +525,12 @@ public class CompatConfigSpec {
 			super(parent, path, defaultSupplier, builderContext);
 		}
 
+		#if MC_12_LATER
+		@Override
+		protected ForgeConfigSpec.ConfigValue<Integer> applyDefine(final ForgeConfigSpec.Builder builder) {
+			return builder.define(this.path, this.defaultSupplier, v -> v instanceof Integer);
+		}
+		#else
 		@Override
 		protected Property applyDefine(final Configuration builder) {
 			final Property ret = builder.get(DOT_JOINER.join(this.path.subList(0, this.path.size()-1)), this.path.get(this.path.size()-1), this.defaultSupplier.get());
@@ -392,6 +547,7 @@ public class CompatConfigSpec {
 		protected void setPropertyValue(final Integer value) {
 			this.value.set(value);
 		}
+		#endif
 	}
 
 	public static class DoubleValue extends ConfigValue<Double> {
@@ -399,6 +555,12 @@ public class CompatConfigSpec {
 			super(parent, path, defaultSupplier, builderContext);
 		}
 
+		#if MC_12_LATER
+		@Override
+		protected ForgeConfigSpec.ConfigValue<Double> applyDefine(final ForgeConfigSpec.Builder builder) {
+			return builder.define(this.path, this.defaultSupplier, v -> v instanceof Double);
+		}
+		#else
 		@Override
 		protected Property applyDefine(final Configuration builder) {
 			final Property ret = builder.get(DOT_JOINER.join(this.path.subList(0, this.path.size()-1)), this.path.get(this.path.size()-1), this.defaultSupplier.get());
@@ -415,6 +577,7 @@ public class CompatConfigSpec {
 		protected void setPropertyValue(final Double value) {
 			this.value.set(value);
 		}
+		#endif
 	}
 
 	private static final Joiner LINE_JOINER = Joiner.on("\n");

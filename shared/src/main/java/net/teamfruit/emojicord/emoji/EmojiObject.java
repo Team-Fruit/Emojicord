@@ -1,5 +1,11 @@
 package net.teamfruit.emojicord.emoji;
 
+#if MC_12_LATER
+import net.minecraft.resources.IResourceManager;
+#else
+import net.minecraft.client.resources.IResourceManager;
+#endif
+
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -7,7 +13,6 @@ import com.google.common.cache.RemovalNotification;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.madgag.gif.fmsware.GifDecoder;
 import net.minecraft.client.renderer.texture.SimpleTexture;
-import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.teamfruit.emojicord.Log;
 import net.teamfruit.emojicord.compat.Compat;
@@ -142,15 +147,13 @@ public class EmojiObject {
 		private void checkTextureUploaded() {
 			if (!this.textureUploaded)
 				if (this.imageData != null && this.animationData != null) {
-					if (this.textureLocation != null)
-						deleteGlTexture();
-
 					try {
-						CompatTexture.uploadTexture(this, super::getGlTextureId, this.imageData);
+						deleteGlTexture();
+						CompatTexture.uploadTexture(super::getGlTextureId, this.imageData);
 						this.animation = this.animationData.stream().map(e -> {
 							final SimpleTexture t = new SimpleTexture(this.textureResourceLocation);
 							try {
-								CompatTexture.uploadTexture(t, t::getGlTextureId, e.getRight());
+								CompatTexture.uploadTexture(t::getGlTextureId, e.getRight());
 							} catch (final IOException e1) {
 								throw new UncheckedIOException(e1);
 							}
@@ -164,11 +167,9 @@ public class EmojiObject {
 					this.animationData = null;
 					this.textureUploaded = true;
 				} else if (this.rawData != null) {
-					if (this.textureLocation != null)
-						deleteGlTexture();
-
 					try {
-						CompatTexture.uploadTexture(this, super::getGlTextureId, new ByteArrayInputStream(this.rawData));
+						deleteGlTexture();
+						CompatTexture.uploadTexture(super::getGlTextureId, new ByteArrayInputStream(this.rawData));
 					} catch (final IOException e) {
 						Log.log.warn("Failed to load texture: ", e);
 					}

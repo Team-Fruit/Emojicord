@@ -1,5 +1,9 @@
 package net.teamfruit.emojicord.emoji;
 
+import net.minecraft.client.gui.fonts.TexturedGlyph;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.util.ResourceLocation;
 import net.teamfruit.emojicord.CoreInvoke;
 import net.teamfruit.emojicord.EmojicordConfig;
 import net.teamfruit.emojicord.EmojicordScope;
@@ -11,6 +15,7 @@ import net.teamfruit.emojicord.emoji.EmojiContext.EmojiContextAttribute;
 import net.teamfruit.emojicord.emoji.EmojiText.EmojiTextElement;
 import org.lwjgl.opengl.GL11;
 
+import javax.annotation.Nullable;
 import java.util.EnumSet;
 
 @CoreInvoke
@@ -63,7 +68,7 @@ public class EmojiFontRenderer {
 		public CompatTexturedGlyph(final ResourceLocation texture, final float width, final float height) {
 		}
 
-		public void onRender(final TextureManager textureManager, final boolean hasShadow, final float x, final float y, final CompatBufferBuilder vbuilder, final float red, final float green, final float blue, final float alpha) {
+		public void onRender(final TextureManager textureManager, final boolean hasShadow, final float x, final float y, final BufferBuilder vbuilder, final float red, final float green, final float blue, final float alpha) {
 		}
 	}
 
@@ -100,14 +105,18 @@ public class EmojiFontRenderer {
 
 	@CoreInvoke
 	public static class EmojiTexturedGlyph extends TexturedGlyph {
+		public EmojiTexturedGlyph(final ResourceLocation texture, final float width, final float height) {
+			super(texture, 0, 1, 0, 1, 0, width, 0+3, height+3);
+		}
+
 		public EmojiTexturedGlyph(final EmojiId emojiId) {
-			super(EmojiObject.EmojiObjectCache.instance.getEmojiObject(emojiId).loadAndGetResourceLocation(), EmojiGlyph.GlyphWidth, EmojiGlyph.GlyphHeight);
+			this(EmojiObject.EmojiObjectCache.instance.getEmojiObject(emojiId).loadAndGetResourceLocation(), EmojiGlyph.GlyphWidth, EmojiGlyph.GlyphHeight);
 		}
 
 		@Override
-		public void onRender(final TextureManager textureManager, final boolean hasShadow, final float x, final float y, final CompatBufferBuilder vbuilder, final float red, final float green, final float blue, final float alpha) {
+		public void render(final TextureManager textureManager, final boolean hasShadow, final float x, final float y, final BufferBuilder vbuilder, final float red, final float green, final float blue, final float alpha) {
 			if (!shadow)
-				super.onRender(textureManager, hasShadow, x, y, vbuilder, 1, 1, 1, alpha);
+				super.render(textureManager, hasShadow, x, y, vbuilder, 1, 1, 1, alpha);
 		}
 	}
 	#else

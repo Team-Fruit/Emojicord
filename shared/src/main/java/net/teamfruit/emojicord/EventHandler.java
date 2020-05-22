@@ -1,20 +1,34 @@
 package net.teamfruit.emojicord;
 
+#if MC_12_LATER
+import net.minecraft.client.gui.screen.ChatScreen;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraftforge.event.TickEvent.ClientTickEvent;
+import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.event.TickEvent;
+#else
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
+import net.minecraft.client.gui.GuiChat;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+#endif
+
+#if (MC_7_LATER && !MC_12_LATER)
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+#endif
+
 #if MC_7_LATER
 import net.minecraftforge.client.event.GuiScreenEvent.*;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.client.event.ClientChatEvent;
 #else
 import net.teamfruit.emojicord.compat.KeyboardInputEvent;
 import net.teamfruit.emojicord.compat.MouseInputEvent;
 import cpw.mods.fml.client.event.ConfigChangedEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
-#endif
-
-#if MC_7_LATER
-import net.minecraftforge.client.event.ClientChatEvent;
-#else
 import net.teamfruit.emojicord.compat.ClientChatEvent;
 #endif
 
@@ -23,10 +37,7 @@ import net.minecraftforge.common.MinecraftForge;
 
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import net.minecraft.client.gui.GuiChat;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.client.event.GuiScreenEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.teamfruit.emojicord.emoji.EmojiFrequently;
 import net.teamfruit.emojicord.emoji.EmojiText;
 import net.teamfruit.emojicord.emoji.PickerItem;
@@ -34,8 +45,6 @@ import net.teamfruit.emojicord.gui.EmojiSelectionChat;
 import net.teamfruit.emojicord.gui.EmojiSettings;
 import net.teamfruit.emojicord.gui.IChatOverlay;
 import net.teamfruit.emojicord.gui.SuggestionChat;
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -64,7 +73,7 @@ public class EventHandler {
 	static final @Nonnull
 	Pattern skintonePattern = Pattern.compile("\\:skin-tone-(\\d)\\:");
 
-	private final List<Function<GuiChat, IChatOverlay>> overlayFactories = Arrays.asList(
+	private final List<Function< #if MC_12_LATER ChatScreen #else GuiChat #endif , IChatOverlay>> overlayFactories = Arrays.asList(
 			EmojiSettings::new,
 			EmojiSelectionChat::new,
 			SuggestionChat::new);
@@ -136,9 +145,9 @@ public class EventHandler {
 
 	@SubscribeEvent
 	public void onInitGui(final GuiScreenEvent.InitGuiEvent.Post event) {
-		final GuiScreen chatScreen = event. #if MC_7_LATER getGui() #else gui #endif ;
-		if (chatScreen instanceof GuiChat)
-			this.overlays = this.overlayFactories.stream().map(e -> e.apply((GuiChat) chatScreen)).collect(Collectors.toList());
+		final #if MC_12_LATER Screen #else GuiScreen #endif chatScreen = event. #if MC_7_LATER getGui() #else gui #endif ;
+		if (chatScreen instanceof #if MC_12_LATER ChatScreen #else GuiChat #endif )
+			this.overlays = this.overlayFactories.stream().map(e -> e.apply(( #if MC_12_LATER ChatScreen #else GuiChat #endif ) chatScreen)).collect(Collectors.toList());
 		else
 			this.overlays = Collections.emptyList();
 	}
@@ -158,6 +167,7 @@ public class EventHandler {
 		// EmojicordConfig.spec.onConfigChanged();
 	}
 
+	#if !MC_12_LATER
 	@SubscribeEvent
 	public void onMouseClicked(final @Nonnull MouseInputEvent event) {
 		final int button = Mouse.getEventButton();
@@ -169,6 +179,7 @@ public class EventHandler {
 				if (MinecraftForge.EVENT_BUS.post(new MouseReleasedEvent.Pre(event. #if MC_7_LATER getGui() #else gui #endif , button)))
 					event.setCanceled(true);
 	}
+	#endif
 
 	@SubscribeEvent
 	public void onMouseClicked(final MouseClickedEvent.Pre event) {
@@ -188,6 +199,7 @@ public class EventHandler {
 			}
 	}
 
+	#if !MC_12_LATER
 	@SubscribeEvent
 	public void onMouseScroll(final @Nonnull MouseInputEvent event) {
 		final int dwheel = Integer.valueOf(Mouse.getEventDWheel()).compareTo(0);
@@ -195,6 +207,7 @@ public class EventHandler {
 			if (MinecraftForge.EVENT_BUS.post(new MouseScrollEvent.Pre(event. #if MC_7_LATER getGui() #else gui #endif , dwheel)))
 				event.setCanceled(true);
 	}
+	#endif
 
 	@SubscribeEvent
 	public void onMouseScroll(final MouseScrollEvent.Pre event) {

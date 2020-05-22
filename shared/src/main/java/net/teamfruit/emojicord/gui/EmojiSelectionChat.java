@@ -1,16 +1,22 @@
 package net.teamfruit.emojicord.gui;
 
-#if MC_7_LATER
+#if MC_12_LATER
+import net.minecraft.client.gui.screen.ChatScreen;
+import net.minecraft.client.gui.widget.TextFieldWidget;
+#elif MC_7_LATER
+import net.minecraft.client.gui.GuiChat;
+import net.minecraft.client.gui.GuiTextField;
 import net.minecraftforge.common.ForgeVersion;
 #else
+import net.minecraft.client.gui.GuiChat;
+import net.minecraft.client.gui.GuiTextField;
 import net.teamfruit.emojicord.compat.VersionChecker;
 #endif
 
 import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.GuiChat;
-import net.minecraft.client.gui.GuiTextField;
+import net.minecraftforge.fml.VersionChecker;
 import net.teamfruit.emojicord.EmojicordConfig;
 import net.teamfruit.emojicord.OSUtils;
 import net.teamfruit.emojicord.Reference;
@@ -31,8 +37,8 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class EmojiSelectionChat implements IChatOverlay {
-	public final GuiChat chatScreen;
-	public final GuiTextField inputField;
+	public final #if MC_12_LATER ChatScreen #else GuiChat #endif chatScreen;
+	public final #if MC_12_LATER TextFieldWidget #else GuiTextField #endif inputField;
 	public final FontRenderer font;
 	public int mouseX, mouseY;
 	private EmojiSelectionList selectionList;
@@ -42,7 +48,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 	private boolean onButton;
 	private String face = ":smile:";
 
-	public EmojiSelectionChat(final GuiChat chatScreen) {
+	public EmojiSelectionChat(final #if MC_12_LATER ChatScreen #else GuiChat #endif chatScreen) {
 		this.chatScreen = chatScreen;
 		this.font = Compat.getMinecraft(). #if MC_10 fontRendererObj #else fontRenderer #endif ;
 		this.inputField = chatScreen.inputField;
@@ -159,13 +165,13 @@ public class EmojiSelectionChat implements IChatOverlay {
 		private final Rectangle2d rectSettingButton;
 		private final Rectangle2d rectUpdate;
 
-		private final #if MC_7_LATER ForgeVersion.CheckResult #else VersionChecker.CheckResult #endif update;
+		private final #if !MC_12_LATER && MC_7_LATER ForgeVersion #else VersionChecker #endif .CheckResult update;
 
 		private final List<PickerGroup> baseCategories;
 		private final List<Pair<String, PickerGroup>> buttonCategories;
 		private List<PickerGroup> categories;
 
-		private GuiTextField searchField;
+		private #if MC_12_LATER TextFieldWidget #else GuiTextField #endif searchField;
 		private float scrollY;
 		private int scrollY0;
 		private int selectedGroupIndex = -1;
@@ -203,10 +209,10 @@ public class EmojiSelectionChat implements IChatOverlay {
 			this.categories = categories;
 
 			select(0, 0);
-			this.searchField = new GuiTextField( #if MC_7_LATER -1, #endif EmojiSelectionChat.this.font, this.rectInputField.getX(), this.rectInputField.getY(), this.rectInputField.getWidth(), this.rectInputField.getHeight() #if MC_12_LATER , "Search Field" #endif );
+			this.searchField = new #if MC_12_LATER TextFieldWidget #else GuiTextField #endif ( #if !MC_12_LATER && MC_7_LATER -1, #endif EmojiSelectionChat.this.font, this.rectInputField.getX(), this.rectInputField.getY(), this.rectInputField.getWidth(), this.rectInputField.getHeight() #if MC_12_LATER , "Search Field" #endif );
 			this.searchField.setMaxStringLength(256);
 			this.searchField.setEnableBackgroundDrawing(false);
-			this.searchField.setFocused(true);
+			this.searchField. #if MC_12_LATER setFocused2 #else setFocused #endif (true);
 			//this.inputField.setText("");
 			//this.inputField.setTextFormatter(this::formatMessage);
 			//this.inputField.func_212954_a(this::func_212997_a);
@@ -363,7 +369,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 			this.searchField. #if MC_12_LATER render(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY, partialTicks) #else drawTextBox() #endif ;
 			EmojiSelectionChat.this.font.drawString(this.searchField.getText().isEmpty() ? "<:search:631021534705877012>" : "<:close:631021519295741973>", this.rectInputButton.getX() + 1, this.rectInputButton.getY() + 3, 0xFFFFFFFF);
 
-			if (this.update != null && this.update.status == #if MC_7_LATER ForgeVersion #else VersionChecker #endif .Status.OUTDATED) {
+			if (this.update != null && this.update.status == #if !MC_12_LATER && MC_7_LATER ForgeVersion #else VersionChecker #endif .Status.OUTDATED) {
 				IChatOverlay.fill(this.rectUpdate, 0xFF36393F);
 				final String text1 = CompatI18n.format("emojicord.gui.picker.update", this.update.target);
 				EmojiSelectionChat.this.font.drawString(text1, this.rectUpdate.getX() + 2, this.rectUpdate.getY() + 3, 0xFFFFFFFF);
@@ -377,7 +383,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 			if (button == 0)
 				this.mouseDown = true;
 
-			if (this.update != null && this.update.status == #if MC_7_LATER ForgeVersion #else VersionChecker #endif .Status.OUTDATED)
+			if (this.update != null && this.update.status == #if !MC_12_LATER && MC_7_LATER ForgeVersion #else VersionChecker #endif .Status.OUTDATED)
 				if (this.rectUpdate.contains(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY)) {
 					if (this.update.url != null)
 						OSUtils.getOSType().openURI(this.update.url);
@@ -413,7 +419,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 			if (this.rectInputButton.contains(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY)) {
 				if (!this.searchField.getText().isEmpty())
 					this.searchField.setText("");
-				this.searchField.setFocused(true);
+				this.searchField. #if MC_12_LATER setFocused2 #else setFocused #endif (true);
 				onTextChanged();
 				return true;
 			}

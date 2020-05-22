@@ -1,9 +1,15 @@
 package net.teamfruit.emojicord.gui;
 
-import net.minecraft.client.gui.FontRenderer;
+#if MC_12_LATER
+import net.minecraft.client.gui.screen.ChatScreen;
+import net.minecraft.client.gui.widget.TextFieldWidget;
+#else
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraftforge.common.ForgeVersion;
+#endif
+
+import net.minecraft.client.gui.FontRenderer;
 import net.teamfruit.emojicord.*;
 import net.teamfruit.emojicord.compat.Compat;
 import net.teamfruit.emojicord.compat.Compat.CompatI18n;
@@ -12,16 +18,19 @@ import net.teamfruit.emojicord.compat.OpenGL;
 import net.teamfruit.emojicord.emoji.DiscordEmojiIdDictionary;
 import net.teamfruit.emojicord.emoji.Models.EmojiDiscordList;
 import net.teamfruit.emojicord.util.MathHelper;
-#if !MC_7_LATER
+
+#if !MC_12_LATER && MC_7_LATER
 import net.teamfruit.emojicord.compat.VersionChecker;
+#else
+import net.minecraftforge.fml.VersionChecker;
 #endif
 
 public class EmojiSettings implements IChatOverlay {
 	public static Runnable showSettings;
 	public static Runnable onWindowActive;
 
-	public final GuiChat chatScreen;
-	public final GuiTextField inputField;
+	public final #if MC_12_LATER ChatScreen #else GuiChat #endif chatScreen;
+	public final #if MC_12_LATER TextFieldWidget #else GuiTextField #endif inputField;
 	public final FontRenderer font;
 	public int mouseX, mouseY;
 	private EmojiSettingMenu settingMenu;
@@ -53,7 +62,7 @@ public class EmojiSettings implements IChatOverlay {
 		}
 	}
 
-	public EmojiSettings(final GuiChat chatScreen) {
+	public EmojiSettings(final #if MC_12_LATER ChatScreen #else GuiChat #endif chatScreen) {
 		this.chatScreen = chatScreen;
 		this.font = Compat.getMinecraft(). #if MC_10 fontRendererObj #else fontRenderer #endif;
 		this.inputField = chatScreen.inputField;
@@ -128,7 +137,7 @@ public class EmojiSettings implements IChatOverlay {
 		private final Rectangle2d rectUpdate;
 
 		private boolean focused = true;
-		private final #if MC_7_LATER ForgeVersion.CheckResult #else VersionChecker.CheckResult #endif update;
+		private final #if !MC_12_LATER && MC_7_LATER ForgeVersion #else VersionChecker #endif .CheckResult update;
 
 		public EmojiSettingMenu(final int posX, final int posY, final int width, final int height) {
 			this.rectangle = new Rectangle2d(posX - width / 2, posY - height / 2, width, height);
@@ -165,7 +174,7 @@ public class EmojiSettings implements IChatOverlay {
 				OpenGL.glPopMatrix();
 			}
 
-			if (this.update != null && this.update.status == #if MC_7_LATER ForgeVersion #else VersionChecker #endif .Status.OUTDATED) {
+			if (this.update != null && this.update.status == #if !MC_12_LATER && MC_7_LATER ForgeVersion #else VersionChecker #endif .Status.OUTDATED) {
 				{
 					final String name = Reference.NAME;
 					EmojiSettings.this.font.drawString(name, this.rectName.getX(), this.rectName.getY() - 15, 0xFFFFFFFF);
@@ -330,7 +339,7 @@ public class EmojiSettings implements IChatOverlay {
 					}
 				}
 			} else {
-				if (this.update != null && this.update.status == #if MC_7_LATER ForgeVersion #else VersionChecker #endif .Status.OUTDATED)
+				if (this.update != null && this.update.status == #if !MC_12_LATER && MC_7_LATER ForgeVersion #else VersionChecker #endif .Status.OUTDATED)
 					if (this.rectUpdate.contains(EmojiSettings.this.mouseX, EmojiSettings.this.mouseY)) {
 						if (this.update.url != null)
 							OSUtils.getOSType().openURI(this.update.url);
@@ -368,7 +377,7 @@ public class EmojiSettings implements IChatOverlay {
 		public void onTick() {
 			if (EmojiSettings.this.addGui != null) {
 				final boolean lastFocused = this.focused;
-				this.focused = Compat.getMinecraft().inGameHasFocus;
+				this.focused = Compat.getMinecraft(). #if MC_12_LATER isGameFocused() #else inGameHasFocus #endif ;
 				if (this.focused != lastFocused)
 					EmojiSettings.this.addGui.onWindowFocus();
 			}

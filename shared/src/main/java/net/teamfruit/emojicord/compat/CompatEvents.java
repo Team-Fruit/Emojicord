@@ -1,16 +1,22 @@
 package net.teamfruit.emojicord.compat;
 
-#if MC_7_LATER
+#if !MC_12_LATER
+import net.minecraft.client.gui.GuiScreen;
+#endif
+
+#if MC_12_LATER
+import net.minecraftforge.eventbus.api.Cancelable;
+#elif MC_7_LATER
 import net.minecraftforge.fml.common.eventhandler.Cancelable;
 #else
 import cpw.mods.fml.common.eventhandler.Cancelable;
 #endif
 
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.client.event.GuiScreenEvent;
 
 public class CompatEvents {
 	public static class CompatGuiScreenEvent {
+	    #if !MC_12_LATER
 		@Cancelable
 		public static class MouseClickedEvent extends GuiScreenEvent {
 			private final int button;
@@ -116,5 +122,6 @@ public class CompatEvents {
 				}
 			}
 		}
+        #endif
 	}
 }

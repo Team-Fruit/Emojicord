@@ -1,24 +1,25 @@
 package net.teamfruit.emojicord.compat;
 
+#if MC_12_LATER
 import net.minecraft.client.renderer.GLAllocation;
+#else
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import org.lwjgl.opengl.ContextCapabilities;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GLContext;
+#endif
 
+import org.lwjgl.opengl.*;
 import javax.annotation.Nullable;
 import java.awt.*;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
-#if MC_7_LATER
-import org.lwjgl.opengl.GL12;
-import net.minecraft.client.renderer.GLAllocation;
+#if MC_12_LATER
+import com.mojang.blaze3d.platform.GlStateManager;
+#elif MC_7_LATER
 import net.minecraft.client.renderer.GlStateManager;
 #else
-import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.texture.TextureUtil;
 #endif
@@ -35,7 +36,7 @@ public class OpenGL {
 		#if MC_7_LATER
 		switch (attrib) {
 		case GL11.GL_ALPHA_TEST:
-			GlStateManager.enableAlpha();
+			GlStateManager. #if MC_12_LATER enableAlphaTest #else enableAlpha #endif ();
 			break;
 		case GL11.GL_BLEND:
 			GlStateManager.enableBlend();
@@ -44,7 +45,7 @@ public class OpenGL {
 			GlStateManager.enableCull();
 			break;
 		case GL11.GL_DEPTH_TEST:
-			GlStateManager.enableDepth();
+			GlStateManager. #if MC_12_LATER enableDepthTest #else enableDepth #endif ();
 			break;
 		case GL11.GL_FOG:
 			GlStateManager.enableFog();
@@ -62,7 +63,7 @@ public class OpenGL {
 			GlStateManager.enableRescaleNormal();
 			break;
 		case GL11.GL_TEXTURE_2D:
-			GlStateManager.enableTexture2D();
+			GlStateManager. #if MC_12_LATER enableTexture #else enableTexture2D #endif ();
 			break;
 		default:
 			GL11.glEnable(attrib);
@@ -76,7 +77,7 @@ public class OpenGL {
 		#if MC_7_LATER
 		switch (attrib) {
 		case GL11.GL_ALPHA_TEST:
-			GlStateManager.disableAlpha();
+			GlStateManager. #if MC_12_LATER disableAlphaTest #else disableAlpha #endif ();
 			break;
 		case GL11.GL_BLEND:
 			GlStateManager.disableBlend();
@@ -85,7 +86,7 @@ public class OpenGL {
 			GlStateManager.disableCull();
 			break;
 		case GL11.GL_DEPTH_TEST:
-			GlStateManager.disableDepth();
+			GlStateManager. #if MC_12_LATER disableDepthTest #else disableDepth #endif ();
 			break;
 		case GL11.GL_FOG:
 			GlStateManager.disableFog();
@@ -103,7 +104,7 @@ public class OpenGL {
 			GlStateManager.disableRescaleNormal();
 			break;
 		case GL11.GL_TEXTURE_2D:
-			GlStateManager.disableTexture2D();
+			GlStateManager. #if MC_12_LATER disableTexture #else disableTexture2D #endif ();
 			break;
 		default:
 			GL11.glDisable(attrib);
@@ -155,11 +156,7 @@ public class OpenGL {
 
 	public static void glBlendFuncSeparate(final int srcFactor, final int dstFactor, final int srcFactorAlpha,
 			final int dstFactorAlpha) {
-		#if MC_7_LATER
-		GlStateManager.tryBlendFuncSeparate(srcFactor, dstFactor, srcFactorAlpha, dstFactorAlpha);
-		#else
-		OpenGlHelper.glBlendFunc(srcFactor, dstFactor, srcFactorAlpha, dstFactorAlpha);
-		#endif
+		GlStateManager. #if MC_12_LATER blendFuncSeparate #elif MC_7_LATER glBlendFunc #else tryBlendFuncSeparate #endif (srcFactor, dstFactor, srcFactorAlpha, dstFactorAlpha);
 	}
 
 	public static void glCallList(final int list) {
@@ -172,7 +169,7 @@ public class OpenGL {
 
 	public static void glClear(final int mask) {
 		#if MC_7_LATER
-		GlStateManager.clear(mask);
+		GlStateManager.clear(mask #if MC_12_LATER , true #endif );
 		#else
 		GL11.glClear(mask);
 		#endif
@@ -198,7 +195,7 @@ public class OpenGL {
 
 	public static void glColor3f(final float red, final float green, final float blue) {
 		#if MC_7_LATER
-		GlStateManager.color(red, green, blue, 1.0F);
+		glColor4f(red, green, blue, 1.0F);
 		#else
 		GL11.glColor3f(red, green, blue);
 		#endif
@@ -206,7 +203,7 @@ public class OpenGL {
 
 	public static void glColor4f(final float red, final float green, final float blue, final float alpha) {
 		#if MC_7_LATER
-		GlStateManager.color(red, green, blue, alpha);
+		GlStateManager. #if MC_12_LATER color4f #else color #endif (red, green, blue, alpha);
 		#else
 		GL11.glColor4f(red, green, blue, alpha);
 		#endif
@@ -237,9 +234,11 @@ public class OpenGL {
 		glColor4i(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
 	}
 
+	#if !MC_12_LATER
 	public static void glColor(final org.lwjgl.util.Color color) {
 		glColor4i(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
 	}
+	#endif
 
 	private static FloatBuffer buf = GLAllocation.createDirectFloatBuffer(16);
 
@@ -253,7 +252,7 @@ public class OpenGL {
 
 	public static int glGetColorRGBA() {
 		buf.clear();
-		GL11.glGetFloat(GL11.GL_CURRENT_COLOR, buf);
+		glGetFloat(GL11.GL_CURRENT_COLOR, buf);
 		final float r = buf.get(0);
 		final float g = buf.get(1);
 		final float b = buf.get(2);
@@ -263,7 +262,7 @@ public class OpenGL {
 
 	public static Color glGetColor() {
 		buf.clear();
-		GL11.glGetFloat(GL11.GL_CURRENT_COLOR, buf);
+		glGetFloat(GL11.GL_CURRENT_COLOR, buf);
 		final float r = Math.min(1f, buf.get(0));
 		final float g = Math.min(1f, buf.get(1));
 		final float b = Math.min(1f, buf.get(2));
@@ -271,9 +270,10 @@ public class OpenGL {
 		return new Color(r, g, b, a);
 	}
 
+	#if !MC_12_LATER
 	public static org.lwjgl.util.Color glGetLwjglColor() {
 		buf.clear();
-		GL11.glGetFloat(GL11.GL_CURRENT_COLOR, buf);
+		glGetFloat(GL11.GL_CURRENT_COLOR, buf);
 		final float r = buf.get(0);
 		final float g = buf.get(1);
 		final float b = buf.get(2);
@@ -281,6 +281,7 @@ public class OpenGL {
 		return new org.lwjgl.util.Color((int) (r * 255 + 0.5) & 0xff, (int) (g * 255 + 0.5) & 0xff,
 				(int) (b * 255 + 0.5) & 0xff, (int) (a * 255 + 0.5) & 0xff);
 	}
+	#endif
 
 	public static void glColorMask(final boolean red, final boolean green, final boolean blue, final boolean alpha) {
 		#if MC_7_LATER
@@ -301,11 +302,11 @@ public class OpenGL {
 	public static void glCullFace(final int mode) {
 		// GlStateManager.cullFace(mode);
 		#if MC_7_LATER
-		if (mode == GlStateManager.CullFace.BACK.mode)
+		if (mode == GlStateManager.CullFace.BACK. #if MC_12_LATER field_187328_d #else mode #endif )
 			GlStateManager.cullFace(GlStateManager.CullFace.BACK);
-		else if (mode == GlStateManager.CullFace.FRONT.mode)
+		else if (mode == GlStateManager.CullFace.FRONT. #if MC_12_LATER field_187328_d #else mode #endif )
 			GlStateManager.cullFace(GlStateManager.CullFace.FRONT);
-		else if (mode == GlStateManager.CullFace.FRONT_AND_BACK.mode)
+		else if (mode == GlStateManager.CullFace.FRONT_AND_BACK. #if MC_12_LATER field_187328_d #else mode #endif )
 			GlStateManager.cullFace(GlStateManager.CullFace.FRONT_AND_BACK);
 		#else
 		GL11.glCullFace(mode);
@@ -329,7 +330,9 @@ public class OpenGL {
 	}
 
 	public static void glGetFloat(final int pname, final FloatBuffer params) {
-		#if MC_7_LATER
+		#if MC_12_LATER
+		GL11.glGetFloatv(pname, params);
+		#elif MC_7_LATER
 		GlStateManager.getFloat(pname, params);
 		#else
 		GL11.glGetFloat(pname, params);
@@ -345,7 +348,9 @@ public class OpenGL {
 	}
 
 	public static void glLogicOp(final int opcode) {
-		#if MC_7_LATER
+		#if MC_12_LATER
+		GlStateManager.logicOp(opcode);
+		#elif MC_7_LATER
 		GlStateManager.colorLogicOp(opcode);
 		#else
 		GL11.glLogicOp(opcode);
@@ -378,7 +383,9 @@ public class OpenGL {
 	}
 
 	public static void glPolygonOffset(final float factor, final float units) {
-		#if MC_7_LATER
+		#if MC_12_LATER
+		GlStateManager.polygonOffset(factor, units);
+		#elif MC_7_LATER
 		GlStateManager.doPolygonOffset(factor, units);
 		#else
 		GL11.glPolygonOffset(factor, units);
@@ -386,7 +393,9 @@ public class OpenGL {
 	}
 
 	public static void glPopAttrib() {
-		#if MC_7_LATER
+		#if MC_12_LATER
+		GlStateManager.popAttributes();
+		#elif MC_7_LATER
 		GlStateManager.popAttrib();
 		#else
 		GL11.glPopAttrib();
@@ -402,7 +411,9 @@ public class OpenGL {
 	}
 
 	public static void glPushAttrib() {
-		#if MC_7_LATER
+		#if MC_12_LATER
+		GlStateManager.pushLightingAttributes();
+		#elif MC_7_LATER
 		GlStateManager.pushAttrib();
 		#else
 		GL11.glPushAttrib(8256);
@@ -419,7 +430,7 @@ public class OpenGL {
 
 	public static void glRotatef(final float angle, final float x, final float y, final float z) {
 		#if MC_7_LATER
-		GlStateManager.rotate(angle, x, y, z);
+		GlStateManager. #if MC_12_LATER rotatef #else rotate #endif (angle, x, y, z);
 		#else
 		GL11.glRotatef(angle, x, y, z);
 		#endif
@@ -427,7 +438,7 @@ public class OpenGL {
 
 	public static void glScaled(final double x, final double y, final double z) {
 		#if MC_7_LATER
-		GlStateManager.scale(x, y, z);
+		GlStateManager. #if MC_12_LATER scaled #else scale #endif (x, y, z);
 		#else
 		GL11.glScaled(x, y, z);
 		#endif
@@ -435,7 +446,7 @@ public class OpenGL {
 
 	public static void glScalef(final float x, final float y, final float z) {
 		#if MC_7_LATER
-		GlStateManager.scale(x, y, z);
+		GlStateManager. #if MC_12_LATER scalef #else scale #endif (x, y, z);
 		#else
 		GL11.glScalef(x, y, z);
 		#endif
@@ -443,7 +454,7 @@ public class OpenGL {
 
 	public static void glSetActiveTextureUnit(final int texture) {
 		#if MC_7_LATER
-		GlStateManager.setActiveTexture(texture);
+		GlStateManager. #if MC_12_LATER activeTexture #else setActiveTexture #endif (texture);
 		#else
 		OpenGlHelper.setActiveTexture(texture);
 		#endif
@@ -459,7 +470,7 @@ public class OpenGL {
 
 	public static void glTranslated(final double x, final double y, final double z) {
 		#if MC_7_LATER
-		GlStateManager.translate(x, y, z);
+		GlStateManager. #if MC_12_LATER translated #else translate #endif (x, y, z);
 		#else
 		GL11.glTranslated(x, y, z);
 		#endif
@@ -467,7 +478,7 @@ public class OpenGL {
 
 	public static void glTranslatef(final float x, final float y, final float z) {
 		#if MC_7_LATER
-		GlStateManager.translate(x, y, z);
+		GlStateManager. #if MC_12_LATER translatef #else translate #endif (x, y, z);
 		#else
 		GL11.glTranslatef(x, y, z);
 		#endif
@@ -490,7 +501,9 @@ public class OpenGL {
 	}
 
 	public static int glGenTextures() {
-		#if MC_7_LATER
+		#if MC_12_LATER
+		return GlStateManager.genTexture();
+		#elif MC_7_LATER
 		return GlStateManager.generateTexture();
 		#else
 		return GL11.glGenTextures();
@@ -523,7 +536,9 @@ public class OpenGL {
 	}
 
 	public static void glTexCoord2f(final float sCoord, final float tCoord) {
-		#if MC_7_LATER
+		#if MC_12_LATER
+		GlStateManager.texCoord2f(sCoord, tCoord);
+		#elif MC_7_LATER
 		GlStateManager.glTexCoord2f(sCoord, tCoord);
 		#else
 		GL11.glTexCoord2f(sCoord, tCoord);
@@ -554,12 +569,12 @@ public class OpenGL {
 		GL11.glStencilOp(fail, zfail, zpass);
 	}
 
-	private static @Nullable ContextCapabilities capabilities;
+	private static @Nullable #if MC_12_LATER GLCapabilities #else ContextCapabilities #endif capabilities;
 
 	public static boolean openGl30() {
 		if (capabilities == null)
-			capabilities = GLContext.getCapabilities();
-		final ContextCapabilities cap = capabilities;
+			capabilities =  #if MC_12_LATER GL #else GLContext #endif .getCapabilities();
+		final #if MC_12_LATER GLCapabilities #else ContextCapabilities #endif cap = capabilities;
 		return cap != null && cap.OpenGL30;
 	}
 

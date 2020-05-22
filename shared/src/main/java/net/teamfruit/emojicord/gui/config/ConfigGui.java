@@ -1,7 +1,11 @@
 package net.teamfruit.emojicord.gui.config;
 
+#if !MC_12_LATER
 #if MC_7_LATER
 import net.minecraftforge.fml.client.config.GuiConfig;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraftforge.common.config.ConfigCategory;
+import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.fml.client.config.IConfigElement;
 #else
 import cpw.mods.fml.client.config.GuiConfig;
@@ -9,9 +13,6 @@ import cpw.mods.fml.client.config.IConfigElement;
 #endif
 
 import com.google.common.collect.Lists;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraftforge.common.config.ConfigCategory;
-import net.minecraftforge.common.config.ConfigElement;
 import net.teamfruit.emojicord.EmojicordConfig;
 import net.teamfruit.emojicord.Reference;
 
@@ -19,7 +20,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class ConfigGui extends GuiConfig {
+public class ConfigGui extends #if MC_12_LATER Config #else GuiConfig #endif {
 	public ConfigGui(final @Nullable GuiScreen parent) {
 		super(parent, getConfigElements(), Reference.MODID, false, false, GuiConfig.getAbridgedConfigPath(EmojicordConfig.spec.getConfigFile().getName()));
 	}
@@ -40,3 +41,4 @@ public class ConfigGui extends GuiConfig {
 		return list;
 	}
 }
+#endif

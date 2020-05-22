@@ -17,7 +17,7 @@ import net.teamfruit.emojicord.asm.lib.INodeTreeTransformer;
 import net.teamfruit.emojicord.asm.lib.VisitorHelper;
 import net.teamfruit.emojicord.compat.CompatTransformer;
 
-public class EmojicordTransformer extends CompatTransformer {
+public class EmojicordTransformer extends CompatTransformer #if MC_12_LATER implements cpw.mods.modlauncher.api.ITransformer<ClassNode> #endif {
 	@Override
 	public ClassNode read(@Nonnull final byte[] bytes) {
 		return VisitorHelper.read(bytes, ClassReader.SKIP_FRAMES);

@@ -1,5 +1,6 @@
 package net.teamfruit.emojicord.gui.config;
 
+#if !MC_12_LATER
 #if MC_7_LATER
 import net.minecraftforge.fml.client.IModGuiFactory;
 #else
@@ -47,3 +48,4 @@ public class ConfigGuiFactory implements IModGuiFactory {
 	public void initialize(final @Nullable Minecraft minecraftInstance) {
 	}
 }
+#endif

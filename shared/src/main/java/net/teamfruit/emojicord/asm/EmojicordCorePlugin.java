@@ -1,5 +1,6 @@
 package net.teamfruit.emojicord.asm;
 
+#if !MC_12_LATER
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -33,3 +34,4 @@ public class EmojicordCorePlugin implements #if MC_7_LATER net.minecraftforge.fm
 		return null;
 	}
 }
+#endif
