@@ -1,6 +1,9 @@
 package net.teamfruit.emojicord.compat;
 
 #if MC_12_LATER
+#if MC_14_LATER
+import com.mojang.blaze3d.systems.RenderSystem;
+#endif
 import net.minecraft.client.renderer.GLAllocation;
 #else
 import net.minecraft.client.renderer.OpenGlHelper;
@@ -36,7 +39,11 @@ public class OpenGL {
 		#if MC_7_LATER
 		switch (attrib) {
 		case GL11.GL_ALPHA_TEST:
+			#if MC_14_LATER
+			RenderSystem.enableAlphaTest();
+			#else
 			GlStateManager. #if MC_12_LATER enableAlphaTest #else enableAlpha #endif ();
+			#endif
 			break;
 		case GL11.GL_BLEND:
 			GlStateManager.enableBlend();
@@ -48,19 +55,35 @@ public class OpenGL {
 			GlStateManager. #if MC_12_LATER enableDepthTest #else enableDepth #endif ();
 			break;
 		case GL11.GL_FOG:
+			#if MC_14_LATER
+			RenderSystem.enableFog();
+			#else
 			GlStateManager.enableFog();
+			#endif
 			break;
 		case GL11.GL_LIGHTING:
+			#if MC_14_LATER
+			RenderSystem.enableLighting();
+			#else
 			GlStateManager.enableLighting();
+			#endif
 			break;
 		case GL11.GL_NORMALIZE:
+			#if MC_14_LATER
+			GL11.glEnable(GL11.GL_NORMALIZE);
+			#else
 			GlStateManager.enableNormalize();
+			#endif
 			break;
 		case GL11.GL_POLYGON_OFFSET_FILL:
 			GlStateManager.enablePolygonOffset();
 			break;
 		case GL12.GL_RESCALE_NORMAL:
+			#if MC_14_LATER
+			RenderSystem.enableRescaleNormal();
+			#else
 			GlStateManager.enableRescaleNormal();
+			#endif
 			break;
 		case GL11.GL_TEXTURE_2D:
 			GlStateManager. #if MC_12_LATER enableTexture #else enableTexture2D #endif ();
@@ -77,7 +100,11 @@ public class OpenGL {
 		#if MC_7_LATER
 		switch (attrib) {
 		case GL11.GL_ALPHA_TEST:
+			#if MC_14_LATER
+			RenderSystem.disableAlphaTest();
+			#else
 			GlStateManager. #if MC_12_LATER disableAlphaTest #else disableAlpha #endif ();
+			#endif
 			break;
 		case GL11.GL_BLEND:
 			GlStateManager.disableBlend();
@@ -89,19 +116,35 @@ public class OpenGL {
 			GlStateManager. #if MC_12_LATER disableDepthTest #else disableDepth #endif ();
 			break;
 		case GL11.GL_FOG:
+			#if MC_14_LATER
+			RenderSystem.disableFog();
+			#else
 			GlStateManager.disableFog();
+			#endif
 			break;
 		case GL11.GL_LIGHTING:
+			#if MC_14_LATER
+			RenderSystem.disableLighting();
+			#else
 			GlStateManager.disableLighting();
+			#endif
 			break;
 		case GL11.GL_NORMALIZE:
+			#if MC_14_LATER
+			GL11.glDisable(GL11.GL_NORMALIZE);
+			#else
 			GlStateManager.disableNormalize();
+			#endif
 			break;
 		case GL11.GL_POLYGON_OFFSET_FILL:
 			GlStateManager.disablePolygonOffset();
 			break;
 		case GL12.GL_RESCALE_NORMAL:
+			#if MC_14_LATER
+			RenderSystem.disableRescaleNormal();
+			#else
 			GlStateManager.disableRescaleNormal();
+			#endif
 			break;
 		case GL11.GL_TEXTURE_2D:
 			GlStateManager. #if MC_12_LATER disableTexture #else disableTexture2D #endif ();
@@ -160,7 +203,7 @@ public class OpenGL {
 	}
 
 	public static void glCallList(final int list) {
-		#if MC_7_LATER
+		#if !MC_14_LATER && MC_7_LATER
 		GlStateManager.callList(list);
 		#else
 		GL11.glCallList(list);
@@ -301,7 +344,9 @@ public class OpenGL {
 
 	public static void glCullFace(final int mode) {
 		// GlStateManager.cullFace(mode);
-		#if MC_7_LATER
+		#if MC_14_LATER
+		// Not supported
+		#elif MC_7_LATER
 		if (mode == GlStateManager.CullFace.BACK. #if MC_12_LATER field_187328_d #else mode #endif )
 			GlStateManager.cullFace(GlStateManager.CullFace.BACK);
 		else if (mode == GlStateManager.CullFace.FRONT. #if MC_12_LATER field_187328_d #else mode #endif )
@@ -536,7 +581,9 @@ public class OpenGL {
 	}
 
 	public static void glTexCoord2f(final float sCoord, final float tCoord) {
-		#if MC_12_LATER
+		#if MC_14_LATER
+		GL11.glTexCoord2f(sCoord, tCoord);
+		#elif MC_12_LATER
 		GlStateManager.texCoord2f(sCoord, tCoord);
 		#elif MC_7_LATER
 		GlStateManager.glTexCoord2f(sCoord, tCoord);

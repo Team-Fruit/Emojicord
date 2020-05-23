@@ -74,7 +74,9 @@ public class CompatVertex {
 
 		@Override
 		public @Nonnull CompatBaseVertex tex(final double u, final double v) {
-			#if MC_7_LATER
+			#if MC_14_LATER
+			w.tex((float)u, (float)v);
+			#elif MC_7_LATER
 			w.tex(u, v);
 			#else
 			t.setTextureUV(u, v);
@@ -89,7 +91,7 @@ public class CompatVertex {
 
 		@Override
 		public @Nonnull CompatBaseVertex color(final int red, final int green, final int blue, final int alpha) {
-			#if MC_7_LATER w.putColorRGBA(0, #else t.setColorRGBA( #endif red, green, blue, alpha);
+			#if MC_14_LATER w.color( #elif MC_7_LATER w.putColorRGBA(0, #else t.setColorRGBA( #endif red, green, blue, alpha);
 			return this;
 		}
 
@@ -97,11 +99,6 @@ public class CompatVertex {
 		public @Nonnull CompatBaseVertex normal(final float nx, final float ny, final float nz) {
 			#if MC_7_LATER w.normal #else t.setNormal #endif (nx, ny, nz);
 			return this;
-		}
-
-		@Override
-		public void setTranslation(final double x, final double y, final double z) {
-			#if MC_7_LATER w #else t #endif .setTranslation(x, y, z);
 		}
 
 		private void endVertex() {

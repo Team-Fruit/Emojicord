@@ -11,6 +11,7 @@ public enum CompatBaseVersion {
 	V12(12),
 	V13(13),
 	V14(14),
+	V15(15),
 	;
 
 	public final int value;

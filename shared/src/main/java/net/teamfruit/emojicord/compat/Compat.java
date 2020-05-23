@@ -19,7 +19,11 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 #if MC_12_LATER
+#if MC_14_LATER
+import net.minecraft.client.renderer.texture.TextureUtil;
+#else
 import com.mojang.blaze3d.platform.TextureUtil;
+#endif
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.VersionChecker;
 import net.minecraft.client.renderer.texture.NativeImage;
@@ -86,7 +90,7 @@ public class Compat {
 					NativeImage nativeimage = NativeImage.read(image);
 			) {
 				TextureUtil.prepareImage(genTextureId.get(), 0, nativeimage.getWidth(), nativeimage.getHeight());
-				nativeimage.uploadTextureSub(0, 0, 0, 0, 0, nativeimage.getWidth(), nativeimage.getHeight(), blur, clamp, false);
+				nativeimage.uploadTextureSub(0, 0, 0, 0, 0, nativeimage.getWidth(), nativeimage.getHeight(), blur, clamp, false #if MC_14_LATER , true #endif );
 			}
 			#else
 			final BufferedImage bufferedimage = #if MC_7_LATER TextureUtil.readBufferedImage #else ImageIO.read #endif (image);
@@ -121,7 +125,7 @@ public class Compat {
 					}
 
 				TextureUtil.prepareImage(genTextureId.get(), 0, nativeimage.getWidth(), nativeimage.getHeight());
-				nativeimage.uploadTextureSub(0, 0, 0, 0, 0, nativeimage.getWidth(), nativeimage.getHeight(), blur, clamp, false);
+				nativeimage.uploadTextureSub(0, 0, 0, 0, 0, nativeimage.getWidth(), nativeimage.getHeight(), blur, clamp, false #if MC_14_LATER , true #endif );
 			}
 			#else
 			if (bufferedimage != null)

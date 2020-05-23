@@ -20,8 +20,12 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 #endif
 
 #if MC_7_LATER
+// #if MC_14_LATER
+// import net.minecraftforge.fml.config.ModConfig.Reloading;
+// #else
+// import net.minecraftforge.fml.client.event.ConfigChangedEvent;
+// #endif
 import net.minecraftforge.client.event.GuiScreenEvent.*;
-import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.client.event.ClientChatEvent;
 #else
 import net.teamfruit.emojicord.compat.KeyboardInputEvent;
@@ -162,10 +166,16 @@ public class EventHandler {
 		}
 	}
 
-	@SubscribeEvent
-	public void onConfigChanged(final @Nonnull ConfigChangedEvent.OnConfigChangedEvent event) {
-		// EmojicordConfig.spec.onConfigChanged();
-	}
+	//	#if MC_14_LATER
+	//	@SubscribeEvent
+	//	public void onConfigChanged(final @Nonnull Reloading event) {
+	//	}
+	//	#else
+	//	@SubscribeEvent
+	//	public void onConfigChanged(final @Nonnull ConfigChangedEvent.OnConfigChangedEvent event) {
+	//		// EmojicordConfig.spec.onConfigChanged();
+	//	}
+	//    #endif
 
 	#if !MC_12_LATER
 	@SubscribeEvent

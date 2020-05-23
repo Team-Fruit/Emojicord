@@ -77,12 +77,4 @@ public interface CompatBaseVertex {
 	 */
 	@Nonnull
 	CompatBaseVertex normal(float nx, float ny, float nz);
-
-	/**
-	 * オフセット
-	 * @param x Xオフセット
-	 * @param y Yオフセット
-	 * @param z Zオフセット
-	 */
-	void setTranslation(double x, double y, double z);
 }

@@ -1,8 +1,11 @@
 package net.teamfruit.emojicord.emoji;
 
+import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.gui.fonts.IGlyph;
 import net.minecraft.client.gui.fonts.TexturedGlyph;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.Matrix4f;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.ResourceLocation;
 import net.teamfruit.emojicord.CoreInvoke;
@@ -119,18 +122,26 @@ public class EmojiFontRenderer {
 	@CoreInvoke
 	public static class EmojiTexturedGlyph extends TexturedGlyph {
 		public EmojiTexturedGlyph(final ResourceLocation texture, final float width, final float height) {
-			super(texture, 0, 1, 0, 1, 0, width, 0+3, height+3);
+			super( #if MC_14_LATER RenderType.getText(texture), RenderType.getTextSeeThrough(texture) #else texture #endif , 0, 1, 0, 1, 0, width, 0+3, height+3);
 		}
 
 		public EmojiTexturedGlyph(final EmojiId emojiId) {
 			this(EmojiObject.EmojiObjectCache.instance.getEmojiObject(emojiId).loadAndGetResourceLocation(), EmojiGlyph.GlyphWidth, EmojiGlyph.GlyphHeight);
 		}
 
+		#if MC_14_LATER
+		@Override
+		public void render(boolean italic, float x, float y, Matrix4f matrix, IVertexBuilder vbuilder, float red, float green, float blue, float alpha, int packedLight) {
+			if (!shadow)
+				super.render(italic, x, y, matrix, vbuilder, 1, 1, 1, alpha, packedLight);
+		}
+		#else
 		@Override
 		public void render(final TextureManager textureManager, final boolean hasShadow, final float x, final float y, final BufferBuilder vbuilder, final float red, final float green, final float blue, final float alpha) {
 			if (!shadow)
 				super.render(textureManager, hasShadow, x, y, vbuilder, 1, 1, 1, alpha);
 		}
+		#endif
 	}
 	#else
 	@CoreInvoke
