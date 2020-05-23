@@ -1,5 +1,6 @@
 package net.teamfruit.emojicord.emoji;
 
+import net.minecraft.client.gui.fonts.IGlyph;
 import net.minecraft.client.gui.fonts.TexturedGlyph;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.texture.TextureManager;
@@ -59,16 +60,28 @@ public class EmojiFontRenderer {
 	*/
 
 	#if MC_12_LATER
-	public static abstract class CompatGlyph {
+	public static abstract class CompatGlyph implements IGlyph {
+		public final float width;
+		public final float height;
+
 		public CompatGlyph(final float width, final float height) {
-		}
-	}
-
-	public static abstract class CompatTexturedGlyph {
-		public CompatTexturedGlyph(final ResourceLocation texture, final float width, final float height) {
+			this.width = width;
+			this.height = height;
 		}
 
-		public void onRender(final TextureManager textureManager, final boolean hasShadow, final float x, final float y, final BufferBuilder vbuilder, final float red, final float green, final float blue, final float alpha) {
+		@Override
+		public float getAdvance() {
+			return this.width;
+		}
+
+		@Override
+		public float getBoldOffset() {
+			return 0;
+		}
+
+		@Override
+		public float getShadowOffset() {
+			return 0;
 		}
 	}
 

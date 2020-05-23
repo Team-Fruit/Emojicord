@@ -3,7 +3,8 @@ package net.teamfruit.emojicord.compat;
 import javax.annotation.Nonnull;
 
 #if MC_12_LATER
-import net.teamfruit.emojicord.asm.EmojicordCoreService;
+import cpw.mods.modlauncher.Launcher;
+
 #else
 import net.minecraft.launchwrapper.Launch;
 #if MC_7_LATER
@@ -56,7 +57,7 @@ public class CompatFMLDeobfuscatingRemapper {
 
 	public static boolean useMcpNames() {
 		#if MC_12_LATER
-		return EmojicordCoreService.Srg2Mcp!=null;
+		return Launcher.INSTANCE.environment().findNameMapping("srg").isPresent();
 		#else
 		final Boolean deobfuscated = (Boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
 		return deobfuscated!=null&&deobfuscated;
