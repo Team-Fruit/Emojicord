@@ -60,10 +60,6 @@ sourceSets {
 		test.java.srcDirs = [createSharedImport('test', 'java')]
 		test.resources.srcDirs = [createSharedImport('test', 'resources')]
 	}
-
-	api.output.resourcesDir = api.output.classesDir
-	main.output.resourcesDir = main.output.classesDir
-	test.output.resourcesDir = test.output.classesDir
 }
 
 // Fix compatibility issue between Gradle 4 and ForgeGradle 2.1
@@ -249,7 +245,7 @@ dependencies {
 	implementation files("${System.properties['java.home']}/../lib/tools.jar")
 
 	// Add manifold to -processorpath for javac
-	annotationProcessor group: 'systems.manifold', name: 'manifold-preprocessor', version: '2020.1.4'
+	annotationProcessor group: 'systems.manifold', name: 'manifold-preprocessor', version: '2020.1.12'
 }
 
 // Manifold
