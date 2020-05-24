@@ -1,5 +1,6 @@
 package net.teamfruit.emojicord;
 
+#if false
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -122,3 +123,4 @@ public class UTFSendTest {
 			}
 	}
 }
+#endif

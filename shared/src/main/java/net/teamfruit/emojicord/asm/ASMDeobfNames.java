@@ -31,15 +31,19 @@ public class ASMDeobfNames {
 	}).get();
 	public static final @Nonnull RefName FontRendererDrawStringWithShadow = RefName.deobName("drawStringWithShadow", "func_175063_a");
 	public static final @Nonnull RefName FontRendererRenderStringAtPos = ((Supplier<RefName>) () -> {
-		if (!CompatVersion.version().newer(CompatBaseVersion.V13))
-			return RefName.deobName("renderStringAtPos", "func_78255_a");
-		else
+		if (CompatVersion.version().newer(CompatBaseVersion.V15))
+			return RefName.deobName("renderStringAtPos", "func_228081_c_");
+		else if (CompatVersion.version().newer(CompatBaseVersion.V13))
 			return RefName.deobName("renderStringAtPos", "func_211843_b");
+		else
+			return RefName.deobName("renderStringAtPos", "func_78255_a");
 	}).get();
 	public static final @Nonnull RefName FontRendererRenderChar = RefName.deobName("renderChar", "func_181559_a");
 	public static final @Nonnull RefName FontRendererRenderCharAtPos = RefName.deobName("renderCharAtPos", "func_78278_a");
 	public static final @Nonnull RefName FontRendererRenderGlyph = ((Supplier<RefName>) () -> {
-		if (CompatVersion.version().older(CompatBaseVersion.V13))
+		if (CompatVersion.version().newer(CompatBaseVersion.V15))
+			return RefName.deobName("drawGlyph", "func_228077_a_");
+		else if (CompatVersion.version().older(CompatBaseVersion.V13))
 			return RefName.deobName("func_212452_a", "func_212452_a");
 		else
 			return RefName.deobName("renderGlyph", "func_212452_a");

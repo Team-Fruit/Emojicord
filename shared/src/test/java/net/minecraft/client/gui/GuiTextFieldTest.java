@@ -1,5 +1,6 @@
 package net.minecraft.client.gui;
 
+#if false
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 
@@ -736,3 +737,4 @@ public class GuiTextFieldTest extends Gui {
 		this.visible = isVisible;
 	}
 }
+#endif

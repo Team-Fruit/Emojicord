@@ -1,5 +1,6 @@
 package net.teamfruit.emojicord.util;
 
+#if false
 import static org.lwjgl.opengl.GL11.*;
 
 import java.awt.Graphics2D;
@@ -320,3 +321,4 @@ public abstract class DynamicImageTexture implements ImageTexture {
 		}
 	}
 }
+#endif
