@@ -165,7 +165,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 		private final Rectangle2d rectSettingButton;
 		private final Rectangle2d rectUpdate;
 
-		private final #if MC_7_LATER && !MC_12_LATER ForgeVersion #else VersionChecker #endif .CheckResult update;
+		private final #if MC_7_LATER && !MC_12_LATER ForgeVersion.CheckResult #else VersionChecker.CheckResult #endif update;
 
 		private final List<PickerGroup> baseCategories;
 		private final List<Pair<String, PickerGroup>> buttonCategories;

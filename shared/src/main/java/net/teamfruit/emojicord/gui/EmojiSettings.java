@@ -138,7 +138,7 @@ public class EmojiSettings implements IChatOverlay {
 		private final Rectangle2d rectUpdate;
 
 		private boolean focused = true;
-		private final #if MC_7_LATER && !MC_12_LATER ForgeVersion #else VersionChecker #endif .CheckResult update;
+		private final #if MC_7_LATER && !MC_12_LATER ForgeVersion.CheckResult #else VersionChecker.CheckResult #endif update;
 
 		public EmojiSettingMenu(final int posX, final int posY, final int width, final int height) {
 			this.rectangle = new Rectangle2d(posX - width / 2, posY - height / 2, width, height);

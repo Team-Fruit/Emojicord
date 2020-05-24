@@ -418,11 +418,7 @@ public class CompatConfigSpec {
 			return this.parent;
 		}
 
-		#if MC_12_LATER
-		protected abstract ForgeConfigSpec.ConfigValue<T> applyDefine(ForgeConfigSpec.Builder builder);
-		#else
-		protected abstract Property applyDefine(Configuration builder);
-		#endif
+		protected abstract #if MC_12_LATER ForgeConfigSpec.ConfigValue<T> #else Property #endif applyDefine( #if MC_12_LATER ForgeConfigSpec.Builder #else Configuration #endif builder);
 
 		#if MC_12_LATER
 		public void apply(final ForgeConfigSpec.Builder builder) {
@@ -465,19 +461,18 @@ public class CompatConfigSpec {
 			super(parent, path, defaultSupplier, builderContext);
 		}
 
-		#if MC_12_LATER
 		@Override
-		protected ForgeConfigSpec.ConfigValue<String> applyDefine(final ForgeConfigSpec.Builder builder) {
+		protected #if MC_12_LATER ForgeConfigSpec.ConfigValue<String> #else Property #endif applyDefine(final #if MC_12_LATER ForgeConfigSpec.Builder #else Configuration #endif builder) {
+			#if MC_12_LATER
 			return builder.define(this.path, this.defaultSupplier, v -> v instanceof String);
-		}
-		#else
-		@Override
-		protected Property applyDefine(final Configuration builder) {
+			#else
 			final Property ret = builder.get(DOT_JOINER.join(this.path.subList(0, this.path.size()-1)), this.path.get(this.path.size()-1), this.defaultSupplier.get());
 			this.builderContext.apply(ret);
 			return ret;
+			#endif
 		}
 
+		#if !MC_12_LATER
 		@Override
 		protected String getPropertyValue() {
 			return this.value.getString();
@@ -495,19 +490,18 @@ public class CompatConfigSpec {
 			super(parent, path, defaultSupplier, builderContext);
 		}
 
-		#if MC_12_LATER
 		@Override
-		protected ForgeConfigSpec.ConfigValue<Boolean> applyDefine(final ForgeConfigSpec.Builder builder) {
+		protected #if MC_12_LATER ForgeConfigSpec.ConfigValue<Boolean> #else Property #endif applyDefine(final #if MC_12_LATER ForgeConfigSpec.Builder #else Configuration #endif builder) {
+			#if MC_12_LATER
 			return builder.define(this.path, this.defaultSupplier);
-		}
-		#else
-		@Override
-		protected Property applyDefine(final Configuration builder) {
+			#else
 			final Property ret = builder.get(DOT_JOINER.join(this.path.subList(0, this.path.size()-1)), this.path.get(this.path.size()-1), this.defaultSupplier.get());
 			this.builderContext.apply(ret);
 			return ret;
+			#endif
 		}
 
+		#if !MC_12_LATER
 		@Override
 		protected Boolean getPropertyValue() {
 			return this.value.getBoolean();
@@ -525,19 +519,18 @@ public class CompatConfigSpec {
 			super(parent, path, defaultSupplier, builderContext);
 		}
 
-		#if MC_12_LATER
 		@Override
-		protected ForgeConfigSpec.ConfigValue<Integer> applyDefine(final ForgeConfigSpec.Builder builder) {
+		protected #if MC_12_LATER ForgeConfigSpec.ConfigValue<Integer> #else Property #endif applyDefine(final #if MC_12_LATER ForgeConfigSpec.Builder #else Configuration #endif builder) {
+			#if MC_12_LATER
 			return builder.define(this.path, this.defaultSupplier, v -> v instanceof Integer);
-		}
-		#else
-		@Override
-		protected Property applyDefine(final Configuration builder) {
+			#else
 			final Property ret = builder.get(DOT_JOINER.join(this.path.subList(0, this.path.size()-1)), this.path.get(this.path.size()-1), this.defaultSupplier.get());
 			this.builderContext.apply(ret);
 			return ret;
+			#endif
 		}
 
+		#if !MC_12_LATER
 		@Override
 		protected Integer getPropertyValue() {
 			return this.value.getInt();
@@ -555,19 +548,18 @@ public class CompatConfigSpec {
 			super(parent, path, defaultSupplier, builderContext);
 		}
 
-		#if MC_12_LATER
 		@Override
-		protected ForgeConfigSpec.ConfigValue<Double> applyDefine(final ForgeConfigSpec.Builder builder) {
+		protected #if MC_12_LATER ForgeConfigSpec.ConfigValue<Double> #else Property #endif applyDefine(final #if MC_12_LATER ForgeConfigSpec.Builder #else Configuration #endif builder) {
+			#if MC_12_LATER
 			return builder.define(this.path, this.defaultSupplier, v -> v instanceof Double);
-		}
-		#else
-		@Override
-		protected Property applyDefine(final Configuration builder) {
+			#else
 			final Property ret = builder.get(DOT_JOINER.join(this.path.subList(0, this.path.size()-1)), this.path.get(this.path.size()-1), this.defaultSupplier.get());
 			this.builderContext.apply(ret);
 			return ret;
+			#endif
 		}
 
+		#if !MC_12_LATER
 		@Override
 		protected Double getPropertyValue() {
 			return this.value.getDouble();
