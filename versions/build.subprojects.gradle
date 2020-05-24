@@ -61,11 +61,16 @@ sourceSets {
 		test.resources.srcDirs = [createSharedImport('test', 'resources')]
 	}
 
-	if (!project.forgegradle.contains('3.+')) {
-		api.output.resourcesDir = api.output.classesDir
-		main.output.resourcesDir = main.output.classesDir
-		test.output.resourcesDir = test.output.classesDir
-	}
+	// pack.mcmeta
+	main.resources.srcDirs += file("${projectDir}/srcDiff/main/resources")
+
+	// 1.10.2と1.12.2は手動でresourcesの中身をclassesに入れる
+	// ↓ はjarを作るときにエラー
+	//	if (!project.forgegradle.contains('3.+')) {
+	//		api.output.resourcesDir = api.output.classesDir
+	//		main.output.resourcesDir = main.output.classesDir
+	//		test.output.resourcesDir = test.output.classesDir
+	//	}
 }
 
 // Fix compatibility issue between Gradle 4 and ForgeGradle 2.1
@@ -243,7 +248,7 @@ dependencies {
 	}
 
 	// Manifold
-	implementation group: 'systems.manifold', name: 'manifold-all', version: '2020.1.4'
+	implementation group: 'systems.manifold', name: 'manifold-all', version: '2020.1.12'
 	testImplementation group: 'junit', name: 'junit', version: '4.12'
 
 	// tools.jar dependency (for Java 8 only), primarily to support structural typing without static proxies.
