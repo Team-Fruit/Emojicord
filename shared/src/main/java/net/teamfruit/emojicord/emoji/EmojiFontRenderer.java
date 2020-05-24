@@ -1,11 +1,17 @@
 package net.teamfruit.emojicord.emoji;
 
+#if MC_14_LATER
 import com.mojang.blaze3d.vertex.IVertexBuilder;
+import net.minecraft.client.renderer.RenderType;
+#endif
+#if MC_12_LATER
 import net.minecraft.client.gui.fonts.IGlyph;
 import net.minecraft.client.gui.fonts.TexturedGlyph;
+#endif
+#if MC_10_LATER
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Matrix4f;
-import net.minecraft.client.renderer.RenderType;
+#endif
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.ResourceLocation;
 import net.teamfruit.emojicord.CoreInvoke;

@@ -11,7 +11,7 @@ public class EmojicordCorePlugin implements #if MC_7_LATER net.minecraftforge.fm
 	@Override
 	public @Nullable String[] getASMTransformerClass() {
 		return new String[] {
-				Reference.TRANSFORMER
+				EmojicordTransformer.class.getName()
 		};
 	}
 

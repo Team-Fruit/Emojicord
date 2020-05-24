@@ -3,6 +3,7 @@ package net.teamfruit.emojicord.gui;
 #if MC_12_LATER
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraftforge.fml.VersionChecker;
 #elif MC_7_LATER
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.GuiTextField;
@@ -16,7 +17,6 @@ import net.teamfruit.emojicord.compat.VersionChecker;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraftforge.fml.VersionChecker;
 import net.teamfruit.emojicord.EmojicordConfig;
 import net.teamfruit.emojicord.OSUtils;
 import net.teamfruit.emojicord.Reference;
@@ -165,7 +165,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 		private final Rectangle2d rectSettingButton;
 		private final Rectangle2d rectUpdate;
 
-		private final #if !MC_12_LATER && MC_7_LATER ForgeVersion #else VersionChecker #endif .CheckResult update;
+		private final #if MC_7_LATER && !MC_12_LATER ForgeVersion #else VersionChecker #endif .CheckResult update;
 
 		private final List<PickerGroup> baseCategories;
 		private final List<Pair<String, PickerGroup>> buttonCategories;
@@ -209,7 +209,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 			this.categories = categories;
 
 			select(0, 0);
-			this.searchField = new #if MC_12_LATER TextFieldWidget #else GuiTextField #endif ( #if !MC_12_LATER && MC_7_LATER -1, #endif EmojiSelectionChat.this.font, this.rectInputField.getX(), this.rectInputField.getY(), this.rectInputField.getWidth(), this.rectInputField.getHeight() #if MC_12_LATER , "Search Field" #endif );
+			this.searchField = new #if MC_12_LATER TextFieldWidget #else GuiTextField #endif ( #if MC_7_LATER && !MC_12_LATER -1, #endif EmojiSelectionChat.this.font, this.rectInputField.getX(), this.rectInputField.getY(), this.rectInputField.getWidth(), this.rectInputField.getHeight() #if MC_12_LATER , "Search Field" #endif );
 			this.searchField.setMaxStringLength(256);
 			this.searchField.setEnableBackgroundDrawing(false);
 			this.searchField. #if MC_12_LATER setFocused2 #else setFocused #endif (true);
@@ -369,7 +369,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 			this.searchField. #if MC_12_LATER render(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY, partialTicks) #else drawTextBox() #endif ;
 			EmojiSelectionChat.this.font.drawString(this.searchField.getText().isEmpty() ? "<:search:631021534705877012>" : "<:close:631021519295741973>", this.rectInputButton.getX() + 1, this.rectInputButton.getY() + 3, 0xFFFFFFFF);
 
-			if (this.update != null && this.update.status == #if !MC_12_LATER && MC_7_LATER ForgeVersion #else VersionChecker #endif .Status.OUTDATED) {
+			if (this.update != null && this.update.status == #if MC_7_LATER && !MC_12_LATER ForgeVersion #else VersionChecker #endif .Status.OUTDATED) {
 				IChatOverlay.fill(this.rectUpdate, 0xFF36393F);
 				final String text1 = CompatI18n.format("emojicord.gui.picker.update", this.update.target);
 				EmojiSelectionChat.this.font.drawString(text1, this.rectUpdate.getX() + 2, this.rectUpdate.getY() + 3, 0xFFFFFFFF);
@@ -383,7 +383,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 			if (button == 0)
 				this.mouseDown = true;
 
-			if (this.update != null && this.update.status == #if !MC_12_LATER && MC_7_LATER ForgeVersion #else VersionChecker #endif .Status.OUTDATED)
+			if (this.update != null && this.update.status == #if MC_7_LATER && !MC_12_LATER ForgeVersion #else VersionChecker #endif .Status.OUTDATED)
 				if (this.rectUpdate.contains(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY)) {
 					if (this.update.url != null)
 						OSUtils.getOSType().openURI(this.update.url);

@@ -12,28 +12,34 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.GuiScreen;
+#if MC_7_LATER
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+#endif
 #endif
 
 #if (MC_7_LATER && !MC_12_LATER)
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 #endif
 
-#if MC_7_LATER
+#if MC_10_LATER
 // #if MC_14_LATER
 // import net.minecraftforge.fml.config.ModConfig.Reloading;
 // #else
 // import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 // #endif
-import net.minecraftforge.client.event.GuiScreenEvent.*;
 import net.minecraftforge.client.event.ClientChatEvent;
 #else
+import net.teamfruit.emojicord.compat.ClientChatEvent;
+#endif
+
+import net.minecraftforge.client.event.GuiScreenEvent.*;
+
+#if !MC_7_LATER
 import net.teamfruit.emojicord.compat.KeyboardInputEvent;
 import net.teamfruit.emojicord.compat.MouseInputEvent;
 import cpw.mods.fml.client.event.ConfigChangedEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
-import net.teamfruit.emojicord.compat.ClientChatEvent;
 #endif
 
 import net.teamfruit.emojicord.compat.CompatEvents.CompatGuiScreenEvent.*;
@@ -160,7 +166,7 @@ public class EventHandler {
 	public void onDraw(final GuiScreenEvent.DrawScreenEvent.Post event) {
 		for (final ListIterator<IChatOverlay> itr = this.overlays.listIterator(this.overlays.size()); itr.hasPrevious(); ) {
 			final IChatOverlay overlay = itr.previous();
-			overlay.onMouseInput(event. #if MC_7_LATER getMouseX() #else mosueX #endif , event. #if MC_7_LATER getMouseY() #else mouseY #endif );
+			overlay.onMouseInput(event. #if MC_7_LATER getMouseX() #else mouseX #endif , event. #if MC_7_LATER getMouseY() #else mouseY #endif );
 			if (overlay.onDraw())
 				event.setCanceled(true);
 		}

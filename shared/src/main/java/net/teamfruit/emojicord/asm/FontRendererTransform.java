@@ -3,8 +3,10 @@ package net.teamfruit.emojicord.asm;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+#if MC_12_LATER
 import cpw.mods.modlauncher.Environment;
 import cpw.mods.modlauncher.Launcher;
+#endif
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;

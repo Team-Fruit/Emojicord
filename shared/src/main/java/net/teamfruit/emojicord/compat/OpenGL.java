@@ -1,11 +1,10 @@
 package net.teamfruit.emojicord.compat;
 
-#if MC_12_LATER
 #if MC_14_LATER
 import com.mojang.blaze3d.systems.RenderSystem;
 #endif
 import net.minecraft.client.renderer.GLAllocation;
-#else
+#if !MC_7_LATER
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.texture.TextureUtil;
 import org.lwjgl.opengl.ContextCapabilities;
@@ -199,11 +198,15 @@ public class OpenGL {
 
 	public static void glBlendFuncSeparate(final int srcFactor, final int dstFactor, final int srcFactorAlpha,
 			final int dstFactorAlpha) {
-		GlStateManager. #if MC_12_LATER blendFuncSeparate #elif MC_7_LATER glBlendFunc #else tryBlendFuncSeparate #endif (srcFactor, dstFactor, srcFactorAlpha, dstFactorAlpha);
+		#if MC_7_LATER
+		GlStateManager. #if MC_12_LATER blendFuncSeparate #else tryBlendFuncSeparate #endif (srcFactor, dstFactor, srcFactorAlpha, dstFactorAlpha);
+		#else
+		GL14.glBlendFuncSeparate(srcFactor, dstFactor, srcFactorAlpha, dstFactorAlpha);
+		#endif
 	}
 
 	public static void glCallList(final int list) {
-		#if !MC_14_LATER && MC_7_LATER
+		#if MC_7_LATER && !MC_14_LATER
 		GlStateManager.callList(list);
 		#else
 		GL11.glCallList(list);
