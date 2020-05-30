@@ -28,16 +28,7 @@ public class EmojicordTransformer extends CompatTransformer #if MC_12_LATER impl
 		return VisitorHelper.write(node, ClassWriter.COMPUTE_FRAMES);
 	}
 
-	public final INodeTreeTransformer transformers[] = {
-			new SendChatMessageTransform(),
-			new GuiTextFieldTransform(),
-			new FontRendererTransform(),
-			new GuiScreenInputEventTransform(),
-	};
-
-	public static String getSimpleClassName(Object object) {
-		return object.getClass().getSimpleName();
-	}
+	public final INodeTreeTransformer transformers[] = EmojicordTransforms.transformers;
 
 	private final Set<String> transformerNames = Stream.of(this.transformers).map(INodeTransformer::getClassName).map(ClassName::getName).collect(Collectors.toSet());
 
