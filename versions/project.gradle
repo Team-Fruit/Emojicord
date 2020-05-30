@@ -4,3 +4,7 @@ dependencies {
 	// https://mvnrepository.com/artifact/com.madgag/animated-gif-lib
 	shade group: 'com.madgag', name: 'animated-gif-lib', version: '1.4'
 }
+
+shadowJar {
+	relocate 'com.madgag.gif.fmsware', 'net.teamfruit.lib.com.madgag.gif.fmsware'
+}

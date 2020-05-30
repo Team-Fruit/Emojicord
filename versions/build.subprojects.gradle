@@ -429,4 +429,4 @@ if (sec_curseforge_key!=null&&project.isProperty('extra_curseforge_id')) {
 	tasks.curseforge.enabled = false
 
 // Configure Project Settings
-['project.gradle'].each { f -> [rootProject, project].each { p -> def fs = p.file(f); if (fs.exists()) apply from: fs } }
+['project.gradle'].each { f -> [project(':versions'), project].each { p -> def fs = p.file(f); if (fs.exists()) apply from: fs } }
