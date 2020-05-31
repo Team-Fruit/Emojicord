@@ -59,6 +59,7 @@ sourceSets {
 				from files(path)
 			}
 			tasks.getByName("process${_mainName.capitalize()}Resources").dependsOn(_task)
+			_task
 		}
 
 		api.java.srcDirs = [createSharedImport('api', 'java')]
