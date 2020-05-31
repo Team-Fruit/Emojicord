@@ -7,6 +7,7 @@ import java.util.stream.StreamSupport;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import net.teamfruit.emojicord.compat.CompatFMLDeobfuscatingRemapper;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.ClassReader;
@@ -44,14 +45,14 @@ public class VisitorHelper {
 					} catch (final ClassNotFoundException e) {
 						final ClassLoader launchClassLoader = getClass().getClassLoader();
 						try {
-							c = Class.forName(ClassName.of(type1).getName(), false, launchClassLoader);
-							d = Class.forName(ClassName.of(type2).getName(), false, launchClassLoader);
+							c = Class.forName(ClassName.of(CompatFMLDeobfuscatingRemapper.map(type1)).getName(), false, launchClassLoader);
+							d = Class.forName(ClassName.of(CompatFMLDeobfuscatingRemapper.map(type2)).getName(), false, launchClassLoader);
 						} catch (final ClassNotFoundException e1) {
 							throw new RuntimeException(String.format("ClassLoader: %s, LaunchClassLoader: %s", e.toString(), e1.toString()));
 						}
 					}
 				} catch (final Exception e) {
-					throw new RuntimeException(e.toString());
+						throw new RuntimeException(e.toString());
 				}
 				if (c.isAssignableFrom(d))
 					return type1;

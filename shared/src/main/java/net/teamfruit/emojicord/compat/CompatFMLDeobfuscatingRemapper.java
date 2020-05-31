@@ -47,6 +47,14 @@ public class CompatFMLDeobfuscatingRemapper {
 		#endif
 	}
 
+	public static @Nonnull String map(@Nonnull final String typeName) {
+		#if MC_12_LATER
+		return typeName;
+		#else
+		return FMLDeobfuscatingRemapper.INSTANCE.map(typeName);
+		#endif
+	}
+
 	public static @Nonnull String unmap(@Nonnull final String typeName) {
 		#if MC_12_LATER
 		return typeName;
