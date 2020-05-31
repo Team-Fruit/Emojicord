@@ -6,9 +6,11 @@
 # artifact output directory
 artifacts/
 # src directory/
-versions/**/src
+versions/**/src/
 # src junction link
 versions/**/src
+# src generated directory/
+versions/**/srcShared/
 
 ### ForgeGradle ###
 # Minecraft client/server files

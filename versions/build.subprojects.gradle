@@ -45,7 +45,7 @@ sourceSets {
 
 	if (!file("${projectDir}/src").exists()) {
 		copy {
-			into "${projectDir}/build/generated/sources/shared/main/resources"
+			into "${projectDir}/srcShared/main/resources"
 			from "${project(':shared').projectDir}/src/main/resources"
 			include 'META-INF/*_at.cfg'
 		}
@@ -54,7 +54,7 @@ sourceSets {
 			def _mainName = _main == 'main' ? '' : _main
 			def _name = "${_mainName.capitalize()}${_java.capitalize()}"
 			def _task = tasks.create(name: "collectImport${_name}", type: Sync) {
-				into file("${projectDir}/build/generated/sources/shared/${_main}/${_java}")
+				into file("${projectDir}/srcShared/${_main}/${_java}")
 				def path ="${project(':shared').projectDir}/src/${_main}/${_java}"
 				from files(path)
 			}
