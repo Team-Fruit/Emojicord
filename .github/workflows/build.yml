@@ -23,6 +23,12 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
+    - uses: actions/cache@v1
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}-${{ hashFiles('**/*.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
     - name: Build with Gradle
       env:
         GRADLE_OPTS: -Dorg.gradle.daemon=false
@@ -37,3 +43,8 @@ jobs:
         chmod a+x ./gradlew
         ./gradlew clean setupCIWorkspace --continue
         ./gradlew build githubRelease curseforge bintrayUpload publish --continue
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v1
+      with:
+        name: artifacts
+        path: artifacts
