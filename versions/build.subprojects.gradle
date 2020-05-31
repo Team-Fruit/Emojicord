@@ -44,13 +44,22 @@ sourceSets {
 	}
 
 	if (!file("${projectDir}/src").exists()) {
+		copy {
+			into "${projectDir}/srcShared/main/resources"
+			from "${project(':shared').projectDir}/src/main/resources"
+			include 'META-INF/*_at.cfg'
+		}
+
 		ext.createSharedImport = { String _main, String _java ->
-			def _name = "${_main.capitalize()}${_java.capitalize()}"
-			tasks.create(name: "collectImport${_name}", type: Sync) {
-				into file("${projectDir}/build/generated/sources/shared/${_main}/${_java}")
+			def _mainName = _main == 'main' ? '' : _main
+			def _name = "${_mainName.capitalize()}${_java.capitalize()}"
+			def _task = tasks.create(name: "collectImport${_name}", type: Sync) {
+				into file("${projectDir}/srcShared/${_main}/${_java}")
 				def path ="${project(':shared').projectDir}/src/${_main}/${_java}"
 				from files(path)
 			}
+			tasks.getByName("process${_mainName.capitalize()}Resources").dependsOn(_task)
+			_task
 		}
 
 		api.java.srcDirs = [createSharedImport('api', 'java')]
@@ -423,4 +432,4 @@ if (sec_curseforge_key!=null&&project.isProperty('extra_curseforge_id')) {
 	tasks.curseforge.enabled = false
 
 // Configure Project Settings
-['project.gradle'].each { f -> [rootProject, project].each { p -> def fs = p.file(f); if (fs.exists()) apply from: fs } }
+['project.gradle'].each { f -> [project(':versions'), project].each { p -> def fs = p.file(f); if (fs.exists()) apply from: fs } }

@@ -1,3 +1,7 @@
 dependencies {
 	shade 'com.mojang:brigadier:1.0.17'
 }
+
+shadowJar {
+	relocate 'com.mojang.brigadier', 'net.teamfruit.lib.com.mojang.brigadier'
+}
