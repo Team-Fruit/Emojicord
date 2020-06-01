@@ -123,7 +123,8 @@ public class FontRendererTransform implements INodeTreeTransformer {
 					 */
 					int o = CompatVersion.version().newer(CompatBaseVersion.V15) ? 3 : 0;
 					final MethodMatcher matcher0 = new MethodMatcher(ClassName.of("net.minecraft.client.gui.fonts.Font"), DescHelper.toDescMethod(ClassName.of("net.minecraft.client.gui.fonts.IGlyph"), char.class), ASMDeobfNames.FontFindGlyph);
-					final Optional<AbstractInsnNode> marker0 = VisitorHelper.stream(method.instructions).filter(matcher0.insnMatcher()).findFirst();
+					final MethodMatcher matcher0Optifine = new MethodMatcher(getClassName(), DescHelper.toDescMethod(ClassName.of("net.minecraft.client.gui.fonts.IGlyph"), char.class), ASMDeobfNames.OptifineFontRendererFindGlyph);
+					final Optional<AbstractInsnNode> marker0 = VisitorHelper.stream(method.instructions).filter(matcher0.insnMatcher().or(matcher0Optifine.insnMatcher())).findFirst();
 					final Optional<AbstractInsnNode> marker1 = VisitorHelper.stream(method.instructions).filter(e -> {
 						return e instanceof VarInsnNode&&e.getOpcode()==Opcodes.ASTORE&&((VarInsnNode) e).var==26+o;
 					}).findFirst();

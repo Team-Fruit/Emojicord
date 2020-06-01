@@ -62,5 +62,6 @@ public class ASMDeobfNames {
 	public static final @Nonnull RefName FontRendererBlue = RefName.deobName("blue", "field_78292_o");
 	public static final @Nonnull RefName FontRendererAlpha = RefName.deobName("alpha", "field_78305_q");
 	public static final @Nonnull RefName FontFindGlyph = RefName.deobName("findGlyph", "func_211184_b");
+	public static final @Nonnull RefName OptifineFontRendererFindGlyph = RefName.name("findGlyph");
 	public static final @Nonnull RefName TexturedGlyphRender = RefName.deobName("render", "func_211234_a");
 }
