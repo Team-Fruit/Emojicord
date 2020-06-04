@@ -58,7 +58,7 @@ public class ClientProxy extends CommonProxy {
 		eventHandler.registerDictionaryWatcher(Locations.instance.getDictionaryDirectory());
 
 		#if !MC_7_LATER
-		// Emojicord doesn't 
+		// Emojicord doesn't work with FastCraft Renderer
 		if (Loader.isModLoaded("FastCraft")) {
 			Minecraft mc = Compat.getMinecraft();
 			mc.fontRenderer = new FontRenderer(mc.gameSettings, new ResourceLocation("textures/font/ascii.png"), mc.renderEngine, false);

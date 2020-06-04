@@ -73,7 +73,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 		else {
 			final boolean onButtonLast = this.onButton;
 			this.onButton = this.emojiButton.contains(this.mouseX, this.mouseY);
-			if (this.onButton && !onButtonLast)
+			if (this.onButton && !onButtonLast && !this.faces.isEmpty())
 				this.face = this.faces.get(RandomUtils.nextInt(0, this.faces.size()));
 		}
 
