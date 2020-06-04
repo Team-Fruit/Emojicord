@@ -7,11 +7,11 @@ import net.minecraftforge.fml.relauncher.Side;
 #else
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.relauncher.Side;
+import net.minecraft.client.resources.IReloadableResourceManager;
 #endif
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.resources.IReloadableResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.teamfruit.emojicord.compat.Compat;
 import net.teamfruit.emojicord.compat.Compat.CompatVersionChecker;
