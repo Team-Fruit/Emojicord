@@ -1,27 +1,12 @@
 package net.teamfruit.emojicord.asm;
 
-import java.util.Optional;
-import java.util.function.Supplier;
-
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.FieldInsnNode;
-import org.objectweb.asm.tree.FieldNode;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.VarInsnNode;
-
-import net.teamfruit.emojicord.asm.lib.ASMValidate;
-import net.teamfruit.emojicord.asm.lib.ClassName;
-import net.teamfruit.emojicord.asm.lib.DescHelper;
-import net.teamfruit.emojicord.asm.lib.FieldMatcher;
-import net.teamfruit.emojicord.asm.lib.INodeTreeTransformer;
-import net.teamfruit.emojicord.asm.lib.MethodMatcher;
-import net.teamfruit.emojicord.asm.lib.RefName;
-import net.teamfruit.emojicord.asm.lib.VisitorHelper;
+import net.teamfruit.emojicord.asm.lib.*;
 import net.teamfruit.emojicord.compat.CompatBaseVersion;
 import net.teamfruit.emojicord.compat.CompatVersion;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.tree.*;
+
+import java.util.function.Supplier;
 
 public class GuiTextFieldTransform implements INodeTreeTransformer {
 	@Override
@@ -77,12 +62,30 @@ public class GuiTextFieldTransform implements INodeTreeTransformer {
 						else
 							return new MethodMatcher(ClassName.of("net.minecraft.client.gui.FontRenderer"), DescHelper.toDescMethod(int.class, ClassName.of("java.lang.String"), float.class, float.class, int.class), ASMDeobfNames.FontRendererDrawStringWithShadow);
 					}).get();
-					final Optional<AbstractInsnNode> marker1 = VisitorHelper.stream(method.instructions).filter(e -> {
-						return e instanceof VarInsnNode&&e.getOpcode()==Opcodes.ISTORE&&((VarInsnNode) e).var==o+10;
-					}).findFirst();
 					VisitorHelper.stream(method.instructions)
 							.filter(matcher0.insnMatcher())
-							.filter(e -> !marker1.isPresent()||method.instructions.indexOf(e)>method.instructions.indexOf(marker1.get()))
+							.filter(e -> {
+								if (CompatVersion.version().older(CompatBaseVersion.V7))
+									return (e = e.getPrevious()).getOpcode() == Opcodes.ILOAD
+											&& (e = e.getPrevious()).getOpcode() == Opcodes.ILOAD
+											&& (e = e.getPrevious()).getOpcode() == Opcodes.ILOAD
+											&& (e = e.getPrevious()).getOpcode() == Opcodes.INVOKEVIRTUAL
+											&& (e = e.getPrevious()).getOpcode() == Opcodes.ILOAD
+											&& (e = e.getPrevious()).getOpcode() == Opcodes.ALOAD
+											&& (e = e.getPrevious()).getOpcode() == Opcodes.GETFIELD
+											&& (e = e.getPrevious()).getOpcode() == Opcodes.ALOAD;
+								else
+									return (e = e.getPrevious()).getOpcode() == Opcodes.ILOAD
+											&& (e = e.getPrevious()).getOpcode() == Opcodes.I2F
+											&& (e = e.getPrevious()).getOpcode() == Opcodes.ILOAD
+											&& (e = e.getPrevious()).getOpcode() == Opcodes.I2F
+											&& (e = e.getPrevious()).getOpcode() == Opcodes.ILOAD
+											&& (e = e.getPrevious()).getOpcode() == Opcodes.INVOKEVIRTUAL
+											&& (e = e.getPrevious()).getOpcode() == Opcodes.ILOAD
+											&& (e = e.getPrevious()).getOpcode() == Opcodes.ALOAD
+											&& (e = e.getPrevious()).getOpcode() == Opcodes.GETFIELD
+											&& (e = e.getPrevious()).getOpcode() == Opcodes.ALOAD;
+							})
 							.findFirst().ifPresent(marker -> {
 								final AbstractInsnNode marker0 = marker.getNext().getNext().getNext();
 								{

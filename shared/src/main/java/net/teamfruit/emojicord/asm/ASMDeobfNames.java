@@ -29,7 +29,12 @@ public class ASMDeobfNames {
 		else
 			return RefName.deobName("renderButton", "renderButton");
 	}).get();
-	public static final @Nonnull RefName FontRendererDrawStringWithShadow = RefName.deobName("drawStringWithShadow", "func_175063_a");
+	public static final @Nonnull RefName FontRendererDrawStringWithShadow = ((Supplier<RefName>) () -> {
+		if (CompatVersion.version().older(CompatBaseVersion.V7))
+			return RefName.deobName("drawStringWithShadow", "func_78261_a");
+		else
+			return RefName.deobName("drawStringWithShadow", "func_175063_a");
+	}).get();
 	public static final @Nonnull RefName FontRendererRenderStringAtPos = ((Supplier<RefName>) () -> {
 		if (CompatVersion.version().newer(CompatBaseVersion.V15))
 			return RefName.deobName("renderStringAtPos", "func_228081_c_");
