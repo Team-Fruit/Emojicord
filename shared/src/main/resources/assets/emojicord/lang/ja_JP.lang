@@ -50,3 +50,6 @@ emojicord.gui.settings.aborting.desc.web=Emojicord Web\nWeb上の操作は完了
 emojicord.gui.settings.aborting.desc.manual=マニュアルモード\nフォルダに変更は見つかりませんでした。\n本当に閉じてもよろしいですか?
 emojicord.gui.settings.aborting.button.ok=OK
 emojicord.gui.settings.aborting.button.cancel=キャンセル
+
+# Error
+emojicord.chat.error.disabled=Emojicord API に接続されていなければ Emojicord を使用することはできません。\nインターネット接続を確認し、Minecraftを再起動してください。

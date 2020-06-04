@@ -50,3 +50,6 @@ emojicord.gui.settings.aborting.desc.web=Emojicord Web\nWeb process not done.\nA
 emojicord.gui.settings.aborting.desc.manual=Manual Management\nNo changes found.\nAre you sure you want to close?
 emojicord.gui.settings.aborting.button.ok=OK
 emojicord.gui.settings.aborting.button.cancel=Cancel
+
+# Error
+emojicord.chat.error.disabled=Emojicord will not work unless connected to Emojicord API.\nCheck your internet connection and restart Minecraft.

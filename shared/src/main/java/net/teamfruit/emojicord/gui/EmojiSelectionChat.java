@@ -47,12 +47,15 @@ public class EmojiSelectionChat implements IChatOverlay {
 	private final List<String> faces;
 	private boolean onButton;
 	private String face = ":smile:";
+	private boolean enabled;
 
 	public EmojiSelectionChat(final #if MC_12_LATER ChatScreen #else GuiChat #endif chatScreen) {
 		this.chatScreen = chatScreen;
 		this.font = Compat.getMinecraft(). #if MC_10 fontRendererObj #else fontRenderer #endif ;
 		this.inputField = chatScreen.inputField;
 		this.emojiButton = new Rectangle2d(this.chatScreen.width - 13, this.chatScreen.height - 13, 10, 10);
+
+		this.enabled = !StandardEmojiIdPicker.instance.categories.isEmpty();
 
 		this.faces = Lists.newArrayList();
 		{
@@ -77,14 +80,21 @@ public class EmojiSelectionChat implements IChatOverlay {
 				this.face = this.faces.get(RandomUtils.nextInt(0, this.faces.size()));
 		}
 
-		this.font.drawString(this.face, this.emojiButton.getX(), this.emojiButton.getY(), 0xFFFFFF);
+		if (this.enabled)
+			this.font.drawString(this.face, this.emojiButton.getX(), this.emojiButton.getY(), 0xFFFFFF);
+		else {
+			this.font.drawString("\u2717", this.emojiButton.getX(), this.emojiButton.getY(), 0xFF0000);
+			if (this.emojiButton.contains(this.mouseX, this.mouseY))
+				#if MC_12_LATER chatScreen.renderTooltip #elif MC_7_LATER chatScreen.drawHoveringText #else chatScreen.func_146283_a #endif (Arrays.asList(CompatI18n.format("emojicord.chat.error.disabled").split("\\\\n|\n")), this.mouseX, this.mouseY);
+		}
 		return false;
 	}
 
 	@Override
 	public boolean onMouseClicked(final int button) {
 		if (this.selectionList == null && this.emojiButton.contains(this.mouseX, this.mouseY)) {
-			show();
+			if (this.enabled)
+				show();
 			return true;
 		}
 		return this.selectionList != null && this.selectionList.onMouseClicked(button);
