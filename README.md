@@ -3,11 +3,10 @@
 
 # Emojicord
 ![Minecraft 1.7.10](https://img.shields.io/badge/Minecraft-1.7.10-yellow.svg?style=flat)
-![Minecraft 1.8.9](https://img.shields.io/badge/Minecraft-1.8.9-green.svg?style=flat)
-![Minecraft 1.9.4](https://img.shields.io/badge/Minecraft-1.9.4-green.svg?style=flat)
 ![Minecraft 1.10.2](https://img.shields.io/badge/Minecraft-1.10.2-green.svg?style=flat)
-![Minecraft 1.11.2](https://img.shields.io/badge/Minecraft-1.11.2-green.svg?style=flat)
-![Minecraft 1.12.2](https://img.shields.io/badge/Minecraft-1.11.2-green.svg?style=flat)
+![Minecraft 1.12.2](https://img.shields.io/badge/Minecraft-1.12.2-green.svg?style=flat)
+![Minecraft 1.14.4](https://img.shields.io/badge/Minecraft-1.14.4-green.svg?style=flat)
+![Minecraft 1.15.2](https://img.shields.io/badge/Minecraft-1.15.2-green.svg?style=flat)
 
 ## Table of Contents
 
@@ -30,22 +29,23 @@ Discord Emojis in Minecraft
 ## License
 
 * Emojicord
-  - (c) 2019 TeamFruit
+  - (c) 2019-2020 TeamFruit
   - [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://opensource.org/licenses/mit-license.php)
 
 ## Downloads
 
-Downloads can be found on [github](https://github.com/Team-Fruit/Emojicord/releases).
+Downloads can be found on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/emojicord).  
+Downloads can be found on [GitHub](https://github.com/Team-Fruit/Emojicord/releases).  
 
 ## Usage
 
-Write emoji names and enclose in single quotes.
+Write emoji names and enclose in colon.
 
 ## Emojicord Localization
 
-### English Text
+### Japanese Text
 
-`en_US` is included in this repository, fixes to typos are welcome.
+`ja_JP` is included in this repository, fixes to typos are welcome.
 
 ### Encoding
 
@@ -61,5 +61,6 @@ Thanks to
 
 * Notch et al for Minecraft
 * Lex et al for MinecraftForge
-* Kamesuta, sjcl for Emojicord
+* Kamesuta for Emojicord
+* sjcl for Emojicord Web
 * all [contributors](https://github.com/Team-Fruit/Emojicord/graphs/contributors)
