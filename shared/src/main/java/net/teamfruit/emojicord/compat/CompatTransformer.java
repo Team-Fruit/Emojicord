@@ -8,6 +8,8 @@ import java.util.Set;
 
 import javax.annotation.Nonnull;
 
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,6 +25,7 @@ import cpw.mods.modlauncher.api.TransformerVoteResult;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 #else
+import net.minecraft.launchwrapper.Launch;
 import net.minecraft.launchwrapper.IClassTransformer;
 #endif
 
@@ -76,6 +79,10 @@ public abstract class CompatTransformer implements #if MC_12_LATER ITransformer<
 		private boolean targetinitialized;
 		private boolean targetfound;
 
+		private Supplier<List<?>> tweakClassNamesSupplier = Suppliers.memoize(() -> {
+			return (List<?>) Launch.blackboard.get("TweakClasses");
+		});
+
 		private boolean transformEqual(String transformName, String className) {
 			return StringUtils.equals(transformName, className) || StringUtils.equals(transformName, "$wrapper."+className);
 		}
@@ -83,6 +90,10 @@ public abstract class CompatTransformer implements #if MC_12_LATER ITransformer<
 		public void transform(final String name, final String transformedName) {
 			if (transformEqual(transformedName, this.targetname))
 				this.targetfound = true;
+
+			// Ignore while transforming
+			if (!tweakClassNamesSupplier.get().isEmpty())
+				return;
 
 			if (!this.targetinitialized) {
 				this.targetinitialized = true;
