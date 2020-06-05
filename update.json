@@ -1,25 +1,27 @@
 {
   "homepage": "http://emojicord.teamfruit.net/download/",
   "promos": {
-    "1.7.10-latest": "1.0.2",
-    "1.7.10-recommended": "1.0.2",
+    "1.7.10-latest": "1.1.1",
+    "1.7.10-recommended": "1.1.1",
     "1.8.9-latest": "1.0.2",
     "1.8.9-recommended": "1.0.2",
     "1.9.4-latest": "1.0.2",
     "1.9.4-recommended": "1.0.2",
-    "1.10.2-latest": "1.0.2",
-    "1.10.2-recommended": "1.0.2",
+    "1.10.2-latest": "1.1.1",
+    "1.10.2-recommended": "1.1.1",
     "1.11.2-latest": "1.0.2",
     "1.11.2-recommended": "1.0.2",
-    "1.12.2-latest": "1.0.2",
-    "1.12.2-recommended": "1.0.2",
+    "1.12.2-latest": "1.1.1",
+    "1.12.2-recommended": "1.1.1",
     "1.13.2-latest": "1.0.2",
     "1.13.2-recommended": "1.0.2",
-    "1.14.4-latest": "1.0.2",
-    "1.14.4-recommended": "1.0.2"
+    "1.14.4-latest": "1.1.1",
+    "1.14.4-recommended": "1.1.1",
+    "1.15.2-latest": "1.1.1",
+    "1.15.2-recommended": "1.1.1"
   },
   "1.7.10": {
-    "1.0.2": "Fix chat emojis are not sync to others"
+    "1.1.1": "1.15.2 and Optifine, FastCraft, IntelliInput Compatible"
   },
   "1.8.9": {
     "1.0.2": "Fix chat emojis are not sync to others"
@@ -28,18 +30,21 @@
     "1.0.2": "Fix chat emojis are not sync to others"
   },
   "1.10.2": {
-    "1.0.2": "Fix chat emojis are not sync to others"
+    "1.1.1": "1.15.2 and Optifine, FastCraft, IntelliInput Compatible"
   },
   "1.11.2": {
     "1.0.2": "Fix chat emojis are not sync to others"
   },
   "1.12.2": {
-    "1.0.2": "Fix chat emojis are not sync to others"
+    "1.1.1": "1.15.2 and Optifine, FastCraft, IntelliInput Compatible"
   },
   "1.13.2": {
     "1.0.2": "Fix chat emojis are not sync to others"
   },
   "1.14.4": {
-    "1.0.2": "Fix chat emojis are not sync to others"
+    "1.1.1": "1.15.2 and Optifine, FastCraft, IntelliInput Compatible"
+  },
+  "1.15.2": {
+    "1.1.1": "1.15.2 and Optifine, FastCraft, IntelliInput Compatible"
   }
 }
