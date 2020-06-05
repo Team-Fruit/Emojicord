@@ -6,7 +6,11 @@ buildscript {
 	}
 
 	dependencies {
+		// for ForgeGradle Version
 		classpath 'com.google.guava:guava:26.0-jre'
+		// for CurseGradle
+		classpath 'org.apache.httpcomponents:httpmime:4.5.2'
+		classpath 'org.apache.httpcomponents:httpclient:4.5.2'
 	}
 }
 
