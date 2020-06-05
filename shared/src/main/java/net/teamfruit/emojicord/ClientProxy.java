@@ -5,6 +5,7 @@ import net.minecraftforge.api.distmarker.Dist;
 #elif MC_7_LATER
 import net.minecraftforge.fml.relauncher.Side;
 #else
+import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.relauncher.Side;
 import net.minecraft.client.resources.IReloadableResourceManager;
@@ -59,7 +60,7 @@ public class ClientProxy extends CommonProxy {
 
 		#if !MC_7_LATER
 		// Emojicord doesn't work with FastCraft Renderer
-		if (Loader.isModLoaded("FastCraft")) {
+		if (Loader.isModLoaded("FastCraft") && !FMLClientHandler.instance().hasOptifine()) {
 			Minecraft mc = Compat.getMinecraft();
 			mc.fontRenderer = new FontRenderer(mc.gameSettings, new ResourceLocation("textures/font/ascii.png"), mc.renderEngine, false);
 			((IReloadableResourceManager)mc.getResourceManager()).registerReloadListener(mc.fontRenderer);
