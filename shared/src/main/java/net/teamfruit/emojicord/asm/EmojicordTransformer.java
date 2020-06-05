@@ -47,13 +47,13 @@ public class EmojicordTransformer extends CompatTransformer #if MC_12_LATER impl
 
 	public static final DeferredTransform intelliInputDeferred = new DeferredTransform(EmojicordTransformer.class.getName(), "com.tsoft_web.IntelliInput.asm.IntelliInputTransformer");
 
-	private final DeferredTransform[] deferredTransforms = {
+	public static final DeferredTransform[] deferredTransforms = {
 			intelliInputDeferred,
 	};
 
 	@Override
 	public DeferredTransform[] deferredTransforms() {
-		return this.deferredTransforms;
+		return deferredTransforms;
 	}
 
 	@Override

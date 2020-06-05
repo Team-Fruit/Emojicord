@@ -86,27 +86,31 @@ public abstract class CompatTransformer implements #if MC_12_LATER ITransformer<
 					this.targetloaded = true;
 			} else if (!this.targetinitialized) {
 				this.targetinitialized = true;
-				try {
-					final Field $transformers = Class.forName("net.minecraft.launchwrapper.LaunchClassLoader").getDeclaredField("transformers");
-					$transformers.setAccessible(true);
-					final List<?> transformers = (List<?>) $transformers.get(Class.forName("net.minecraft.launchwrapper.Launch").getField("classLoader").get(null));
-					int thistransformer = -1, targettransformer = -1;
-					for (final ListIterator<?> itr = transformers.listIterator(); itr.hasNext();) {
-						final int index = itr.nextIndex();
-						final Object transformer = itr.next();
-						final String tname = transformer.getClass().getName();
-						if (StringUtils.equals(tname, "$wrapper."+this.thisname))
-							thistransformer = index;
-						else if (StringUtils.equals(tname, "$wrapper."+this.targetname))
-							targettransformer = index;
-					}
-					if (thistransformer>=0&&targettransformer>=0&&targettransformer>thistransformer) {
-						Collections.swap(transformers, thistransformer, targettransformer);
-						LOGGER.info("The order of EmojicordTransformer and IntelliInputTransformer has been swapped while loading "+transformedName);
-					}
-				} catch (final Exception e) {
-					LOGGER.error(e.getMessage(), e);
+				apply();
+			}
+		}
+
+		public void apply() {
+			try {
+				final Field $transformers = Class.forName("net.minecraft.launchwrapper.LaunchClassLoader").getDeclaredField("transformers");
+				$transformers.setAccessible(true);
+				final List<?> transformers = (List<?>) $transformers.get(Class.forName("net.minecraft.launchwrapper.Launch").getField("classLoader").get(null));
+				int thistransformer = -1, targettransformer = -1;
+				for (final ListIterator<?> itr = transformers.listIterator(); itr.hasNext();) {
+					final int index = itr.nextIndex();
+					final Object transformer = itr.next();
+					final String tname = transformer.getClass().getName();
+					if (StringUtils.equals(tname, this.thisname) || StringUtils.equals(tname, "$wrapper."+this.thisname))
+						thistransformer = index;
+					else if (StringUtils.equals(tname, this.targetname) || StringUtils.equals(tname, "$wrapper."+this.targetname))
+						targettransformer = index;
 				}
+				if (thistransformer>=0&&targettransformer>=0&&targettransformer>thistransformer) {
+					Collections.swap(transformers, thistransformer, targettransformer);
+					LOGGER.info("The order of EmojicordTransformer and IntelliInputTransformer has been swapped while loading");
+				}
+			} catch (final Exception e) {
+				LOGGER.error(e.getMessage(), e);
 			}
 		}
 		#endif
