@@ -186,10 +186,10 @@ public class EmojiObject {
 					this.current = this.animationIterator.next();
 				Timer.tick();
 				final int currentId = this.current.getRight().getGlTextureId();
-				final float t = this.timer.getTime() - this.current.getLeft() / 1e+3f;
+				final float t = this.timer.getTime() - this.current.getLeft() * 1e-3f;
 				if (t > 0) {
 					this.current = null;
-					this.timer.set(t);
+					this.timer.set(0);
 				}
 				return currentId;
 			}
