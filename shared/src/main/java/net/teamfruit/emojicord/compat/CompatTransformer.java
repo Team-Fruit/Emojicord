@@ -73,18 +73,18 @@ public abstract class CompatTransformer implements #if MC_12_LATER ITransformer<
 			return this.shouldDeferSupplier.get();
 		}
 		#else
-		private boolean targetloaded;
 		private boolean targetinitialized;
 		private boolean targetfound;
 
+		private boolean transformEqual(String transformName, String className) {
+			return StringUtils.equals(transformName, className) || StringUtils.equals(transformName, "$wrapper."+className);
+		}
+
 		public void transform(final String name, final String transformedName) {
-			if (StringUtils.equals(transformedName, "$wrapper."+this.targetname))
+			if (transformEqual(transformedName, this.targetname))
 				this.targetfound = true;
 
-			if (!this.targetloaded) {
-				if (StringUtils.equals(transformedName, "$wrapper."+this.targetname))
-					this.targetloaded = true;
-			} else if (!this.targetinitialized) {
+			if (!this.targetinitialized) {
 				this.targetinitialized = true;
 				apply();
 			}
@@ -100,9 +100,9 @@ public abstract class CompatTransformer implements #if MC_12_LATER ITransformer<
 					final int index = itr.nextIndex();
 					final Object transformer = itr.next();
 					final String tname = transformer.getClass().getName();
-					if (StringUtils.equals(tname, this.thisname) || StringUtils.equals(tname, "$wrapper."+this.thisname))
+					if (transformEqual(tname, this.thisname))
 						thistransformer = index;
-					else if (StringUtils.equals(tname, this.targetname) || StringUtils.equals(tname, "$wrapper."+this.targetname))
+					else if (transformEqual(tname, this.targetname))
 						targettransformer = index;
 				}
 				if (thistransformer>=0&&targettransformer>=0&&targettransformer>thistransformer) {
