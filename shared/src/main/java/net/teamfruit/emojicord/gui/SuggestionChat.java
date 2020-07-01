@@ -47,9 +47,9 @@ public class SuggestionChat implements IChatOverlay {
 	}
 
 	@Override
-	public boolean onDraw() {
+	public boolean onDraw(Compat.CompatMatrixStack compatMatrixStack) {
 		if (this.suggestions != null)
-			this.suggestions.render();
+			this.suggestions.render(compatMatrixStack);
 		checkTextUpdate();
 		return false;
 	}
@@ -96,8 +96,8 @@ public class SuggestionChat implements IChatOverlay {
 				for (final Suggestion suggestion : suggestions.getList())
 					i = Math.max(i, this.font.getStringWidth(suggestion.getText() + " " + StringUtils.substringBetween(suggestion.getText(), ":")));
 
-				final int j = MathHelper.clamp(CompatGui.CompatTextFieldWidget.getInsertPos(this.inputField, font, suggestions.getRange().getStart()), 0, this.chatScreen.width - i);
-				this.suggestions = new SuggestionsList(j, this.chatScreen.height - 12, i, suggestions);
+				final int j = MathHelper.clamp(CompatGui.CompatTextFieldWidget.getInsertPos(this.inputField, font, suggestions.getRange().getStart()), 0, this.chatScreen. #if MC_15_LATER field_230708_k_ #else width #endif - i);
+				this.suggestions = new SuggestionsList(j, this.chatScreen. #if MC_15_LATER field_230709_l_ #else height #endif - 12, i, suggestions);
 			}
 		}
 	}
@@ -188,7 +188,7 @@ public class SuggestionChat implements IChatOverlay {
 			select(0);
 		}
 
-		public void render() {
+		public void render(Compat.CompatMatrixStack compatMatrixStack) {
 			final int i = Math.min(this.suggestions.getList().size(), 10);
 			final boolean isScrollTop = this.scrollY > 0;
 			final boolean isScrollBottom = this.suggestions.getList().size() > this.scrollY + i;
@@ -225,7 +225,7 @@ public class SuggestionChat implements IChatOverlay {
 					flag4 = true;
 				}
 
-				SuggestionChat.this.font.drawStringWithShadow(getEmojiDisplayText(suggestion.getText()), this.rectangle.getX() + 1, this.rectangle.getY() + 2 + 12 * l, l + this.scrollY == this.selectedIndex ? 0xFFFFFF00 : 0xFFAAAAAA);
+				SuggestionChat.this.font. #if MC_15_LATER func_238405_a_(compatMatrixStack.matrix, #else drawStringWithShadow( #endif getEmojiDisplayText(suggestion.getText()), this.rectangle.getX() + 1, this.rectangle.getY() + 2 + 12 * l, l + this.scrollY == this.selectedIndex ? 0xFFFFFF00 : 0xFFAAAAAA);
 			}
 
 			if (flag4) {

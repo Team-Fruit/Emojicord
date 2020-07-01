@@ -10,7 +10,11 @@ import net.minecraft.client.gui.fonts.TexturedGlyph;
 #endif
 #if MC_10_LATER
 import net.minecraft.client.renderer.BufferBuilder;
+#if MC_15_LATER
+import net.minecraft.util.math.vector.Matrix4f;
+#else
 import net.minecraft.client.renderer.Matrix4f;
+#endif
 #endif
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.ResourceLocation;

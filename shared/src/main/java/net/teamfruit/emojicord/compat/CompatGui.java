@@ -16,7 +16,11 @@ public class CompatGui {
 	public static class CompatScreen {
 		public static boolean hasShiftDown() {
 			#if MC_12_LATER
+			#if MC_15_LATER
+			return Screen.func_231173_s_();
+			#else
 			return Screen.hasShiftDown();
+			#endif
 			#else
 			return GuiScreen.isShiftKeyDown();
 			#endif
@@ -51,7 +55,11 @@ public class CompatGui {
 		@CoreInvoke
 		public static void renderSuggestion(final FontRenderer font, final boolean flag, final String suggestion, final int posX, final int posY) {
 			if (!flag && suggestion != null)
+				#if MC_15_LATER
+				font.func_238405_a_(null, suggestion, posX - 1, posY, 0xFF808080);
+				#else
 				font.drawStringWithShadow(suggestion, posX - 1, posY, 0xFF808080);
+				#endif
 		}
 	}
 

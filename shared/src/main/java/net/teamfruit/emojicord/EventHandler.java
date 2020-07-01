@@ -42,6 +42,7 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 #endif
 
+import net.teamfruit.emojicord.compat.Compat;
 import net.teamfruit.emojicord.compat.CompatEvents.CompatGuiScreenEvent.*;
 import net.minecraftforge.common.MinecraftForge;
 
@@ -167,7 +168,7 @@ public class EventHandler {
 		for (final ListIterator<IChatOverlay> itr = this.overlays.listIterator(this.overlays.size()); itr.hasPrevious(); ) {
 			final IChatOverlay overlay = itr.previous();
 			overlay.onMouseInput(event. #if MC_7_LATER getMouseX() #else mouseX #endif , event. #if MC_7_LATER getMouseY() #else mouseY #endif );
-			if (overlay.onDraw())
+			if (overlay.onDraw(new Compat.CompatMatrixStack( #if MC_15_LATER event.getMatrixStack() #endif )))
 				event.setCanceled(true);
 		}
 	}

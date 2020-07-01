@@ -18,6 +18,10 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+#if MC_15_LATER
+import com.mojang.blaze3d.matrix.MatrixStack;
+#endif
+
 #if MC_12_LATER
 #if MC_14_LATER
 import net.minecraft.client.renderer.texture.TextureUtil;
@@ -170,5 +174,15 @@ public class Compat {
 		public static String getForgeVersion() {
 			return ForgeVersion.getVersion();
 		}
+	}
+
+	public static class CompatMatrixStack {
+		#if MC_15_LATER
+		public MatrixStack matrix;
+
+		public CompatMatrixStack(MatrixStack matrix) {
+			this.matrix = matrix;
+		}
+		#endif
 	}
 }

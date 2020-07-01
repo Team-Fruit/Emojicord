@@ -3,6 +3,7 @@ package net.teamfruit.emojicord.gui;
 #if MC_12_LATER
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.fml.VersionChecker;
 #elif MC_7_LATER
 import net.minecraft.client.gui.GuiChat;
@@ -53,7 +54,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 		this.chatScreen = chatScreen;
 		this.font = Compat.getMinecraft(). #if MC_10 fontRendererObj #else fontRenderer #endif ;
 		this.inputField = chatScreen.inputField;
-		this.emojiButton = new Rectangle2d(this.chatScreen.width - 13, this.chatScreen.height - 13, 10, 10);
+		this.emojiButton = new Rectangle2d( #if MC_15_LATER this.chatScreen.field_230708_k_#else this.chatScreen.width #endif - 13, #if MC_15_LATER this.chatScreen.field_230709_l_ #else this.chatScreen.height #endif - 13, 10, 10);
 
 		this.enabled = !StandardEmojiIdPicker.instance.categories.isEmpty();
 
@@ -69,10 +70,18 @@ public class EmojiSelectionChat implements IChatOverlay {
 		}
 	}
 
+	private void drawString(Compat.CompatMatrixStack compatMatrixStack, String text, float x, float y, int color) {
+		#if MC_15_LATER
+		this.font.func_238405_a_(compatMatrixStack.matrix, text, x, y, color);
+		#else
+		this.font.drawStringWithShadow(text, x, y, color);
+		#endif
+	}
+
 	@Override
-	public boolean onDraw() {
+	public boolean onDraw(Compat.CompatMatrixStack compatMatrixStack) {
 		if (this.selectionList != null)
-			this.selectionList.onDraw();
+			this.selectionList.onDraw(compatMatrixStack);
 		else {
 			final boolean onButtonLast = this.onButton;
 			this.onButton = this.emojiButton.contains(this.mouseX, this.mouseY);
@@ -81,11 +90,15 @@ public class EmojiSelectionChat implements IChatOverlay {
 		}
 
 		if (this.enabled)
-			this.font.drawString(this.face, this.emojiButton.getX(), this.emojiButton.getY(), 0xFFFFFF);
+			drawString(compatMatrixStack, this.face, this.emojiButton.getX(), this.emojiButton.getY(), 0xFFFFFF);
 		else {
-			this.font.drawString("\u2717", this.emojiButton.getX(), this.emojiButton.getY(), 0xFF0000);
+			drawString(compatMatrixStack, "\u2717", this.emojiButton.getX(), this.emojiButton.getY(), 0xFF0000);
 			if (this.emojiButton.contains(this.mouseX, this.mouseY))
+				#if MC_15_LATER
+				chatScreen.func_238654_b_(null, Arrays.stream(CompatI18n.format("emojicord.chat.error.disabled").split("\\\\n|\n")).map(StringTextComponent::new).collect(Collectors.toList()), this.mouseX, this.mouseY);
+				#else
 				#if MC_12_LATER chatScreen.renderTooltip #elif MC_7_LATER chatScreen.drawHoveringText #else chatScreen.func_146283_a #endif (Arrays.asList(CompatI18n.format("emojicord.chat.error.disabled").split("\\\\n|\n")), this.mouseX, this.mouseY);
+				#endif
 		}
 		return false;
 	}
@@ -155,7 +168,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 					Pair.of("<:symbols:630652764955082752>", standardCategories.stream().filter(e -> "SYMBOLS".equalsIgnoreCase(e.name)).findFirst().map(e -> e.setTranslation("emojicord.gui.picker.standard.symbols")).orElse(null)),
 					Pair.of("<:flags:630652781866385490>", standardCategories.stream().filter(e -> "FLAGS".equalsIgnoreCase(e.name)).findFirst().map(e -> e.setTranslation("emojicord.gui.picker.standard.flags")).orElse(null)));
 		}).get();
-		this.selectionList = new EmojiSelectionList(this.chatScreen.width, this.chatScreen.height - 12, width, height, categories, buttonCategories);
+		this.selectionList = new EmojiSelectionList( #if MC_15_LATER this.chatScreen.field_230708_k_ #else this.chatScreen.width #endif , #if MC_15_LATER this.chatScreen.field_230709_l_ #else this.chatScreen.height #endif - 12, width, height, categories, buttonCategories);
 	}
 
 	public void hide() {
@@ -219,7 +232,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 			this.categories = categories;
 
 			select(0, 0);
-			this.searchField = new #if MC_12_LATER TextFieldWidget #else GuiTextField #endif ( #if MC_7_LATER && !MC_12_LATER -1, #endif EmojiSelectionChat.this.font, this.rectInputField.getX(), this.rectInputField.getY(), this.rectInputField.getWidth(), this.rectInputField.getHeight() #if MC_12_LATER , "Search Field" #endif );
+			this.searchField = new #if MC_12_LATER TextFieldWidget #else GuiTextField #endif ( #if MC_7_LATER && !MC_12_LATER -1, #endif EmojiSelectionChat.this.font, this.rectInputField.getX(), this.rectInputField.getY(), this.rectInputField.getWidth(), this.rectInputField.getHeight() #if MC_12_LATER , #if MC_15_LATER new StringTextComponent #endif ("Search Field") #endif );
 			this.searchField.setMaxStringLength(256);
 			this.searchField.setEnableBackgroundDrawing(false);
 			this.searchField. #if MC_12_LATER setFocused2 #else setFocused #endif (true);
@@ -236,7 +249,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 		}
 
 		@Override
-		public boolean onDraw() {
+		public boolean onDraw(Compat.CompatMatrixStack compatMatrixStack) {
 			IChatOverlay.fill(this.rectangle, 0xFFFFFFFF);
 
 			final int row = 10;
@@ -261,7 +274,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 				for (final PickerGroup group : this.categories) {
 					posY += titleSpanY;
 					if (this.rectMain.contains(this.rectMain.getX(), posY) || this.rectMain.contains(this.rectMain.getX() + this.rectMain.getWidth(), posY + titleSpanY2))
-						EmojiSelectionChat.this.font.drawString(group.getTranslation(), posX, posY, 0xFFABABAB);
+						drawString(compatMatrixStack, group.getTranslation(), posX, posY, 0xFFABABAB);
 					posY += titleSpanY2;
 					int index = 0;
 					for (final PickerItem item : group.items) {
@@ -277,7 +290,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 							if (this.selectedColor > 0)
 								if (EmojiId.StandardEmojiId.fromAlias(StringUtils.strip(item.name, ":") + ":skin-tone-" + this.selectedColor) != null)
 									tone = ":skin-tone-" + this.selectedColor + ":";
-							EmojiSelectionChat.this.font.drawString(item.name + tone, rect.getX() + emojiMargin, rect.getY() + emojiMargin, 0xFFFFFFFF);
+							drawString(compatMatrixStack, item.name + tone, rect.getX() + emojiMargin, rect.getY() + emojiMargin, 0xFFFFFFFF);
 							if (rect.contains(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY)) {
 								this.selecting = item;
 								if (!(this.selectedGroupIndex == groupIndex && this.selectedIndex == index)) {
@@ -321,7 +334,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 			IChatOverlay.fill(this.rectBottom.getX(), this.rectBottom.getY() - 1, this.rectBottom.getX() + this.rectBottom.getWidth(), this.rectBottom.getY(), 0xFFEBEBEB);
 
 			final int colorOffset = 1;
-			EmojiSelectionChat.this.font.drawString(":ok_hand:" + (this.selectedColor > 0 ? ":skin-tone-" + this.selectedColor + ":" : ""), this.rectColorButton.getX() + colorOffset, this.rectColorButton.getY() + colorOffset, 0xFFFFFFFF);
+			drawString(compatMatrixStack, ":ok_hand:" + (this.selectedColor > 0 ? ":skin-tone-" + this.selectedColor + ":" : ""), this.rectColorButton.getX() + colorOffset, this.rectColorButton.getY() + colorOffset, 0xFFFFFFFF);
 			if (this.colorShown) {
 				IChatOverlay.fill(this.rectColor, 0xFFEFEFEF);
 
@@ -334,12 +347,12 @@ public class EmojiSelectionChat implements IChatOverlay {
 					final int py = posY + pindex * spanY;
 					final int index = colorIndex[pindex];
 					final Rectangle2d rect = new Rectangle2d(this.rectColor.getX(), py, this.rectColor.getWidth(), spanY);
-					EmojiSelectionChat.this.font.drawString(":ok_hand:" + (index > 0 ? ":skin-tone-" + index + ":" : ""), rect.getX() + colorOffset, rect.getY() + colorOffset, 0xFFFFFFFF);
+					drawString(compatMatrixStack, ":ok_hand:" + (index > 0 ? ":skin-tone-" + index + ":" : ""), rect.getX() + colorOffset, rect.getY() + colorOffset, 0xFFFFFFFF);
 					if (rect.contains(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY))
 						this.selectingColor = index;
 				}
 			}
-			EmojiSelectionChat.this.font.drawString(":gear:", this.rectSettingButton.getX() + colorOffset, this.rectSettingButton.getY() + colorOffset, 0xFFFFFFFF);
+			drawString(compatMatrixStack, ":gear:", this.rectSettingButton.getX() + colorOffset, this.rectSettingButton.getY() + colorOffset, 0xFFFFFFFF);
 
 			{
 				PickerGroup currentGroup = null;
@@ -366,7 +379,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 							IChatOverlay.fill(rect, 0xFFEBEBEB);
 						if (currentGroup == group.getRight())
 							IChatOverlay.fill(new Rectangle2d(rect.getX(), rect.getY() + rect.getHeight(), rect.getWidth(), 2), 0xFF7289DA);
-						EmojiSelectionChat.this.font.drawString(group.getLeft(), rect.getX() + emojiMargin, rect.getY() + emojiMargin, 0xFFFFFFFF);
+						drawString(compatMatrixStack, group.getLeft(), rect.getX() + emojiMargin, rect.getY() + emojiMargin, 0xFFFFFFFF);
 						if (rect.contains(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY))
 							//if (!(this.selectingGroupButton==index))
 							this.selectingGroupButton = group.getRight();
@@ -376,13 +389,13 @@ public class EmojiSelectionChat implements IChatOverlay {
 			}
 
 			final float partialTicks = 0.066f;
-			this.searchField. #if MC_12_LATER render(EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY, partialTicks) #else drawTextBox() #endif ;
-			EmojiSelectionChat.this.font.drawString(this.searchField.getText().isEmpty() ? "<:search:631021534705877012>" : "<:close:631021519295741973>", this.rectInputButton.getX() + 1, this.rectInputButton.getY() + 3, 0xFFFFFFFF);
+			this.searchField. #if MC_12_LATER #if MC_15_LATER func_230431_b_(compatMatrixStack.matrix, #else render( #endif EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY, partialTicks) #else drawTextBox() #endif ;
+			drawString(compatMatrixStack, this.searchField.getText().isEmpty() ? "<:search:631021534705877012>" : "<:close:631021519295741973>", this.rectInputButton.getX() + 1, this.rectInputButton.getY() + 3, 0xFFFFFFFF);
 
 			if (this.update != null && this.update.status == #if MC_7_LATER && !MC_12_LATER ForgeVersion #else VersionChecker #endif .Status.OUTDATED) {
 				IChatOverlay.fill(this.rectUpdate, 0xFF36393F);
 				final String text1 = CompatI18n.format("emojicord.gui.picker.update", this.update.target);
-				EmojiSelectionChat.this.font.drawString(text1, this.rectUpdate.getX() + 2, this.rectUpdate.getY() + 3, 0xFFFFFFFF);
+				drawString(compatMatrixStack, text1, this.rectUpdate.getX() + 2, this.rectUpdate.getY() + 3, 0xFFFFFFFF);
 			}
 
 			return false;
@@ -434,7 +447,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 				return true;
 			}
 			#if MC_12_OR_LATER boolean b = #endif
-			this.searchField.mouseClicked(mouseX, mouseY, button);
+			this.searchField. #if MC_15_LATER func_231048_c_ #else mouseClicked #endif (mouseX, mouseY, button);
 			#if !MC_12_OR_LATER
 			boolean b = this.searchField.xPosition <= mouseX && mouseX <= this.searchField.xPosition + this.searchField.width
 					&& this.searchField.yPosition <= mouseY && mouseY <= this.searchField.yPosition + this.searchField.height;
@@ -506,7 +519,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 
 		@Override
 		public boolean onCharTyped(final char typed, final int keycode) {
-			if (this.searchField. #if MC_12_LATER charTyped #else textboxKeyTyped #endif (typed, keycode)) {
+			if (this.searchField. #if MC_15_LATER func_231042_a_ #elif MC_12_LATER charTyped #else textboxKeyTyped #endif (typed, keycode)) {
 				onTextChanged();
 				return true;
 			}
@@ -515,7 +528,7 @@ public class EmojiSelectionChat implements IChatOverlay {
 
 		@Override
 		public boolean onKeyPressed(final int keycode) {
-			if (#if MC_12_LATER this.searchField.keyPressed(keycode, EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY) #else true #endif ) {
+			if (#if MC_12_LATER this.searchField. #if MC_15_LATER func_231046_a_ #else keyPressed #endif (keycode, EmojiSelectionChat.this.mouseX, EmojiSelectionChat.this.mouseY) #else true #endif ) {
 				onTextChanged();
 				return true;
 			}

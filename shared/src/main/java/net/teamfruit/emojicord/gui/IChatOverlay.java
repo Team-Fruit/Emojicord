@@ -1,5 +1,6 @@
 package net.teamfruit.emojicord.gui;
 
+import net.teamfruit.emojicord.compat.Compat;
 import org.lwjgl.opengl.GL11;
 
 import net.teamfruit.emojicord.compat.CompatBaseVertex;
@@ -7,7 +8,7 @@ import net.teamfruit.emojicord.compat.CompatVertex;
 import net.teamfruit.emojicord.compat.OpenGL;
 
 public interface IChatOverlay {
-	default boolean onDraw() {
+	default boolean onDraw(Compat.CompatMatrixStack compatMatrixStack) {
 		return false;
 	}
 

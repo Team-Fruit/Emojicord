@@ -67,15 +67,23 @@ public class EmojiSettings implements IChatOverlay {
 		this.chatScreen = chatScreen;
 		this.font = Compat.getMinecraft(). #if MC_10 fontRendererObj #else fontRenderer #endif;
 		this.inputField = chatScreen.inputField;
-		this.rectScreen = new Rectangle2d(0, 0, this.chatScreen.width, this.chatScreen.height);
+		this.rectScreen = new Rectangle2d(0, 0, #if MC_15_LATER this.chatScreen.field_230708_k_ #else this.chatScreen.width #endif, #if MC_15_LATER this.chatScreen.field_230709_l_ #else this.chatScreen.height #endif );
 
 		showSettings = this::show;
 	}
 
+	private void drawString(Compat.CompatMatrixStack compatMatrixStack, String text, float x, float y, int color) {
+		#if MC_15_LATER
+		this.font.func_238405_a_(compatMatrixStack.matrix, text, x, y, color);
+		#else
+		this.font.drawStringWithShadow(text, x, y, color);
+		#endif
+	}
+
 	@Override
-	public boolean onDraw() {
+	public boolean onDraw(Compat.CompatMatrixStack compatMatrixStack) {
 		if (this.settingMenu != null)
-			this.settingMenu.onDraw();
+			this.settingMenu.onDraw(compatMatrixStack);
 
 		return false;
 	}
@@ -117,7 +125,7 @@ public class EmojiSettings implements IChatOverlay {
 		final int width = 200;
 		final int height = 180;
 
-		this.settingMenu = new EmojiSettingMenu(this.chatScreen.width / 2, this.chatScreen.height / 2, width, height);
+		this.settingMenu = new EmojiSettingMenu(( #if MC_15_LATER this.chatScreen.field_230708_k_ #else this.chatScreen.width #endif ) / 2, ( #if MC_15_LATER this.chatScreen.field_230709_l_ #else this.chatScreen.height #endif ) / 2, width, height);
 	}
 
 	public void hide() {
@@ -162,7 +170,7 @@ public class EmojiSettings implements IChatOverlay {
 				this.update = null;
 		}
 
-		public boolean onDraw() {
+		public boolean onDraw(Compat.CompatMatrixStack compatMatrixStack) {
 			IChatOverlay.fill(EmojiSettings.this.rectScreen, 0x77000000);
 			IChatOverlay.fill(this.rectangle, 0xFF36393F);
 			IChatOverlay.fill(this.rectTop, 0xFF202225);
@@ -171,69 +179,69 @@ public class EmojiSettings implements IChatOverlay {
 				OpenGL.glPushMatrix();
 				OpenGL.glTranslatef(this.rectLogo.getX(), this.rectLogo.getY() + 2, 0);
 				OpenGL.glScalef(5, 5, 1);
-				EmojiSettings.this.font.drawString("<:emojicord:631339297886175295>", 0, 0, 0xFFFFFFFF);
+				drawString(compatMatrixStack, "<:emojicord:631339297886175295>", 0, 0, 0xFFFFFFFF);
 				OpenGL.glPopMatrix();
 			}
 
 			if (this.update != null && this.update.status == #if MC_7_LATER && !MC_12_LATER ForgeVersion #else VersionChecker #endif .Status.OUTDATED) {
 				{
 					final String name = Reference.NAME;
-					EmojiSettings.this.font.drawString(name, this.rectName.getX(), this.rectName.getY() - 15, 0xFFFFFFFF);
-					EmojiSettings.this.font.drawString("by TeamFruit", this.rectName.getX() + 5 + EmojiSettings.this.font.getStringWidth(name), this.rectName.getY() - 15, 0xFF777777);
+					drawString(compatMatrixStack, name, this.rectName.getX(), this.rectName.getY() - 15, 0xFFFFFFFF);
+					drawString(compatMatrixStack, "by TeamFruit", this.rectName.getX() + 5 + EmojiSettings.this.font.getStringWidth(name), this.rectName.getY() - 15, 0xFF777777);
 				}
 				{
 					final boolean b = this.rectUpdate.contains(EmojiSettings.this.mouseX, EmojiSettings.this.mouseY);
 					final double t = (Math.sin(System.currentTimeMillis() / 200d) + 1) / 2;
 					IChatOverlay.fill(this.rectUpdate, 0xFAA61A | (b ? 0xFF : (int) MathHelper.lerp(0x77, 0xFF, (float) t)) << 24);
 					final String text1 = CompatI18n.format("emojicord.gui.settings.update", this.update.target);
-					EmojiSettings.this.font.drawString(text1, this.rectUpdate.getX() + this.rectUpdate.getWidth() / 2 - EmojiSettings.this.font.getStringWidth(text1) / 2, this.rectUpdate.getY() + 7, 0xFFFFFFFF);
+					drawString(compatMatrixStack, text1, this.rectUpdate.getX() + this.rectUpdate.getWidth() / 2 - EmojiSettings.this.font.getStringWidth(text1) / 2, this.rectUpdate.getY() + 7, 0xFFFFFFFF);
 					final String text2 = CompatI18n.format("emojicord.gui.settings.update.click", this.update.target);
-					EmojiSettings.this.font.drawString(text2, this.rectUpdate.getX() + this.rectUpdate.getWidth() / 2 - EmojiSettings.this.font.getStringWidth(text2) / 2, this.rectUpdate.getY() + 18, 0xFFFFFFFF);
+					drawString(compatMatrixStack, text2, this.rectUpdate.getX() + this.rectUpdate.getWidth() / 2 - EmojiSettings.this.font.getStringWidth(text2) / 2, this.rectUpdate.getY() + 18, 0xFFFFFFFF);
 				}
 			} else {
 				{
 					OpenGL.glPushMatrix();
 					OpenGL.glTranslatef(this.rectName.getX(), this.rectName.getY(), 0);
 					OpenGL.glScalef(1.5f, 1.5f, 1);
-					EmojiSettings.this.font.drawString(Reference.NAME, 0, 0, 0xFFFFFFFF);
+					drawString(compatMatrixStack, Reference.NAME, 0, 0, 0xFFFFFFFF);
 					OpenGL.glPopMatrix();
 				}
-				EmojiSettings.this.font.drawString("by TeamFruit", this.rectName.getX() + 10, this.rectName.getY() + 15, 0xFF777777);
+				drawString(compatMatrixStack, "by TeamFruit", this.rectName.getX() + 10, this.rectName.getY() + 15, 0xFF777777);
 			}
 
 			if (EmojiSettings.this.addGui == null) {
 				{
 					final Rectangle2d rectInner = this.rectMain.inner(2, 2, 2, 2);
 					#if MC_12_LATER float #else int #endif posY = rectInner.getY() + 2;
-					EmojiSettings.this.font.drawString(CompatI18n.format("emojicord.gui.settings.menu.packs"), rectInner.getX() + 2, posY, 0xFF777777);
+					drawString(compatMatrixStack, CompatI18n.format("emojicord.gui.settings.menu.packs"), rectInner.getX() + 2, posY, 0xFF777777);
 					posY += 13;
 					for (final EmojiDiscordList group : DiscordEmojiIdDictionary.instance.groups)
 						if (posY + 20 > rectInner.getY() + rectInner.getHeight()) {
-							EmojiSettings.this.font.drawString(CompatI18n.format("emojicord.gui.settings.menu.more"), rectInner.getX() + 12, posY, 0xFF777777);
+							drawString(compatMatrixStack, CompatI18n.format("emojicord.gui.settings.menu.more"), rectInner.getX() + 12, posY, 0xFF777777);
 							break;
 						} else {
-							EmojiSettings.this.font.drawString(group.name, rectInner.getX() + 12, posY, 0xFFFFFFFF);
+							drawString(compatMatrixStack, group.name, rectInner.getX() + 12, posY, 0xFFFFFFFF);
 							posY += 13;
 						}
 				}
 				{
 					IChatOverlay.fill(this.rectButton1, this.rectButton1.contains(EmojiSettings.this.mouseX, EmojiSettings.this.mouseY) ? 0xFF3CA374 : 0xFF43B581);
 					final String text = CompatI18n.format("emojicord.gui.settings.menu.button.web");
-					EmojiSettings.this.font.drawString(text, this.rectButton1.getX() + this.rectButton1.getWidth() / 2
+					drawString(compatMatrixStack, text, this.rectButton1.getX() + this.rectButton1.getWidth() / 2
 							- EmojiSettings.this.font.getStringWidth(text) / 2, this.rectButton1.getY() + 5, 0xFFFFFFFF);
 				}
 
 				{
 					IChatOverlay.fill(this.rectButton2, this.rectButton2.contains(EmojiSettings.this.mouseX, EmojiSettings.this.mouseY) ? 0xFF677BC4 : 0xFF7289DA);
 					final String text = CompatI18n.format("emojicord.gui.settings.menu.button.manual");
-					EmojiSettings.this.font.drawString(text, this.rectButton2.getX() + this.rectButton2.getWidth() / 2
+					drawString(compatMatrixStack, text, this.rectButton2.getX() + this.rectButton2.getWidth() / 2
 							- EmojiSettings.this.font.getStringWidth(text) / 2, this.rectButton2.getY() + 2, 0xFFFFFFFF);
 				}
 
 				{
 					IChatOverlay.fill(this.rectButton3, this.rectButton3.contains(EmojiSettings.this.mouseX, EmojiSettings.this.mouseY) ? 0xFF62666D : 0xFF72767D);
 					final String text = CompatI18n.format("emojicord.gui.settings.menu.button.done");
-					EmojiSettings.this.font.drawString(text, this.rectButton3.getX() + this.rectButton3.getWidth() / 2
+					drawString(compatMatrixStack, text, this.rectButton3.getX() + this.rectButton3.getWidth() / 2
 							- EmojiSettings.this.font.getStringWidth(text) / 2, this.rectButton3.getY() + 2, 0xFFFFFFFF);
 				}
 			} else if (!EmojiSettings.this.addGui.isClosing()) {
@@ -242,15 +250,15 @@ public class EmojiSettings implements IChatOverlay {
 						OpenGL.glPushMatrix();
 						OpenGL.glTranslatef(this.rectMain.getX() + this.rectMain.getWidth() / 2 - 10 * 5 / 2, this.rectMain.getY(), 0);
 						OpenGL.glScalef(5, 5, 1);
-						EmojiSettings.this.font.drawString("<:info:633136157626204181>", 0, 0, 0xFFFFFFFF);
+						drawString(compatMatrixStack, "<:info:633136157626204181>", 0, 0, 0xFFFFFFFF);
 						OpenGL.glPopMatrix();
 					}
 
 					{
 						final Rectangle2d rectInner = this.rectMain.inner(2, 10 * 5 + 2, 2, 2);
 						#if MC_12_LATER float #else int #endif posY = 0;
-						for (final String desc : EmojiSettings.this.font.wrapFormattedStringToWidth(EmojiSettings.this.addGui.getDescription(), rectInner.getWidth() - 2).split("\n")) {
-							EmojiSettings.this.font.drawString(desc, rectInner.getX() + 2, rectInner.getY() + 2 + posY, 0xFF777777);
+						for (final String desc : EmojiSettings.this.font. #if MC_15_LATER func_238412_a_ #else wrapFormattedStringToWidth #endif (EmojiSettings.this.addGui.getDescription(), rectInner.getWidth() - 2).split("\n")) {
+							drawString(compatMatrixStack, desc, rectInner.getX() + 2, rectInner.getY() + 2 + posY, 0xFF777777);
 							posY += 12;
 						}
 					}
@@ -258,7 +266,7 @@ public class EmojiSettings implements IChatOverlay {
 					{
 						IChatOverlay.fill(this.rectButton3, this.rectButton3.contains(EmojiSettings.this.mouseX, EmojiSettings.this.mouseY) ? 0xFFD84040 : 0xFFF04747);
 						final String text = CompatI18n.format("emojicord.gui.settings.waiting.button.cancel");
-						EmojiSettings.this.font.drawString(text, this.rectButton3.getX() + this.rectButton3.getWidth() / 2
+						drawString(compatMatrixStack, text, this.rectButton3.getX() + this.rectButton3.getWidth() / 2
 								- EmojiSettings.this.font.getStringWidth(text) / 2, this.rectButton3.getY() + 2, 0xFFFFFFFF);
 					}
 				} else {
@@ -266,15 +274,15 @@ public class EmojiSettings implements IChatOverlay {
 						OpenGL.glPushMatrix();
 						OpenGL.glTranslatef(this.rectMain.getX() + this.rectMain.getWidth() / 2 - 10 * 5 / 2, this.rectMain.getY(), 0);
 						OpenGL.glScalef(5, 5, 1);
-						EmojiSettings.this.font.drawString("<:check:633136145122983957>", 0, 0, 0xFFFFFFFF);
+						drawString(compatMatrixStack, "<:check:633136145122983957>", 0, 0, 0xFFFFFFFF);
 						OpenGL.glPopMatrix();
 					}
 
 					{
 						final Rectangle2d rectInner = this.rectMain.inner(2, 10 * 5 + 2, 2, 2);
 						#if MC_12_LATER float #else int #endif posY = 0;
-						for (final String desc : EmojiSettings.this.font.wrapFormattedStringToWidth(EmojiSettings.this.addGui.getApplyPreferredDescription(), rectInner.getWidth() - 2).split("\n")) {
-							EmojiSettings.this.font.drawString(desc, rectInner.getX() + 2, rectInner.getY() + 2 + posY, 0xFF777777);
+						for (final String desc : EmojiSettings.this.font. #if MC_15_LATER func_238412_a_ #else wrapFormattedStringToWidth #endif (EmojiSettings.this.addGui.getApplyPreferredDescription(), rectInner.getWidth() - 2).split("\n")) {
+							drawString(compatMatrixStack, desc, rectInner.getX() + 2, rectInner.getY() + 2 + posY, 0xFF777777);
 							posY += 12;
 						}
 					}
@@ -282,7 +290,7 @@ public class EmojiSettings implements IChatOverlay {
 					{
 						IChatOverlay.fill(this.rectButton3, this.rectButton3.contains(EmojiSettings.this.mouseX, EmojiSettings.this.mouseY) ? 0xFF3CA374 : 0xFF43B581);
 						final String text = CompatI18n.format("emojicord.gui.settings.completed.button.done");
-						EmojiSettings.this.font.drawString(text, this.rectButton3.getX() + this.rectButton3.getWidth() / 2
+						drawString(compatMatrixStack, text, this.rectButton3.getX() + this.rectButton3.getWidth() / 2
 								- EmojiSettings.this.font.getStringWidth(text) / 2, this.rectButton3.getY() + 2, 0xFFFFFFFF);
 					}
 				}
@@ -291,15 +299,15 @@ public class EmojiSettings implements IChatOverlay {
 					OpenGL.glPushMatrix();
 					OpenGL.glTranslatef(this.rectMain.getX() + this.rectMain.getWidth() / 2 - 10 * 5 / 2, this.rectMain.getY(), 0);
 					OpenGL.glScalef(5, 5, 1);
-					EmojiSettings.this.font.drawString("<:warning:633136170250928151>", 0, 0, 0xFFFFFFFF);
+					drawString(compatMatrixStack, "<:warning:633136170250928151>", 0, 0, 0xFFFFFFFF);
 					OpenGL.glPopMatrix();
 				}
 
 				{
 					final Rectangle2d rectInner = this.rectMain.inner(2, 10 * 5 + 2, 2, 2);
 					#if MC_12_LATER float #else int #endif posY = 0;
-					for (final String desc : EmojiSettings.this.font.wrapFormattedStringToWidth(EmojiSettings.this.addGui.getClosingDescription(), rectInner.getWidth() - 2).split("\n")) {
-						EmojiSettings.this.font.drawString(desc, rectInner.getX() + 2, rectInner.getY() + 2 + posY, 0xFF777777);
+					for (final String desc : EmojiSettings.this.font. #if MC_15_LATER func_238412_a_ #else wrapFormattedStringToWidth #endif (EmojiSettings.this.addGui.getClosingDescription(), rectInner.getWidth() - 2).split("\n")) {
+						drawString(compatMatrixStack, desc, rectInner.getX() + 2, rectInner.getY() + 2 + posY, 0xFF777777);
 						posY += 12;
 					}
 				}
@@ -307,14 +315,14 @@ public class EmojiSettings implements IChatOverlay {
 				{
 					IChatOverlay.fill(this.rectButton2, this.rectButton2.contains(EmojiSettings.this.mouseX, EmojiSettings.this.mouseY) ? 0xFFD84040 : 0xFFF04747);
 					final String text = CompatI18n.format("emojicord.gui.settings.aborting.button.ok");
-					EmojiSettings.this.font.drawString(text, this.rectButton2.getX() + this.rectButton2.getWidth() / 2
+					drawString(compatMatrixStack, text, this.rectButton2.getX() + this.rectButton2.getWidth() / 2
 							- EmojiSettings.this.font.getStringWidth(text) / 2, this.rectButton2.getY() + 2, 0xFFFFFFFF);
 				}
 
 				{
 					IChatOverlay.fill(this.rectButton3, this.rectButton3.contains(EmojiSettings.this.mouseX, EmojiSettings.this.mouseY) ? 0xFF62666D : 0xFF72767D);
 					final String text = CompatI18n.format("emojicord.gui.settings.aborting.button.cancel");
-					EmojiSettings.this.font.drawString(text, this.rectButton3.getX() + this.rectButton3.getWidth() / 2
+					drawString(compatMatrixStack, text, this.rectButton3.getX() + this.rectButton3.getWidth() / 2
 							- EmojiSettings.this.font.getStringWidth(text) / 2, this.rectButton3.getY() + 2, 0xFFFFFFFF);
 				}
 			}
