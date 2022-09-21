@@ -1,7 +1,7 @@
 {
     "api": {
         "importings": "https://emojicord.teamfruit.net/connect/",
-        "analytics": "https://emojicord.teamfruit.net/api/analytics/"
+        "analytics": null
     },
     "emojis": [
         "https://raw.githubusercontent.com/Team-Fruit/Emojicord/api/emojis/emojis.min.json"
