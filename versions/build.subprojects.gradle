@@ -2,11 +2,6 @@
 buildscript {
 	repositories {
 		mavenCentral()
-		jcenter()
-		maven {
-			name = 'Bintray TeamFruit'
-			url = "https://dl.bintray.com/team-fruit/mods/"
-		}
 		maven {
 			name = 'forge'
 			url = 'http://files.minecraftforge.net/maven'
@@ -235,14 +230,9 @@ processResources {
 
 // Dependency Repositories
 repositories {
-	jcenter()
 	maven {
 		name = 'CurseForge'
 		url = 'https://minecraft.curseforge.com/api/maven/'
-	}
-	maven {
-		name = 'Bintray TeamFruit'
-		url = "https://dl.bintray.com/team-fruit/mods/"
 	}
 	maven {
 		name = 'Sonatype'
@@ -256,16 +246,16 @@ dependencies {
 		minecraft "net.minecraftforge:forge:${project.version_minecraft}-${project.version_forge}"
 	}
 
-	// Manifold
-	implementation group: 'systems.manifold', name: 'manifold-all', version: '2020.1.12'
 	testImplementation group: 'junit', name: 'junit', version: '4.12'
 
 	// tools.jar dependency (for Java 8 only), primarily to support structural typing without static proxies.
 	// Thus if you are *not* using structural typing, you **don't** need tools.jar
 	implementation files("${System.properties['java.home']}/../lib/tools.jar")
 
+	// Manifold
 	// Add manifold to -processorpath for javac
-	annotationProcessor group: 'systems.manifold', name: 'manifold-preprocessor', version: '2020.1.12'
+	annotationProcessor 'systems.manifold:manifold-preprocessor:2022.1.21'
+	testAnnotationProcessor 'systems.manifold:manifold-preprocessor:2022.1.21'
 }
 
 // Manifold

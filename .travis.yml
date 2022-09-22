@@ -11,9 +11,8 @@ before_install:
 install: "./gradlew setupCIWorkspace --continue"
 script: "./gradlew build --continue"
 after_success:
-  - ./gradlew githubRelease curseforge bintrayUpload --continue
+  - ./gradlew githubRelease curseforge --continue
   #- ./gradlew githubRelease --continue
-  #- ./gradlew bintrayUpload --continue
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/

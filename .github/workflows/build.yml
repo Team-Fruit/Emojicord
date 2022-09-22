@@ -35,14 +35,12 @@ jobs:
         TRAVIS: true
         CURSEFORGE_TOKEN: ${{secrets.curseforge_token}}
         GH_TOKEN: ${{secrets.github_token}}
-        BINTRAY_USER: ${{secrets.bintray_user}}
-        BINTRAY_KEY: ${{secrets.bintray_key}}
       run: |
         export TRAVIS_TAG=$(bash -c "if [[ ${GITHUB_REF} == refs/tags/* ]] ; then echo ${GITHUB_REF##*/} ; else echo ; fi")
         export TRAVIS_BUILD_NUMBER=${BUILD_NUMBER}
         chmod a+x ./gradlew
         ./gradlew clean setupCIWorkspace --continue
-        ./gradlew build githubRelease curseforge bintrayUpload publish --continue
+        ./gradlew build githubRelease curseforge publish --continue
     - name: Archive production artifacts
       uses: actions/upload-artifact@v1
       with:

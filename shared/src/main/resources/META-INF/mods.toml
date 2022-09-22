@@ -2,6 +2,7 @@ modLoader="javafml"
 loaderVersion="[13,)"
 issueTrackerURL="https://github.com/Team-Fruit/Emojicord/issues?q=is%3Aissue"
 logoFile="logo.png"
+license="MIT"
 
 [[mods]]
     modId="emojicord"
