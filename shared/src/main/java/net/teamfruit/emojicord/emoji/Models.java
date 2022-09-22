@@ -12,7 +12,6 @@ public class Models {
 
 		public static class EmojiGatewayApi {
 			public String importings;
-			public String analytics;
 		}
 	}
 

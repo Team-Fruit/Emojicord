@@ -51,7 +51,6 @@ public class ClientProxy extends CommonProxy {
 		if (Endpoint.loadGateway()) {
 			Endpoint.loadStandardEmojis();
 			Endpoint.loadStandardPicker();
-			Analytics.instance.startAnalytics();
 		}
 
 		eventHandler = new EventHandler();
