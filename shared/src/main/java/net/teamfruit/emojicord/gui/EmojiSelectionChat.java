@@ -73,8 +73,10 @@ public class EmojiSelectionChat implements IChatOverlay {
 	private void drawString(Compat.CompatMatrixStack compatMatrixStack, String text, float x, float y, int color) {
 		#if MC_15_LATER
 		this.font.func_238405_a_(compatMatrixStack.matrix, text, x, y, color);
-		#else
+		#elif MC_7_LATER
 		this.font.drawStringWithShadow(text, x, y, color);
+		#else
+		this.font.drawStringWithShadow(text, (int) x, (int) y, color);
 		#endif
 	}
 
